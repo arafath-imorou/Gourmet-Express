@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Clients - Gourmet Admin</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .admin-nav {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 24px;
+        }
+
+        .admin-nav a {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .admin-nav a.active {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .client-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .client-row:first-child {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .client-row:last-child {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border-bottom: none;
+        }
+
+        .status-active {
+            color: #10B981;
+            background: #D1FAE5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .status-blocked {
+            color: #DC3545;
+            background: #F8D7DA;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body style="background: #f0f2f5;">
+
+    <div class="admin-nav">
+        <a href="index.html">Commandes</a>
+        <a href="menu.html">Menu</a>
+        <a href="clients.html" class="active">Clients</a>
+        <div style="flex:1"></div>
+        <button onclick="logout()"
+            style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 600;">Déconnexion</button>
+    </div>
+
+    <div class="container" style="max-width: 1000px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 style="margin: 0;">Clients Fidèles</h2>
+            <button onclick="recalculatePoints()" class="btn btn-secondary" style="width: auto;">🔄 Recalculer les
+                points</button>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div id="clients-list">
+                <!-- Rendered by JS -->
+                <div style="padding: 32px; text-align: center; color: #888;">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase.js"></script>
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/admin.js"></script>
+    <script>
+        // Override checkAuth or similar if needed, or rely on admin.js to handle basics? 
+        // admin.js handles checkAuth on load. 
+        // We need checkAuth to ensure we are logged in as ADMIN.
+        // admin.js checkAuth logic:
+        /*
+        const token = sessionStorage.getItem('admin_token');
+        if (!token && !document.getElementById('login-overlay')) {
+             window.location.href = 'index.html';
+        }
+        */
+        // So it should be fine.
+
+        function renderClients() {
+            const container = document.getElementById('clients-list');
+            const clients = DataManager.getClients();
+
+            if (clients.length === 0) {
+                container.innerHTML = '<div style="padding: 32px; text-align: center; color: #888;">Aucun client inscrit pour le moment.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            clients.forEach(client => {
+                const div = document.createElement('div');
+                div.className = 'client-row';
+                div.innerHTML = `
+                    <div style="flex: 2;">
+                        <div class="font-bold">${client.firstname} ${client.lastname}</div>
+                        <div class="text-sm text-muted">${client.phone} • ${client.email}</div>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <div class="font-bold" style="color: var(--primary-color); font-size: 1.1rem;">${client.points || 0} pts</div>
+                        <div class="text-xs text-muted">Fidélité</div>
+                        ${(client.vouchers && client.vouchers > 0) ?
+                        `<div style="margin-top: 4px; color: #F59E0B; font-weight: 700; font-size: 0.9rem;">🎁 ${client.vouchers} Bon(s)</div>`
+                        : ''}
+                    </div>
+                    <div style="flex: 1; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                        <div>
+                            <span class="status-${client.status}">${client.status === 'active' ? 'Actif' : 'Bloqué'}</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            ${(client.vouchers && client.vouchers > 0) ?
+                        `<button onclick="redeemVoucher('${client.id}')" class="btn btn-primary btn-sm" style="background-color: #F59E0B; border-color: #F59E0B; padding: 4px 8px;">🎁 Utiliser</button>`
+                        : ''}
+                            <button onclick="toggleClientStatus('${client.id}')" class="btn btn-secondary btn-sm" style="width: auto; padding: 4px 8px;">
+                                ${client.status === 'active' ? '🚫' : '✅'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.toggleClientStatus = (id) => {
+            const clients = DataManager.getClients();
+            const index = clients.findIndex(c => c.id === id);
+            if (index !== -1) {
+                clients[index].status = clients[index].status === 'active' ? 'blocked' : 'active';
+                DataManager.saveClients(clients);
+                renderClients();
+            }
+        };
+
+        window.redeemVoucher = (id) => {
+            const gift = prompt("Quel cadeau offrez-vous pour ce bon ? (Ex: Pizza offerte)");
+            if (gift) {
+                const result = DataManager.redeemVoucher(id, gift);
+                if (result.success) {
+                    alert(`Bon validé ! Cadeau : ${gift}`);
+                    renderClients();
+                } else {
+                    alert(result.message);
+                }
+            }
+        };
+
+        window.recalculatePoints = () => {
+            if (confirm("Voulez-vous recalculer tous les points de fidélité en fonction de l'historique des commandes livrées ?")) {
+                const result = DataManager.recalculateLoyaltyPoints();
+                alert(result.message);
+                renderClients();
+            }
+        };
+
+        renderClients();
+    </script>
+</body>
+
+</html>

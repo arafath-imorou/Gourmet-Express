@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Agents</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #f0f2f5; }
+        .admin-nav { display: flex; gap: 16px; padding: 16px 24px; background: white; border-bottom: 1px solid #eee; margin-bottom: 24px; align-items: center; }
+        .admin-nav a { font-weight: 500; color: #666; text-decoration: none; }
+        .admin-nav a.active { color: #e74c3c; font-weight: 700; }
+        .admin-nav .brand { font-family: 'Poppins', sans-serif; font-weight: 700; color: #1a1a2e; margin-right: 8px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px 40px; }
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card-title { font-weight: 700; font-size: 1.05rem; }
+        .btn-primary { background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .btn-primary:disabled { opacity: 0.7; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: #555; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 2px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #e74c3c; }
+        .agent-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid #f5f5f5; }
+        .agent-row:last-child { border-bottom: none; }
+        .agent-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+        .agent-info { flex: 1; }
+        .agent-name { font-weight: 700; color: #1a1a2e; font-size: 0.95rem; }
+        .agent-meta { font-size: 0.8rem; color: #888; margin-top: 2px; }
+        .role-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .role-admin { background: #eff6ff; color: #2563eb; }
+        .role-agent { background: #fef3c7; color: #d97706; }
+        .role-caissier { background: #f0fdf4; color: #16a34a; }
+        .role-cuisinier { background: #fff7ed; color: #ea580c; }
+        .role-livreur { background: #f0f9ff; color: #0284c7; }
+        .role-administrateur { background: #faf5ff; color: #7c3aed; }
+        .btn-sm { padding: 6px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+        .btn-danger { background: #fee2e2; color: #dc2626; }
+        .btn-warning { background: #fef3c7; color: #d97706; }
+        .status-active { color: #16a34a; font-size: 0.8rem; font-weight: 600; }
+        .status-inactive { color: #dc2626; font-size: 0.8rem; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="admin-nav">
+        <span class="brand" id="restaurant-name">Restaurant</span>
+        <a href="index.html">Commandes</a>
+        <a href="menu.html">Menu</a>
+        <a href="agents.html" class="active">Agents</a>
+        <a href="clients.html">Clients</a>
+        <div style="flex:1;"></div>
+        <button onclick="logout()" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-weight:600;">Déconnexion</button>
+    </div>
+
+    <div class="container">
+        <!-- Create Agent Form -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">👤 Ajouter un agent</span>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>Prénom *</label><input id="a-firstname" type="text"></div>
+                <div class="form-group"><label>Nom *</label><input id="a-lastname" type="text"></div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>Email *</label><input id="a-email" type="email"></div>
+                <div class="form-group"><label>Mot de passe *</label><input id="a-password" type="text"></div>
+            </div>
+            <div class="form-group" style="max-width:300px;">
+                <label>Rôle *</label>
+                <select id="a-agent-role">
+                    <option value="administrateur">Administrateur</option>
+                    <option value="caissier">Caissier</option>
+                    <option value="serveur">Serveur</option>
+                    <option value="cuisinier">Cuisinier</option>
+                    <option value="livreur">Livreur</option>
+                </select>
+            </div>
+            <div id="create-error" style="color:#e74c3c;font-size:0.85rem;margin-bottom:10px;display:none;"></div>
+            <button class="btn-primary" id="btn-create" onclick="createAgent()">Créer l'agent</button>
+        </div>
+
+        <!-- Agents List -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Liste des agents</span>
+            </div>
+            <div id="agents-list">Chargement...</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase.js"></script>
+    <script src="../assets/js/data.js"></script>
+    <script>
+        let staff = null;
+        const ROLE_LABELS = { administrateur: 'Administrateur', caissier: 'Caissier', serveur: 'Serveur', cuisinier: 'Cuisinier', livreur: 'Livreur' };
+        const ROLE_CLASSES = { administrateur: 'role-administrateur', caissier: 'role-caissier', serveur: 'role-serveur', cuisinier: 'role-cuisinier', livreur: 'role-livreur', admin: 'role-admin' };
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            staff = DataManager.getCurrentStaff();
+            if (!staff || (staff.role !== 'admin' && !(staff.role === 'agent' && staff.agent_role === 'administrateur'))) {
+                window.location.href = 'index.html'; return;
+            }
+            document.getElementById('restaurant-name').textContent = staff.restaurant_name || 'Restaurant';
+            await loadAgents();
+        });
+
+        async function loadAgents() {
+            const container = document.getElementById('agents-list');
+            const agents = await DataManager.getStaff(staff.restaurant_id);
+            if (!agents.length) { container.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Aucun agent.</p>'; return; }
+            container.innerHTML = agents.map(a => `
+                <div class="agent-row">
+                    <div class="agent-avatar">${(a.firstname || '?')[0].toUpperCase()}</div>
+                    <div class="agent-info">
+                        <div class="agent-name">${a.firstname} ${a.lastname}</div>
+                        <div class="agent-meta">${a.email}</div>
+                    </div>
+                    <span class="role-badge ${ROLE_CLASSES[a.agent_role || a.role] || 'role-agent'}">${ROLE_LABELS[a.agent_role] || a.role}</span>
+                    <span class="${a.status === 'active' ? 'status-active' : 'status-inactive'}">${a.status === 'active' ? '● Actif' : '● Inactif'}</span>
+                    <button class="btn-sm btn-warning" onclick="toggleAgent('${a.id}', '${a.status}')">${a.status === 'active' ? 'Désactiver' : 'Activer'}</button>
+                    <button class="btn-sm btn-danger" onclick="removeAgent('${a.id}')">Suppr.</button>
+                </div>`).join('');
+        }
+
+        async function createAgent() {
+            const firstname = document.getElementById('a-firstname').value.trim();
+            const lastname = document.getElementById('a-lastname').value.trim();
+            const email = document.getElementById('a-email').value.trim();
+            const password = document.getElementById('a-password').value.trim();
+            const agent_role = document.getElementById('a-agent-role').value;
+            if (!firstname || !lastname || !email || !password) { showError('Tous les champs sont obligatoires.'); return; }
+
+            const btn = document.getElementById('btn-create');
+            btn.disabled = true; btn.textContent = 'Création...';
+
+            const result = await DataManager.createStaff({ restaurant_id: staff.restaurant_id, firstname, lastname, email, password, role: 'agent', agent_role, status: 'active' });
+            if (result.success) {
+                ['a-firstname', 'a-lastname', 'a-email', 'a-password'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('create-error').style.display = 'none';
+                await loadAgents();
+            } else { showError(result.message); }
+            btn.disabled = false; btn.textContent = 'Créer l\'agent';
+        }
+
+        async function toggleAgent(id, currentStatus) {
+            await DataManager.updateStaff(id, { status: currentStatus === 'active' ? 'inactive' : 'active' });
+            await loadAgents();
+        }
+
+        async function removeAgent(id) {
+            if (!confirm('Supprimer cet agent ?')) return;
+            await DataManager.deleteStaff(id);
+            await loadAgents();
+        }
+
+        function showError(msg) { const el = document.getElementById('create-error'); el.textContent = msg; el.style.display = 'block'; }
+        function logout() { DataManager.logout(); window.location.href = '../login.html'; }
+    </script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Panier - Gourmet Express</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: white;
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .cart-item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            margin-right: 12px;
+        }
+
+        .cart-item-details {
+            flex: 1;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #F0F0F0;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+
+        .qty-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+            font-weight: bold;
+            color: var(--primary-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .bottom-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 24px;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+        }
+
+        @media(min-width: 600px) {
+            .bottom-panel {
+                position: static;
+                border-radius: var(--radius-md);
+                margin-top: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header-fixed" style="justify-content: flex-start; gap: 16px;">
+        <a href="menu.html" class="nav-back-container">
+            <span style="font-size: 24px;">←</span>
+            <span class="nav-back-text">Retour</span>
+        </a>
+        <h2 style="font-size: 1.2rem; margin: 0;">Mon Panier</h2>
+    </header>
+
+    <div class="container" style="padding-top: 16px;">
+
+        <div id="empty-state" class="text-center" style="display: none; padding-top: 60px;">
+            <div style="font-size: 64px; margin-bottom: 24px;">🛒</div>
+            <h3>Votre panier est vide</h3>
+            <p class="text-muted mb-4">Découvrez nos plats délicieux et remplissez votre panier !</p>
+            <a href="menu.html" class="btn btn-primary">Voir le menu</a>
+        </div>
+
+        <div id="cart-content">
+            <div id="cart-items" style="padding-bottom: 140px;">
+                <!-- Filled by JS -->
+            </div>
+
+            <div class="bottom-panel">
+                <div
+                    style="display: flex; justify-content: space-between; margin-bottom: 16px; font-weight: 600; font-size: 1.1rem;">
+                    <span>Total</span>
+                    <span id="cart-total">0 FCFA</span>
+                </div>
+                <!-- Redirect to Order Page -->
+                <a href="order.html" class="btn btn-primary">Valider la commande</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/cart.js"></script>
+</body>
+
+</html>

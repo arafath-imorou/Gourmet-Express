@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Gourmet Express</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .admin-nav {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 24px;
+        }
+
+        .admin-nav a {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .admin-nav a.active {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            flex: 1;
+            text-align: center;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #F8F9FA;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            display: inline-block;
+            position: static;
+        }
+
+        .bg-blue {
+            background-color: #EBF8FF;
+            color: #3B82F6;
+        }
+
+        .bg-orange {
+            background-color: #FFFBEB;
+            color: #F59E0B;
+        }
+
+        .bg-green {
+            background-color: #D1FAE5;
+            color: #10B981;
+        }
+
+        .bg-gray {
+            background-color: #F3F4F6;
+            color: #9CA3AF;
+        }
+
+        /* Login Layer Styles */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--background-color);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .error-msg {
+            color: #DC3545;
+            background: #F8D7DA;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
+</head>
+
+<body style="background: #f0f2f5;">
+
+    <!-- LOGIN LAYER -->
+    <div id="login-overlay" style="display: none;">
+        <div class="login-card">
+            <h2 class="mb-4" style="color: var(--primary-color);">Gourmet Admin 🔐</h2>
+
+            <div id="error-box" class="error-msg">Identifiants incorrects</div>
+
+            <form id="login-form">
+                <div class="input-group" style="text-align: left;">
+                    <label for="username">Identifiant</label>
+                    <input type="text" id="username" name="username" required placeholder="admin">
+                </div>
+
+                <div class="input-group" style="text-align: left;">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" name="password" required placeholder="admin">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 16px;">Se connecter</button>
+                <a href="../index.html" class="btn btn-secondary"
+                    style="margin-top: 12px; display: block; text-decoration: none;">← Retour au site</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD LAYER -->
+    <div id="dashboard-content" style="display: none;">
+        <!-- Desktop Nav -->
+        <div class="admin-nav desktop-only">
+            <span id="nav-restaurant-name" style="font-weight:700;color:var(--primary-color);margin-right:12px;">Restaurant</span>
+            <a href="index.html" class="active">Commandes</a>
+            <a href="menu.html">Menu</a>
+            <a href="agents.html" id="nav-agents" style="display:none;">Agents</a>
+            <a href="clients.html">Clients</a>
+            <div style="flex:1"></div>
+            <button onclick="logout()"
+                style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 600;">Déconnexion</button>
+        </div>
+
+        <!-- Mobile Header -->
+        <div class="mobile-only"
+            style="background: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; margin-bottom: 16px;">
+            <span style="font-weight: 700; font-size: 1.2rem;">Gourmet Admin</span>
+            <div>
+                <a href="menu.html" style="margin-right: 16px; font-size: 1.5rem; text-decoration: none;">🍔</a>
+                <button onclick="logout()" style="background: none; border: none; font-size: 1.5rem;">🚪</button>
+            </div>
+        </div>
+
+        <div class="container" style="max-width: 1000px;">
+            <h2 class="mb-4 desktop-only">Tableau de bord</h2>
+            <h3 class="mb-4 mobile-only">Commandes</h3>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="text-sm text-muted">Aujourd'hui</div>
+                    <div class="font-bold" style="font-size: 1.5rem;" id="stat-count">0</div>
+                    <div class="text-xs text-muted">Commandes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-sm text-muted">Revenu</div>
+                    <div class="font-bold" style="font-size: 1.5rem;" id="stat-revenue">0</div>
+                    <div class="text-xs text-muted">FCFA</div>
+                </div>
+                <!-- Hide Pending on mobile to save space if needed, or keep it. Let's keep it but smaller. -->
+                <div class="stat-card">
+                    <div class="text-sm text-muted">En attente</div>
+                    <div class="font-bold" style="font-size: 1.5rem; color: #F59E0B;" id="stat-pending">0</div>
+                </div>
+            </div>
+
+            <!-- FILTERS BAR -->
+            <div class="card mb-4" style="padding: 16px;">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: end;">
+                    <!-- Search -->
+                    <div style="flex: 2; min-width: 200px;">
+                        <label class="text-xs text-muted font-bold" style="display:block; margin-bottom:4px;">Recherche
+                            (Nom, Tél, N°)</label>
+                        <input type="text" id="filter-search" class="input-field" placeholder="Ex: Jean, 0707..."
+                            style="margin:0; padding: 10px;" oninput="renderAdminOrders()">
+                    </div>
+
+                    <!-- Date -->
+                    <div style="flex: 1; min-width: 140px;">
+                        <label class="text-xs text-muted font-bold"
+                            style="display:block; margin-bottom:4px;">Période</label>
+                        <select id="filter-date" class="input-field" style="margin:0; padding: 10px;"
+                            onchange="renderAdminOrders()">
+                            <option value="all">Toutes les dates</option>
+                            <option value="today">Aujourd'hui</option>
+                            <option value="week">Cette semaine</option>
+                            <option value="month">Ce mois</option>
+                        </select>
+                    </div>
+
+                    <!-- Specific Date -->
+                    <div style="flex: 1; min-width: 140px;">
+                        <label class="text-xs text-muted font-bold" style="display:block; margin-bottom:4px;">OU Date
+                            Spécifique</label>
+                        <input type="date" id="filter-date-specific" class="input-field"
+                            style="margin:0; padding: 10px;" onchange="renderAdminOrders()">
+                    </div>
+
+                    <!-- Status -->
+                    <div style="flex: 1; min-width: 140px;">
+                        <label class="text-xs text-muted font-bold"
+                            style="display:block; margin-bottom:4px;">Statut</label>
+                        <select id="filter-status" class="input-field" style="margin:0; padding: 10px;"
+                            onchange="renderAdminOrders()">
+                            <option value="all">Tous les statuts</option>
+                            <option value="ENVOYÉE">ENVOYÉE</option>
+                            <option value="APPROUVÉE">APPROUVÉE</option>
+                            <option value="EN PRÉPARATION">En prépa.</option>
+                            <option value="PRÊTE">Prête</option>
+                            <option value="EN LIVRAISON">En livraison</option>
+                            <option value="LIVRÉE">Livrée</option>
+                            <option value="ANNULÉE">Annulée</option>
+                        </select>
+                    </div>
+
+                    <!-- Mode -->
+                    <div style="flex: 1; min-width: 140px;">
+                        <label class="text-xs text-muted font-bold"
+                            style="display:block; margin-bottom:4px;">Mode</label>
+                        <select id="filter-mode" class="input-field" style="margin:0; padding: 10px;"
+                            onchange="renderAdminOrders()">
+                            <option value="all">Tous</option>
+                            <option value="delivery">Livraison</option>
+                            <option value="takeaway">Emporter</option>
+                            <option value="dinein">Sur place</option>
+                        </select>
+                    </div>
+
+                    <!-- Reset -->
+                    <button onclick="resetFilters()" class="btn btn-secondary"
+                        style="width: auto; height: 42px; padding: 0 16px;">
+                        🔄
+                    </button>
+                </div>
+
+                <!-- Active Tags -->
+                <div id="active-tags" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;"></div>
+            </div>
+
+            <h3 class="mb-2 desktop-only">Dernières commandes</h3>
+
+            <!-- Desktop Table -->
+            <div class="table-responsive desktop-only">
+                <table id="orders-table">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Client</th>
+                            <th>Montant</th>
+                            <th>Mode</th>
+                            <th>Statut</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-list">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Cards -->
+            <div id="mobile-orders-list" class="mobile-only"
+                style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 40px;">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase.js"></script>
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/admin.js"></script>
+    <script>
+        // Multi-restaurant auth guard
+        document.addEventListener('DOMContentLoaded', () => {
+            const staff = DataManager.getCurrentStaff();
+            const loginOverlay = document.getElementById('login-overlay');
+            const dashboardContent = document.getElementById('dashboard-content');
+            if (staff && (staff.role === 'admin' || staff.role === 'agent')) {
+                if (loginOverlay) loginOverlay.style.display = 'none';
+                if (dashboardContent) dashboardContent.style.display = 'block';
+                const nameEl = document.getElementById('nav-restaurant-name');
+                if (nameEl) nameEl.textContent = staff.restaurant_name || '';
+                if (staff.role === 'admin' || staff.agent_role === 'administrateur') {
+                    const agentsLink = document.getElementById('nav-agents');
+                    if (agentsLink) agentsLink.style.display = 'inline';
+                }
+                renderAdminOrders();
+            } else if (loginOverlay && dashboardContent) {
+                loginOverlay.style.display = 'flex';
+                dashboardContent.style.display = 'none';
+            }
+        });
+        function logout() { DataManager.logout(); window.location.href = '../login.html'; }
+        function resetFilters() {
+            ['filter-search','filter-date-specific'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+            ['filter-date','filter-status','filter-mode'].forEach(id => { const el = document.getElementById(id); if(el) el.value='all'; });
+            renderAdminOrders();
+        }
+
+        // Override renderAdminOrders for table view
+        async function renderAdminOrders() {
+            const tableContainer = document.getElementById('orders-list');
+            const mobileContainer = document.getElementById('mobile-orders-list');
+
+            if (!tableContainer && !mobileContainer) return;
+
+            const orders = await DataManager.getOrders();
+
+            // 1. FILTER ORDERS based on DOM Inputs (Replicate filter logic here or grab from DOM?)
+            // Actually, admin.js handles filtering and calls renderOrderList.
+            // But renderAdminOrders HERE is the one initializing stats?
+            // Let's rely on DataManager.getOrders() and the Filter DOM elements.
+
+            const filterDate = document.getElementById('filter-date') ? document.getElementById('filter-date').value : 'all';
+            const filterDateSpecific = document.getElementById('filter-date-specific') ? document.getElementById('filter-date-specific').value : '';
+            const filterStatus = document.getElementById('filter-status') ? document.getElementById('filter-status').value : 'all';
+            const filterMode = document.getElementById('filter-mode') ? document.getElementById('filter-mode').value : 'all';
+            const filterSearch = document.getElementById('filter-search') ? document.getElementById('filter-search').value.toLowerCase() : '';
+
+            // Apply Filters
+            let filteredOrders = orders.filter(order => {
+                // Date
+                const d = new Date(order.date);
+                const now = new Date();
+                let dateMatch = true;
+
+                if (filterDateSpecific) {
+                    // Check specific date match (ignoring time)
+                    const specificDate = new Date(filterDateSpecific);
+                    dateMatch = d.toDateString() === specificDate.toDateString();
+                } else {
+                    // Fallback to range
+                    if (filterDate === 'today') dateMatch = d.toDateString() === now.toDateString();
+                    if (filterDate === 'week') {
+                        const weekAgo = new Date();
+                        weekAgo.setDate(now.getDate() - 7);
+                        dateMatch = d >= weekAgo;
+                    }
+                    if (filterDate === 'month') {
+                        dateMatch = d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                    }
+                }
+
+                // Status
+                let statusMatch = (filterStatus === 'all') || (order.status === filterStatus);
+
+                // Mode
+                let modeMatch = (filterMode === 'all') || (order.type === filterMode);
+
+                // Search
+                let searchMatch = true;
+                if (filterSearch) {
+                    const cn = (order.client_name || order.clientName || '').toLowerCase();
+                    searchMatch = cn.includes(filterSearch) ||
+                        (order.phone || '').includes(filterSearch) ||
+                        (order.id || '').toLowerCase().includes(filterSearch);
+                }
+
+                return dateMatch && statusMatch && modeMatch && searchMatch;
+            });
+
+            // Update Stats based on FILTERED view
+            // Count
+            const elCount = document.getElementById('stat-count');
+            if (elCount) elCount.textContent = filteredOrders.length;
+
+            // Revenue (Sum of 'LIVRÉE' within the filtered set)
+            const elRevenue = document.getElementById('stat-revenue');
+            if (elRevenue) {
+                const revenue = filteredOrders
+                    .filter(o => o.status === 'LIVRÉE')
+                    .reduce((acc, o) => acc + o.total, 0);
+                elRevenue.textContent = formatPrice(revenue);
+            }
+
+            // Pending (active within filtered set)
+            const elPending = document.getElementById('stat-pending');
+            const activeStatuses = ['ENVOYÉE', 'APPROUVÉE', 'EN PRÉPARATION', 'PRÊTE', 'EN LIVRAISON'];
+            if (elPending) {
+                const pending = filteredOrders.filter(o => activeStatuses.includes(o.status)).length;
+                elPending.textContent = pending;
+            }
+
+            // Update Labels to indicate context
+            const labelCount = elCount.parentElement.querySelector('.text-sm');
+            if (labelCount) {
+                if (filterDateSpecific) {
+                    labelCount.textContent = 'Date Spécifique';
+                } else {
+                    labelCount.textContent = filterDate === 'all' ? 'Total' : (filterDate === 'today' ? "Aujourd'hui" : 'Période');
+                }
+            }
+
+            const labelRev = elRevenue.parentElement.querySelector('.text-sm');
+            if (labelRev) {
+                if (filterDateSpecific) {
+                    labelRev.textContent = 'CA Date';
+                } else {
+                    labelRev.textContent = filterDate === 'all' ? 'CA Total' : (filterDate === 'today' ? "CA Jour" : 'CA Période');
+                }
+            }
+
+
+            const ordersToRender = filteredOrders;
+            // (The rest of formatting uses ordersToRender instead of raw orders)
+
+            // Render Desktop Table
+            if (tableContainer) {
+                tableContainer.innerHTML = '';
+                // Sort by date desc
+                const sorted = ordersToRender.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                sorted.forEach(order => {
+                    const tr = document.createElement('tr');
+                    const clientName = order.client_name || order.clientName || 'Client';
+                    tr.innerHTML = `
+                        <td class="font-bold">${(order.id || '').split('-').pop()}</td>
+                        <td><div>${clientName}</div><div class="text-xs text-muted">${order.phone || ''}</div></td>
+                        <td>${formatPrice(order.total)}</td>
+                        <td>${order.type === 'delivery' ? '🛵 Livraison' : (order.type === 'dinein' ? '🍽️ Sur place' : '🥡 Emporter')}</td>
+                        <td><span class="badge ${getStatusClass(order.status)}">${order.status}</span></td>
+                        <td>
+                            <select onchange="updateStatus('${order.id}', this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid #eee;font-size:0.8rem;">
+                                <option value="Nouvelle" ${order.status==='Nouvelle'?'selected':''}>Nouvelle</option>
+                                <option value="En cours" ${order.status==='En cours'?'selected':''}>En cours</option>
+                                <option value="Terminée" ${order.status==='Terminée'?'selected':''}>Terminée</option>
+                                <option value="Annulée" ${order.status==='Annulée'?'selected':''}>Annulée</option>
+                            </select>
+                        </td>
+                    `;
+                    tableContainer.appendChild(tr);
+                });
+            }
+
+            // Render Mobile Cards
+            if (mobileContainer) {
+                mobileContainer.innerHTML = '';
+                // Sort by date desc
+                const sorted = ordersToRender.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                sorted.forEach(order => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.style.padding = '16px';
+                    // Highlight new orders
+                    if (order.status === 'ENVOYÉE') {
+                        card.style.borderLeft = '4px solid #3B82F6';
+                    }
+
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div>
+                                <span class="font-bold">#${order.id.split('-')[1]}</span>
+                                <span class="text-muted text-sm"> • ${new Date(order.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                            <span class="badge ${getStatusClass(order.status)}">${order.status}</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <div class="font-bold">${order.clientName}</div>
+                            <div class="text-sm text-muted">${formatPrice(order.total)} • ${order.type === 'delivery' ? '🛵 Livraison' : (order.type === 'dinein' ? '🍽️ Sur place' : '🥡 Emporter')}</div>
+                        </div>
+                        <a href="order-detail.html?id=${order.id}" class="btn btn-secondary" style="width: 100%; display: block; text-align: center;">Voir la commande</a>
+                    `;
+                    mobileContainer.appendChild(card);
+                });
+            }
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(price);
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'ENVOYÉE': return 'bg-blue';
+                case 'APPROUVÉE': return 'bg-orange';
+                case 'EN PRÉPARATION': return 'bg-orange';
+                case 'PRÊTE': return 'bg-green';
+                case 'EN LIVRAISON': return 'bg-orange';
+                case 'LIVRÉE': return 'bg-green';
+                case 'ANNULÉE': return 'bg-gray';
+                default: return 'bg-gray';
+            }
+        }
+    </script>
+</body>
+
+</html>

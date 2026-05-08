@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil - Gourmet Express</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .form-card {
+            background: white;
+            padding: 24px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+    </style>
+</head>
+
+<body style="background: #f0f2f5;">
+
+    <div class="client-header"
+        style="background: white; padding: 16px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 16px;">
+        <a href="index.html" style="text-decoration: none; font-size: 1.2rem;">←</a>
+        <div style="font-weight: 700;">Mon Profil</div>
+    </div>
+
+    <div class="container" style="max-width: 600px; padding-top: 24px;">
+        <div class="form-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 class="mb-0">Informations personnelles</h3>
+                <button id="btn-edit" class="btn btn-secondary" style="width: auto; padding: 8px 16px;"
+                    onclick="enableEdit()">✏️ Modifier</button>
+            </div>
+
+            <form id="profile-form">
+                <div class="input-group">
+                    <label>Prénom</label>
+                    <input type="text" id="firstname" required disabled
+                        style="background: #f9f9f9; border-color: transparent;">
+                </div>
+                <div class="input-group">
+                    <label>Nom</label>
+                    <input type="text" id="lastname" required disabled
+                        style="background: #f9f9f9; border-color: transparent;">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="email" readonly style="background: #eee; cursor: not-allowed;">
+                </div>
+                <div class="input-group">
+                    <label>Téléphone</label>
+                    <input type="tel" id="phone" required disabled
+                        style="background: #f9f9f9; border-color: transparent;">
+                </div>
+
+                <div id="edit-actions" style="display: none; gap: 12px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Enregistrer</button>
+                    <button type="button" class="btn btn-secondary" style="flex: 1;"
+                        onclick="cancelEdit()">Annuler</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="text-center mt-4 text-muted text-sm">
+            Membre depuis le: <span id="join-date"></span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase.js"></script>
+    <script src="../assets/js/data.js"></script>
+    <script>
+        const client = DataManager.getCurrentClient();
+        const isAdmin = sessionStorage.getItem('admin_token') === 'valid';
+
+        if (!client && !isAdmin) {
+            window.location.href = '../login.html';
+        } else if (!client && isAdmin) {
+            window.location.href = '../admin/index.html';
+        }
+
+        function populateForm() {
+            document.getElementById('firstname').value = client.firstname;
+            document.getElementById('lastname').value = client.lastname;
+            document.getElementById('email').value = client.email;
+            document.getElementById('phone').value = client.phone;
+        }
+
+        populateForm();
+        document.getElementById('join-date').textContent = new Date(client.joinDate).toLocaleDateString();
+
+        function enableEdit() {
+            document.getElementById('btn-edit').style.display = 'none';
+            document.getElementById('edit-actions').style.display = 'flex';
+
+            ['firstname', 'lastname', 'phone'].forEach(id => {
+                const el = document.getElementById(id);
+                el.disabled = false;
+                el.style.background = 'white';
+                el.style.borderColor = '#ddd';
+            });
+            document.getElementById('firstname').focus();
+        }
+
+        function cancelEdit() {
+            document.getElementById('btn-edit').style.display = 'block';
+            document.getElementById('edit-actions').style.display = 'none';
+
+            ['firstname', 'lastname', 'phone'].forEach(id => {
+                const el = document.getElementById(id);
+                el.disabled = true;
+                el.style.background = '#f9f9f9';
+                el.style.borderColor = 'transparent';
+            });
+            populateForm(); // Reset values
+        }
+
+        document.getElementById('profile-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newPhone = document.getElementById('phone').value;
+            const newFirstname = document.getElementById('firstname').value;
+            const newLastname = document.getElementById('lastname').value;
+
+            // Logic to update client... 
+            const clients = DataManager.getClients();
+            const index = clients.findIndex(c => c.id === client.id);
+            if (index !== -1) {
+                clients[index].phone = newPhone;
+                clients[index].firstname = newFirstname;
+                clients[index].lastname = newLastname;
+
+                DataManager.saveClients(clients);
+
+                // Update session
+                client.phone = newPhone;
+                client.firstname = newFirstname;
+                client.lastname = newLastname;
+                localStorage.setItem(STORAGE_KEYS.CURRENT_SESSION, JSON.stringify(client));
+
+                alert('Profil mis à jour !');
+            }
+        });
+    </script>
+</body>
+
+</html>

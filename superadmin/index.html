@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superadmin - Gourmet Express</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; min-height: 100vh; }
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 240px; background: #1a1a2e; color: white; padding: 0; z-index: 100; display: flex; flex-direction: column; }
+        .sidebar-brand { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-brand .title { font-family: 'Poppins', sans-serif; font-size: 1.1rem; font-weight: 700; }
+        .sidebar-brand .sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
+        .sidebar-nav { flex: 1; padding: 16px 0; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item .icon { font-size: 1.1rem; width: 20px; }
+        .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .logout-btn { display: block; text-align: center; padding: 10px; background: rgba(231,76,60,0.2); color: #e74c3c; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.85rem; border: none; width: 100%; }
+        .logout-btn:hover { background: rgba(231,76,60,0.35); }
+        .main { margin-left: 240px; padding: 32px; }
+        .page-header { margin-bottom: 32px; }
+        .page-header h1 { font-family: 'Poppins', sans-serif; font-size: 1.6rem; font-weight: 700; color: #1a1a2e; }
+        .page-header p { color: #888; margin-top: 4px; }
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+        .stat-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .stat-card .label { font-size: 0.8rem; color: #888; font-weight: 500; margin-bottom: 8px; }
+        .stat-card .value { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 700; color: #1a1a2e; }
+        .stat-card .sub-value { font-size: 0.8rem; color: #10b981; margin-top: 4px; }
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card-title { font-weight: 700; font-size: 1.05rem; color: #1a1a2e; }
+        .btn-primary { background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-primary:hover { background: #c0392b; }
+        .btn-secondary { background: #f0f2f5; color: #444; padding: 8px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+        .restaurant-row { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f0f2f5; }
+        .restaurant-row:last-child { border-bottom: none; }
+        .restaurant-avatar { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #e74c3c, #c0392b); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; overflow: hidden; }
+        .restaurant-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .restaurant-info { flex: 1; }
+        .restaurant-name { font-weight: 700; color: #1a1a2e; font-size: 0.95rem; }
+        .restaurant-meta { font-size: 0.8rem; color: #888; margin-top: 2px; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-active { background: #d1fae5; color: #059669; }
+        .badge-inactive { background: #fee2e2; color: #dc2626; }
+        .actions { display: flex; gap: 8px; }
+        .btn-icon { padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+        .btn-edit { background: #eff6ff; color: #2563eb; }
+        .btn-toggle { background: #fef3c7; color: #d97706; }
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: white; border-radius: 20px; padding: 32px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+        .modal h3 { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 24px; }
+        .modal-section { font-weight: 700; font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 12px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: #444; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 11px 13px; border: 2px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #e74c3c; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-footer { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+        .btn-cancel { background: #f0f2f5; color: #444; padding: 11px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        @media(max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; padding: 16px; } }
+    </style>
+</head>
+<body>
+    <div id="auth-guard" style="display:none;position:fixed;inset:0;background:#1a1a2e;z-index:999;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">Vérification...</div>
+
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div class="title">🍔 Gourmet Express</div>
+            <div class="sub">Super Administration</div>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-item active" onclick="showSection('dashboard')"><span class="icon">📊</span> Dashboard</button>
+            <button class="nav-item" onclick="showSection('restaurants')"><span class="icon">🏪</span> Restaurants</button>
+            <button class="nav-item" onclick="showSection('clients')"><span class="icon">👥</span> Clients</button>
+        </nav>
+        <div class="sidebar-footer">
+            <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-bottom:10px;" id="staff-name"></div>
+            <button class="logout-btn" onclick="logout()">🚪 Déconnexion</button>
+        </div>
+    </div>
+
+    <main class="main">
+        <!-- Dashboard -->
+        <section id="section-dashboard">
+            <div class="page-header">
+                <h1>Tableau de bord</h1>
+                <p>Vue globale de la plateforme</p>
+            </div>
+            <div class="stats-row">
+                <div class="stat-card"><div class="label">Restaurants</div><div class="value" id="stat-restaurants">—</div><div class="sub-value">actifs</div></div>
+                <div class="stat-card"><div class="label">Commandes totales</div><div class="value" id="stat-orders">—</div></div>
+                <div class="stat-card"><div class="label">Chiffre d'affaires</div><div class="value" id="stat-revenue">—</div><div class="sub-value">commandes terminées</div></div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Aperçu des restaurants</span>
+                    <button class="btn-primary" onclick="openCreateModal()">+ Nouveau restaurant</button>
+                </div>
+                <div id="restaurants-list">Chargement...</div>
+            </div>
+        </section>
+
+        <!-- Restaurants -->
+        <section id="section-restaurants" style="display:none;">
+            <div class="page-header">
+                <h1>Gestion des Restaurants</h1>
+                <p>Créer et gérer les restaurants de la plateforme</p>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Tous les restaurants</span>
+                    <button class="btn-primary" onclick="openCreateModal()">+ Nouveau restaurant</button>
+                </div>
+                <div id="restaurants-list-2">Chargement...</div>
+            </div>
+        </section>
+        
+        <!-- Clients -->
+        <section id="section-clients" style="display:none;">
+            <div class="page-header">
+                <h1>Gestion des Clients</h1>
+                <p>Liste globale de tous les clients inscrits sur Gourmet Express</p>
+            </div>
+            <div class="card">
+                <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <span class="card-title">Tous les clients</span>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-primary" style="background:#27ae60; padding:8px 14px; font-size:0.8rem;" onclick="exportToExcel()">📊 Exporter Excel</button>
+                        <button class="btn-primary" style="background:#2980b9; padding:8px 14px; font-size:0.8rem;" onclick="exportToPDF()">📄 Exporter PDF</button>
+                    </div>
+                </div>
+                <div id="clients-list" style="overflow-x:auto;">Chargement...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Create Restaurant Modal -->
+    <div class="modal-overlay" id="modal-create">
+        <div class="modal">
+            <h3>🏪 Créer un restaurant</h3>
+            <div class="modal-section">Informations du restaurant</div>
+            <div class="form-group"><label>Nom du restaurant *</label><input id="r-name" type="text" placeholder="Ex: Chez Mamie"></div>
+            <div class="form-group"><label>Adresse</label><input id="r-address" type="text" placeholder="Rue, Quartier, Ville"></div>
+            <div class="form-group"><label>Téléphone</label><input id="r-phone" type="tel" placeholder="00 229 xx xx xx xx"></div>
+            <div class="form-group">
+                <label>Logo du restaurant</label>
+                <input id="r-logo-file" type="file" accept="image/*" style="padding:6px 10px;">
+                <input id="r-logo" type="hidden">
+                <div id="r-logo-preview" style="margin-top:8px;display:none;align-items:center;gap:12px;">
+                    <img id="r-logo-img" style="width:50px;height:50px;border-radius:10px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                    <span style="font-size:0.8rem;color:#888;">Aperçu du logo</span>
+                </div>
+            </div>
+            <div class="form-group"><label>Description</label><input id="r-desc" type="text" placeholder="Courte description"></div>
+
+            <div class="modal-section">Compte Administrateur</div>
+            <div class="form-grid">
+                <div class="form-group"><label>Prénom *</label><input id="a-firstname" type="text"></div>
+                <div class="form-group"><label>Nom *</label><input id="a-lastname" type="text"></div>
+            </div>
+            <div class="form-group"><label>Email *</label><input id="a-email" type="email" placeholder="admin@restaurant.com"></div>
+            <div class="form-group"><label>Mot de passe *</label><input id="a-password" type="text" placeholder="Mot de passe initial"></div>
+
+            <div id="modal-error" style="color:#e74c3c;font-size:0.85rem;margin-top:8px;display:none;"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn-primary" onclick="createRestaurant()">Créer le restaurant</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Client Modal -->
+    <div class="modal-overlay" id="modal-view-client">
+        <div class="modal" style="max-width:650px;">
+            <div style="display:flex; justify-content:between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">👤 Détails du Client</h3>
+                <button onclick="closeViewClientModal()" style="border:none; background:none; font-size:1.5rem; cursor:pointer; color:#888;">&times;</button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; background:#f8f9fa; padding:16px; border-radius:12px; margin-bottom:24px;">
+                <div>
+                    <div style="font-size:0.8rem; color:#888;">NOM COMPLET</div>
+                    <div id="vc-name" style="font-weight:700; color:#1a1a2e; font-size:1.1rem; margin-top:2px;">—</div>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem; color:#888;">ID CLIENT</div>
+                    <div id="vc-id" style="font-weight:600; color:#555; margin-top:2px;">—</div>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem; color:#888;">EMAIL</div>
+                    <div id="vc-email" style="font-weight:500; color:#555; margin-top:2px;">—</div>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem; color:#888;">TÉLÉPHONE</div>
+                    <div id="vc-phone" style="font-weight:500; color:#555; margin-top:2px;">—</div>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem; color:#888;">POINTS FIDÉLITÉ</div>
+                    <div id="vc-points" style="font-weight:600; color:#10b981; margin-top:2px;">—</div>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem; color:#888;">STATUT DU COMPTE</div>
+                    <div style="margin-top:4px;"><span id="vc-status" class="badge">—</span></div>
+                </div>
+            </div>
+
+            <h4 style="font-family:'Poppins', sans-serif; font-size:1rem; margin-bottom:12px; color:#1a1a2e;">🛍️ Historique des Commandes</h4>
+            <div id="vc-orders-list" style="max-height:250px; overflow-y:auto; border:1px solid #eee; border-radius:10px; padding:8px;">
+                Chargement des commandes...
+            </div>
+            
+            <div class="modal-footer" style="margin-top:24px;">
+                <button class="btn-cancel" onclick="closeViewClientModal()">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase.js"></script>
+    <script src="../assets/js/data.js"></script>
+    <script>
+        let allStats = [];
+
+            window.addEventListener('DOMContentLoaded', async () => {
+                const staff = DataManager.getCurrentStaff();
+                if (!staff || staff.role !== 'superadmin') { window.location.href = '../login.html'; return; }
+                document.getElementById('auth-guard').style.display = 'none';
+                document.getElementById('staff-name').textContent = staff.firstname + ' ' + staff.lastname;
+                
+                // Read logo file and convert to base64
+                const logoFileInput = document.getElementById('r-logo-file');
+                if (logoFileInput) {
+                    logoFileInput.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(evt) {
+                                document.getElementById('r-logo').value = evt.target.result;
+                                document.getElementById('r-logo-img').src = evt.target.result;
+                                document.getElementById('r-logo-preview').style.display = 'flex';
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                }
+                
+                await loadData();
+            });
+
+        async function loadData() {
+            allStats = await DataManager.getAllRestaurantsStats();
+            const active = allStats.filter(r => r.status === 'active').length;
+            const totalOrders = allStats.reduce((s, r) => s + r.orderCount, 0);
+            const totalRevenue = allStats.reduce((s, r) => s + r.revenue, 0);
+            document.getElementById('stat-restaurants').textContent = active;
+            document.getElementById('stat-orders').textContent = totalOrders;
+            document.getElementById('stat-revenue').textContent = new Intl.NumberFormat('fr-FR').format(totalRevenue) + ' F';
+            renderRestaurantsList('restaurants-list');
+            renderRestaurantsList('restaurants-list-2');
+            await loadClients();
+        }
+
+        async function loadClients() {
+            const container = document.getElementById('clients-list');
+            if (!container) return;
+            const clients = await DataManager.getClients();
+            if (!clients.length) { container.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Aucun client inscrit.</p>'; return; }
+            container.innerHTML = `
+                <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                    <thead>
+                        <tr style="border-bottom:2px solid #f0f2f5; text-align:left; font-size:0.85rem; color:#888;">
+                            <th style="padding:12px 8px;">ID</th>
+                            <th style="padding:12px 8px;">Nom complet</th>
+                            <th style="padding:12px 8px;">Téléphone</th>
+                            <th style="padding:12px 8px;">Email</th>
+                            <th style="padding:12px 8px;">Statut</th>
+                            <th style="padding:12px 8px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${clients.map(c => `
+                            <tr style="border-bottom:1px solid #f0f2f5; font-size:0.9rem;">
+                                <td style="padding:12px 8px; font-weight:600; color:#666;">${c.id}</td>
+                                <td style="padding:12px 8px; font-weight:700; color:#1a1a2e;">${c.firstname} ${c.lastname}</td>
+                                <td style="padding:12px 8px; color:#555;">${c.phone || '—'}</td>
+                                <td style="padding:12px 8px; color:#555;">${c.email || '—'}</td>
+                                <td style="padding:12px 8px;">
+                                    <span class="badge ${c.status === 'active' ? 'badge-active' : 'badge-inactive'}">
+                                        ${c.status === 'active' ? 'Actif' : 'Bloqué'}
+                                    </span>
+                                </td>
+                                <td style="padding:12px 8px; display:flex; gap:6px; align-items:center;">
+                                    <button class="btn-sm" style="padding:6px 10px; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600; background:#eff6ff; color:#2563eb;" onclick="viewClientDetails('${c.id}')">
+                                        👁️ Voir
+                                    </button>
+                                    <button class="btn-sm" style="padding:6px 10px; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600; ${c.status==='active'?'background:#fee2e2;color:#dc2626;':'background:#d1fae5;color:#059669;'}" onclick="toggleClientStatus('${c.id}', '${c.status}')">
+                                        ${c.status === 'active' ? 'Bloquer' : 'Débloquer'}
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        async function toggleClientStatus(id, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'blocked' : 'active';
+            if (!confirm(`Voulez-vous vraiment ${newStatus === 'blocked' ? 'bloquer' : 'débloquer'} ce client ?`)) return;
+            const { error } = await window.supabaseClient.from('restau_clients').update({ status: newStatus }).eq('id', id);
+            if (!error) {
+                await loadClients();
+            } else {
+                alert('Erreur : ' + error.message);
+            }
+        }
+
+        async function viewClientDetails(clientId) {
+            const clients = await DataManager.getClients();
+            const client = clients.find(c => c.id === clientId);
+            if (!client) return;
+
+            document.getElementById('vc-name').textContent = client.firstname + ' ' + client.lastname;
+            document.getElementById('vc-id').textContent = client.id;
+            document.getElementById('vc-email').textContent = client.email || '—';
+            document.getElementById('vc-phone').textContent = client.phone || '—';
+            document.getElementById('vc-points').textContent = (client.points || 0) + ' points';
+            document.getElementById('vc-status').className = 'badge ' + (client.status === 'active' ? 'badge-active' : 'badge-inactive');
+            document.getElementById('vc-status').textContent = client.status === 'active' ? 'Actif' : 'Bloqué';
+
+            const ordersContainer = document.getElementById('vc-orders-list');
+            ordersContainer.innerHTML = 'Chargement des commandes...';
+
+            const { data: orders, error } = await window.supabaseClient
+                .from('restau_orders')
+                .select('*, restaurants(name)')
+                .eq('client_id', clientId);
+
+            if (error || !orders || orders.length === 0) {
+                ordersContainer.innerHTML = '<p style="color:#888; font-size:0.9rem; text-align:center; padding:15px;">Aucune commande effectuée.</p>';
+            } else {
+                ordersContainer.innerHTML = `
+                    <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:0.85rem;">
+                        <thead>
+                            <tr style="border-bottom:2px solid #f0f2f5; text-align:left; color:#888;">
+                                <th style="padding:8px 4px;">ID</th>
+                                <th style="padding:8px 4px;">Restaurant</th>
+                                <th style="padding:8px 4px;">Date</th>
+                                <th style="padding:8px 4px;">Total</th>
+                                <th style="padding:8px 4px;">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(o => `
+                                <tr style="border-bottom:1px solid #f0f2f5;">
+                                    <td style="padding:8px 4px; font-weight:600; color:#555;">${o.id}</td>
+                                    <td style="padding:8px 4px; font-weight:700; color:#1a1a2e;">${o.restaurants ? o.restaurants.name : 'Gourmet Express'}</td>
+                                    <td style="padding:8px 4px; color:#666;">${o.date ? new Date(o.date).toLocaleDateString('fr-FR') : '—'}</td>
+                                    <td style="padding:8px 4px; font-weight:600; color:#e74c3c;">${new Intl.NumberFormat('fr-FR').format(o.total)} F</td>
+                                    <td style="padding:8px 4px;">
+                                        <span class="badge ${o.status === 'Terminée' ? 'badge-active' : o.status === 'Annulée' ? 'badge-inactive' : 'badge-inactive'}" style="${o.status !== 'Terminée' && o.status !== 'Annulée' ? 'background:#fef3c7;color:#d97706;' : ''}">
+                                            ${o.status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>`;
+            }
+
+            document.getElementById('modal-view-client').classList.add('open');
+        }
+
+        function closeViewClientModal() {
+            document.getElementById('modal-view-client').classList.remove('open');
+        }
+
+        async function exportToExcel() {
+            const clients = await DataManager.getClients();
+            if (!clients.length) { alert('Aucun client à exporter.'); return; }
+            
+            // Format data for SheetJS
+            const formatted = clients.map(c => ({
+                'ID': c.id,
+                'Nom complet': c.firstname + ' ' + c.lastname,
+                'Téléphone': c.phone || '—',
+                'Email': c.email || '—',
+                'Statut': c.status === 'active' ? 'Actif' : 'Bloqué',
+                'Date d\'inscription': c.created_at ? new Date(c.created_at).toLocaleDateString('fr-FR') : '—'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(formatted);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Clients');
+            XLSX.writeFile(workbook, 'clients_gourmet_express.xlsx');
+        }
+
+        async function exportToPDF() {
+            const clients = await DataManager.getClients();
+            if (!clients.length) { alert('Aucun client à exporter.'); return; }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add title
+            doc.setFontSize(16);
+            doc.text('Liste des clients - Gourmet Express', 14, 15);
+            doc.setFontSize(10);
+            doc.text('Généré le ' + new Date().toLocaleDateString('fr-FR') + ' à ' + new Date().toLocaleTimeString('fr-FR'), 14, 22);
+
+            // Setup table
+            const tableHeaders = [['ID', 'Nom complet', 'Téléphone', 'Email', 'Statut']];
+            const tableData = clients.map(c => [
+                c.id,
+                c.firstname + ' ' + c.lastname,
+                c.phone || '—',
+                c.email || '—',
+                c.status === 'active' ? 'Actif' : 'Bloqué'
+            ]);
+
+            doc.autoTable({
+                startY: 26,
+                head: tableHeaders,
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [231, 76, 60] }, // Gourmet Express Red
+                styles: { fontSize: 9 }
+            });
+
+            doc.save('clients_gourmet_express.pdf');
+        }
+
+        function renderRestaurantsList(containerId) {
+            const container = document.getElementById(containerId);
+            if (!allStats.length) { container.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Aucun restaurant.</p>'; return; }
+            container.innerHTML = allStats.map(r => `
+                <div class="restaurant-row">
+                    <div class="restaurant-avatar">${r.logo ? `<img src="${r.logo}">` : '🍽️'}</div>
+                    <div class="restaurant-info">
+                        <div class="restaurant-name">${r.name}</div>
+                        <div class="restaurant-meta">${r.orderCount} commandes • ${new Intl.NumberFormat('fr-FR').format(r.revenue)} F CA</div>
+                    </div>
+                    <span class="badge ${r.status === 'active' ? 'badge-active' : 'badge-inactive'}">${r.status === 'active' ? 'Actif' : 'Inactif'}</span>
+                    <div class="actions">
+                        <button class="btn-icon btn-toggle" onclick="toggleRestaurant('${r.id}', '${r.status}')">${r.status === 'active' ? 'Désactiver' : 'Activer'}</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function showSection(name) {
+            document.querySelectorAll('section[id^="section-"]').forEach(s => s.style.display = 'none');
+            document.getElementById('section-' + name).style.display = 'block';
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        function openCreateModal() { document.getElementById('modal-create').classList.add('open'); }
+        function closeModal() { 
+            document.getElementById('modal-create').classList.remove('open'); 
+            document.getElementById('modal-error').style.display = 'none'; 
+            const fileInput = document.getElementById('r-logo-file');
+            if (fileInput) fileInput.value = '';
+            const logoInput = document.getElementById('r-logo');
+            if (logoInput) logoInput.value = '';
+            const previewEl = document.getElementById('r-logo-preview');
+            if (previewEl) previewEl.style.display = 'none';
+        }
+
+        async function createRestaurant() {
+            const name = document.getElementById('r-name').value.trim();
+            const firstname = document.getElementById('a-firstname').value.trim();
+            const lastname = document.getElementById('a-lastname').value.trim();
+            const email = document.getElementById('a-email').value.trim();
+            const password = document.getElementById('a-password').value.trim();
+            if (!name || !firstname || !lastname || !email || !password) { showModalError('Tous les champs obligatoires (*) doivent être remplis.'); return; }
+            const result = await DataManager.createRestaurant(
+                { name, address: document.getElementById('r-address').value, phone: document.getElementById('r-phone').value, logo: document.getElementById('r-logo').value, description: document.getElementById('r-desc').value },
+                { firstname, lastname, email, password }
+            );
+            if (result.success) { closeModal(); await loadData(); alert('✅ Restaurant créé avec succès !'); }
+            else showModalError(result.message);
+        }
+
+        async function toggleRestaurant(id, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            if (!confirm(`${newStatus === 'inactive' ? 'Désactiver' : 'Activer'} ce restaurant ?`)) return;
+            await DataManager.updateRestaurant(id, { status: newStatus });
+            await loadData();
+        }
+
+        function showModalError(msg) {
+            const el = document.getElementById('modal-error');
+            el.textContent = msg; el.style.display = 'block';
+        }
+
+        function logout() { DataManager.logout(); window.location.href = '../login.html'; }
+
+        function formatPrice(p) { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(p); }
+    </script>
+</body>
+</html>

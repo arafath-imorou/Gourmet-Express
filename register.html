@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - Gourmet Express</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        .auth-card {
+            background: white;
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            max-width: 500px;
+            margin: 40px auto;
+        }
+    </style>
+</head>
+<body style="background: #f0f2f5;">
+
+    <div class="container">
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="index.html" class="nav-back-container" style="flex-direction: row; gap: 8px;">
+                <span style="font-size: 24px;">←</span>
+                <span>Retour à l'accueil</span>
+            </a>
+            <div style="display:flex; flex-direction:column; align-items:center; margin-top:16px;">
+                <div style="font-size:1.6rem; font-weight:700; color:var(--primary-color);">Gourmet Express 🍔</div>
+                <div style="font-size:0.8rem; font-weight:700; letter-spacing:2px; color:#888; margin-top:2px; text-transform:uppercase; font-family:'Inter', sans-serif;">by ITA INNOVATE</div>
+            </div>
+        </div>
+
+        <div class="auth-card">
+            <h2 class="text-center mb-4">Créer un compte</h2>
+
+            <form id="register-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="input-group">
+                        <label>Prénom</label>
+                        <input type="text" name="firstname" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Nom</label>
+                        <input type="text" name="lastname" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Téléphone</label>
+                    <input type="tel" name="phone" required placeholder="0102030405">
+                </div>
+
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required placeholder="exemple@email.com">
+                </div>
+
+                <div class="input-group">
+                    <label>Mot de passe</label>
+                    <input type="password" name="password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+            </form>
+
+            <div class="text-center mt-4">
+                Déjà un compte ? <a href="login.html" style="color: var(--primary-color); font-weight: 600;">Se connecter</a>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:24px;"><p style="font-size:0.75rem; letter-spacing:1px; display:inline-block; background:#1a1a2e; padding:6px 14px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.15); font-weight:700;"><span style="color:#ffffff; font-weight:500;">Réalisé par</span> <a href="http://www.itainnovate.com" target="_blank" class="blink-orange" style="text-decoration:none;">ITA INNOVATE</a></p></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                firstname: formData.get('firstname'),
+                lastname: formData.get('lastname'),
+                phone: formData.get('phone'),
+                email: formData.get('email'),
+                password: formData.get('password')
+            };
+
+            const result = await DataManager.registerClient(data);
+            if (result.success) {
+                alert('Compte créé avec succès ! Veuillez vous connecter avec vos identifiants.');
+                window.location.href = 'login.html';
+            } else {
+                alert('Erreur: ' + result.message);
+            }
+        });
+    </script>
+</body>
+</html>

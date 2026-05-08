@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commander - Gourmet Express</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <header class="header-fixed" style="justify-content: flex-start; gap: 16px;">
+        <a href="cart.html" class="nav-back-container">
+            <span style="font-size: 24px;">←</span>
+            <span class="nav-back-text">Retour</span>
+        </a>
+        <h2 style="font-size: 1.2rem; margin: 0;">Finaliser la commande</h2>
+    </header>
+
+    <div class="container" style="padding-top: 16px;">
+
+        <div class="card"
+            style="padding: 16px; margin-bottom: 24px; background: #fffcf8; border-left: 4px solid var(--secondary-color);">
+            <div class="text-sm text-muted">Montant à payer</div>
+            <div class="font-bold" style="font-size: 1.5rem; color: var(--primary-color);" id="summary-total">0 FCFA
+            </div>
+        </div>
+
+        <form id="order-form">
+            <h3 class="mb-4">Vos Coordonnées</h3>
+
+            <div class="input-group">
+                <label for="name">Nom complet *</label>
+                <input type="text" id="name" name="name" required placeholder="Ex: Jean Kouassi">
+            </div>
+
+            <div class="input-group">
+                <label for="phone">Numéro de téléphone *</label>
+                <input type="tel" id="phone" name="phone" required placeholder="Ex: 0707070707">
+            </div>
+
+            <h3 class="mb-4" style="margin-top: 32px;">Mode de réception</h3>
+
+            <div class="input-group">
+                <label
+                    style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
+                    <input type="radio" name="mode" value="takeaway" checked>
+                    <div style="font-weight: 600; margin-top: 4px;">À emporter</div>
+                </label>
+                <label
+                    style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
+                    <input type="radio" name="mode" value="dinein">
+                    <div style="font-weight: 600; margin-top: 4px;">Sur place</div>
+                </label>
+                <label
+                    style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
+                    <input type="radio" name="mode" value="delivery">
+                    <div style="font-weight: 600; margin-top: 4px;">Livraison</div>
+                </label>
+            </div>
+    </div>
+
+    <div class="input-group" id="address-group" style="display: none;">
+        <label for="address">Adresse de livraison *</label>
+        <textarea id="address" name="address" rows="2" placeholder="Quartier, repère..."></textarea>
+    </div>
+
+    <div class="input-group" style="max-width: 50%; margin: 0 auto;">
+        <label for="comment">Instructions (Optionnel)</label>
+        <textarea id="comment" name="comment" rows="2" placeholder="Sans oignons, sauce à part..."></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="margin-top: 24px; padding: 16px;">
+        Envoyer la commande 🚀
+    </button>
+    </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/order.js"></script>
+</body>
+
+</html>

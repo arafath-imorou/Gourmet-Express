@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Gourmet Express</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/menu.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="header-fixed">
+        <a href="index.html" class="nav-back-container">
+            <span style="font-size: 24px;">←</span>
+            <span class="nav-back-text">Retour</span>
+        </a>
+        <h2 style="font-size: 1.2rem; margin: 0;">Notre Menu</h2>
+        <a href="cart.html" style="position: relative; font-size: 24px;">
+            🛒
+            <span class="badge cart-counter" style="display: none;">0</span>
+        </a>
+    </header>
+
+    <div class="category-scroll" id="category-filter">
+        <!-- JS renders categories here -->
+    </div>
+
+    <div class="container product-grid" id="menu-container">
+        <!-- JS renders products here -->
+    </div>
+
+    <a href="cart.html" class="btn btn-primary btn-floating">
+        Voir mon panier (<span class="cart-counter">0</span>)
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/menu.js"></script>
+</body>
+
+</html>

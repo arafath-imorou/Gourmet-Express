@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Client - Gourmet Express</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .client-header {
+            background: white;
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .loyalty-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .nav-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: transform 0.2s;
+        }
+
+        .nav-card:active {
+            transform: scale(0.98);
+        }
+
+        .nav-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body style="background: #f0f2f5;">
+
+    <div class="client-header">
+        <a href="../index.html" style="text-decoration: none; font-weight: 700; color: var(--primary-color);">Gourmet
+            Express</a>
+        <button onclick="logout()"
+            style="background: none; border: none; font-weight: 600; color: #666;">Déconnexion</button>
+    </div>
+
+    <div class="container" style="max-width: 600px; padding-top: 24px;">
+        <h2 class="mb-4">Bonjour <span id="client-name">...</span> 👋</h2>
+
+        <div class="loyalty-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="text-sm opacity-90">Mes points fidélité</div>
+                    <div class="font-bold" style="font-size: 2.5rem;" id="points-display">0</div>
+                    <div class="text-sm opacity-90" style="margin-top: 4px;">10 points = 1 Bon Cadeau 🎁</div>
+                </div>
+                <div
+                    style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; text-align: center; min-width: 80px;">
+                    <div class="font-bold" style="font-size: 1.5rem;" id="vouchers-display">0</div>
+                    <div class="text-xs" style="line-height: 1;">Bons</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="mb-3">Mon Espace</h3>
+        <div class="nav-grid">
+            <a href="orders.html" class="nav-card">
+                <span class="nav-icon">📜</span>
+                <span class="font-bold">Mes Commandes</span>
+            </a>
+            <a href="profile.html" class="nav-card">
+                <span class="nav-icon">👤</span>
+                <span class="font-bold">Mon Profil</span>
+            </a>
+            <a href="../menu.html" class="nav-card"
+                style="border: 2px solid var(--primary-color); background: #FFFBF0;">
+                <span class="nav-icon">🍔</span>
+                <span class="font-bold" style="color: var(--primary-color);">Commander</span>
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase.js"></script>
+    <script src="../assets/js/data.js"></script>
+    <script>
+        // Check Auth
+        const client = DataManager.getCurrentClient();
+        if (!client) {
+            window.location.href = '../login.html';
+        } else {
+            document.getElementById('client-name').textContent = client.firstname;
+            document.getElementById('points-display').textContent = client.points || 0;
+            document.getElementById('vouchers-display').textContent = client.vouchers || 0;
+        }
+
+        function logout() {
+            DataManager.logoutClient();
+            window.location.href = '../index.html';
+        }
+    </script>
+</body>
+
+</html>

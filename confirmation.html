@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commande Confirmée - Gourmet Express</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #D1FAE5;
+            color: #059669;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 24px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container text-center" style="padding-top: 60px;">
+        <div class="success-icon">✓</div>
+        <h1 class="mb-2">Merci !</h1>
+        <p class="text-muted mb-4">Votre commande a bien été reçue.</p>
+
+        <div class="card" style="padding: 24px; margin-bottom: 32px;">
+            <div class="text-sm text-muted">Numéro de commande</div>
+            <div class="font-bold" style="font-size: 1.2rem; color: var(--text-primary);" id="order-id">...</div>
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee;">
+                <p class="text-sm">Nous allons confirmer votre commande dans quelques instants.</p>
+            </div>
+        </div>
+
+        <a id="wa-btn" href="#" class="btn btn-success"
+            style="background-color: #25D366; color: white; margin-bottom: 16px;">
+            Envoyer sur WhatsApp 💬
+        </a>
+
+        <a href="index.html" class="btn btn-secondary">Retour à l'accueil</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script>
+        // Get Order ID from URL
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get('id');
+
+        // Auth Check
+        const client = DataManager.getCurrentClient();
+        const isAdmin = sessionStorage.getItem('admin_token') === 'valid';
+
+        if (!client && !isAdmin) {
+            window.location.href = 'login.html';
+        }
+
+        if (!orderId) {
+            window.location.href = 'index.html';
+        }
+
+        // Ownership Check
+        const orders = DataManager.getOrders();
+        const order = orders.find(o => o.id === orderId);
+
+        if (order) {
+            // Only allow owner or admin
+            if (!isAdmin && order.clientId !== client.id) {
+                alert('Accès refusé.');
+                window.location.href = 'index.html';
+            }
+
+            document.getElementById('order-id').textContent = orderId;
+
+            // Construct WhatsApp Message
+            const menu = DataManager.getMenu();
+            let message = `*Nouvelle Commande ${order.id}*\n`;
+            message += `👤 ${order.clientName} (${order.phone})\n`;
+            message += `🛵 ${order.type === 'delivery' ? 'Livraison' : 'À emporter'}\n`;
+            if (order.address) message += `📍 ${order.address}\n`;
+            message += `\n*Articles:*\n`;
+
+            order.items.forEach(item => {
+                const p = menu.find(x => x.id === item.productId);
+                if (p) message += `- ${item.quantity}x ${p.name}\n`;
+            });
+
+            message += `\n💰 *Total: ${order.total} FCFA*`;
+            if (order.comment) message += `\n📝 Note: ${order.comment}`;
+
+            const waLink = `https://wa.me/2250700000000?text=${encodeURIComponent(message)}`;
+            document.getElementById('wa-btn').href = waLink;
+        }
+    </script>
+</body>
+
+</html>

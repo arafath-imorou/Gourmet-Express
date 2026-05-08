@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Menu - Gourmet Express</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .admin-nav {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 24px;
+        }
+
+        .admin-nav a {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .admin-nav a.active {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .menu-item-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            flex-wrap: wrap;
+            /* Enable wrap for mobile */
+        }
+
+        .menu-actions-container {
+            width: 100%;
+            margin-top: 12px;
+            justify-content: space-between;
+        }
+
+        @media (min-width: 600px) {
+            .menu-item-row {
+                flex-wrap: nowrap;
+            }
+
+            .menu-actions-container {
+                width: auto;
+                margin-top: 0;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+
+<body style="background: #f0f2f5;">
+
+    <div class="admin-nav">
+        <a href="index.html">Commandes</a>
+        <a href="menu.html" class="active">Menu</a>
+        <a href="clients.html">Clients</a>
+        <div style="flex:1"></div>
+        <button onclick="logout()"
+            style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 600;">Déconnexion</button>
+    </div>
+
+    <div class="container" style="max-width: 800px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 class="mb-0">Gestion du Menu</h2>
+            <a href="menu-edit.html" class="btn btn-primary" style="width: auto;">+ Nouveau Plat</a>
+        </div>
+
+        <div id="admin-menu-list">
+            <!-- Rendered by JS -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase.js"></script>
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/admin.js"></script>
+    <script>
+        function renderAdminMenu() {
+            const container = document.getElementById('admin-menu-list');
+            const menu = DataManager.getMenu();
+            container.innerHTML = '';
+
+            menu.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'menu-item-row';
+                // Adjust for mobile: Stack on very small screens, row on larger.
+                div.style.flexWrap = 'wrap';
+
+                div.innerHTML = `
+                    <div style="display: flex; gap: 16px; flex: 1; min-width: 250px;">
+                        <div style="width: 60px; height: 60px; border-radius: 8px; background-image: url('${item.image}'); background-size: cover; background-position: center; flex-shrink: 0;"></div>
+                        <div>
+                            <div class="font-bold" style="font-size: 1.1rem;">${item.name}</div>
+                            <div class="text-sm text-muted">${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(item.price)} • ${item.category}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px; width: 100%; margin-top: 12px; justify-content: flex-end;" class="menu-actions-container">
+                        <!-- Desktop/Tablet styles handled by CSS mostly, but inline fallback -->
+                         <button class="btn btn-secondary btn-sm" style="flex: 1; white-space: nowrap;" onclick="toggleMenuItem('${item.id}')">
+                            ${item.active ? '✅ Actif' : '❌ Inactif'}
+                        </button>
+                        <a href="menu-edit.html?id=${item.id}" class="btn btn-secondary btn-sm" style="flex: 1; text-align: center;">
+                            ✏️ Modi.
+                        </a>
+                        <button class="btn btn-secondary btn-sm" style="flex: 0; min-width: 50px; color: #DC3545; border-color: #DC3545;" onclick="deleteMenuItem('${item.id}')">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+
+                // Add media query inline style for desktop to prevent wrapping if ample space? 
+                // Better handled by style tag below
+                container.appendChild(div);
+            });
+        }
+
+        // Initial render
+        renderAdminMenu();
+    </script>
+</body>
+
+</html>
