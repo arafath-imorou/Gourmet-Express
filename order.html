@@ -96,7 +96,7 @@
                 </div>
 
                 <div class="input-group" style="margin-bottom: 0;">
-                    <label for="phone">Numéro de téléphone (Mobile Money) *</label>
+                    <label for="phone">Numéro de téléphone (Whatsapp) *</label>
                     <input type="tel" id="phone" name="phone" required placeholder="Ex: 0197000000">
                 </div>
             </div>
@@ -138,15 +138,21 @@
                     <span style="background:#ecfdf5; color:#065f46; font-size:0.75rem; font-weight:700; padding:4px 8px; border-radius:6px;">Requis avant validation</span>
                 </div>
                 
-                <p style="font-size:0.85rem; color:#64748b; margin: 8px 0 12px;">
-                    La commande sera transmise au restaurant uniquement après confirmation de votre règlement.
+                <p style="font-size:0.85rem; color:#64748b; margin: 8px 0 14px;">
+                    Sélectionnez votre réseau de paiement Mobile Money :
                 </p>
 
-                <div class="payment-logos">
-                    <span class="payment-badge">🟡 MTN MoMo</span>
-                    <span class="payment-badge">🟢 Moov Money</span>
-                    <span class="payment-badge">🔵 Celtiis Cash</span>
-                    <span class="payment-badge">💳 Visa / Mastercard</span>
+                <!-- Réseau de paiement à cocher -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px;">
+                    <label style="display:flex; align-items:center; gap:8px; border: 2px solid #f59e0b; background: #fffbeb; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #92400e;">
+                        <input type="radio" name="payment_network" value="MTN MoMo" checked style="accent-color:#d97706;"> 🟡 MTN MoMo
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; border: 2px solid #10b981; background: #ecfdf5; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #065f46;">
+                        <input type="radio" name="payment_network" value="Moov Money" style="accent-color:#059669;"> 🟢 Moov Money
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; border: 2px solid #3b82f6; background: #eff6ff; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #1e40af;">
+                        <input type="radio" name="payment_network" value="Celtiis Cash" style="accent-color:#2563eb;"> 🔵 Celtiis Cash
+                    </label>
                 </div>
 
                 <button type="submit" class="btn-fedapay-pay" id="btn-submit-order">

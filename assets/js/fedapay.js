@@ -134,20 +134,17 @@ const FedaPayManager = {
 
                 <div style="margin-bottom: 16px;">
                     <label style="font-size: 0.82rem; font-weight: 700; color: #334155; display:block; margin-bottom: 8px;">
-                        Choisissez votre moyen de paiement :
+                        Réseau de paiement Mobile Money :
                     </label>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <label style="display:flex; align-items:center; gap: 8px; border: 2px solid #f59e0b; background: #fffbeb; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #92400e;">
-                            <input type="radio" name="fedapay_method" value="MTN MoMo" checked> 🟡 MTN MoMo
+                    <div style="display:grid; grid-template-columns: 1fr; gap: 8px;">
+                        <label style="display:flex; align-items:center; gap: 10px; border: 2px solid #f59e0b; background: #fffbeb; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #92400e;">
+                            <input type="radio" name="fedapay_method" value="MTN MoMo" ${customer.network === 'MTN MoMo' || !customer.network ? 'checked' : ''}> 🟡 MTN Mobile Money (MoMo)
                         </label>
-                        <label style="display:flex; align-items:center; gap: 8px; border: 2px solid #10b981; background: #ecfdf5; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #065f46;">
-                            <input type="radio" name="fedapay_method" value="Moov Money"> 🟢 Moov Money
+                        <label style="display:flex; align-items:center; gap: 10px; border: 2px solid #10b981; background: #ecfdf5; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #065f46;">
+                            <input type="radio" name="fedapay_method" value="Moov Money" ${customer.network === 'Moov Money' ? 'checked' : ''}> 🟢 Moov Money
                         </label>
-                        <label style="display:flex; align-items:center; gap: 8px; border: 2px solid #3b82f6; background: #eff6ff; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #1e40af;">
-                            <input type="radio" name="fedapay_method" value="Celtiis Cash"> 🔵 Celtiis Cash
-                        </label>
-                        <label style="display:flex; align-items:center; gap: 8px; border: 2px solid #8b5cf6; background: #f5f3ff; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #5b21b6;">
-                            <input type="radio" name="fedapay_method" value="Carte Bancaire"> 💳 Carte Visa/MC
+                        <label style="display:flex; align-items:center; gap: 10px; border: 2px solid #3b82f6; background: #eff6ff; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #1e40af;">
+                            <input type="radio" name="fedapay_method" value="Celtiis Cash" ${customer.network === 'Celtiis Cash' ? 'checked' : ''}> 🔵 Celtiis Cash
                         </label>
                     </div>
                 </div>

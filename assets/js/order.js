@@ -101,9 +101,10 @@ function setupForm() {
         const mode = formData.get('mode');
         const address = formData.get('address') ? formData.get('address').trim() : '';
         const userComment = formData.get('comment') ? formData.get('comment').trim() : '';
+        const paymentNetwork = formData.get('payment_network') || 'MTN MoMo';
 
         if (!clientName || !phone) {
-            alert('Veuillez renseigner votre nom et numéro de téléphone.');
+            alert('Veuillez renseigner votre nom et numéro de téléphone WhatsApp.');
             return;
         }
 
@@ -114,24 +115,26 @@ function setupForm() {
 
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span>⏳ Ouverture du paiement FedaPay...</span>';
+            submitBtn.innerHTML = `<span>⏳ Traitement paiement ${paymentNetwork}...</span>`;
         }
 
         // Lancement du paiement FedaPay
         FedaPayManager.pay({
             amount: orderTotal,
-            description: `Commande ${DataManager.getCurrentRestaurantName() || 'Gourmet Express'}`,
+            description: `Commande ${DataManager.getCurrentRestaurantName() || 'Gourmet Express'} (${paymentNetwork})`,
             customer: {
                 name: clientName,
                 email: (client && client.email) || 'client@gourmetexpress.com',
-                phone: phone
+                phone: phone,
+                network: paymentNetwork
             },
             onSuccess: async (paymentResult) => {
                 if (submitBtn) {
                     submitBtn.innerHTML = '<span>✅ Paiement validé ! Enregistrement de la commande...</span>';
                 }
 
-                const paymentInfo = `[Paiement FedaPay Validé - Réf: ${paymentResult.transactionId || 'FEDA'}]`;
+                const actualMethod = paymentResult.method || paymentNetwork;
+                const paymentInfo = `[Paiement FedaPay Validé - ${actualMethod} - Réf: ${paymentResult.transactionId || 'FEDA'}]`;
                 const finalComment = userComment ? `${paymentInfo} ${userComment}` : paymentInfo;
 
                 const orderDetails = {
