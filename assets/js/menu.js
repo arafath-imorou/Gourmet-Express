@@ -1,32 +1,82 @@
 /**
  * Menu.js
- * Handles rendering of menu items and interactions on the menu page.
+ * Handles rendering of menu items and interactive restaurant switching.
  */
 
+let allRestaurantsList = [];
+
 document.addEventListener('DOMContentLoaded', async () => {
-    const restaurantId = DataManager.getCurrentRestaurantId();
-    if (!restaurantId) {
+    // 1. Load active restaurants list
+    allRestaurantsList = await DataManager.getRestaurants(true);
+
+    let restaurantId = DataManager.getCurrentRestaurantId();
+    if (!restaurantId && allRestaurantsList.length > 0) {
+        restaurantId = allRestaurantsList[0].id;
+        DataManager.setCurrentRestaurant(restaurantId, allRestaurantsList[0].name);
+    } else if (!restaurantId) {
         window.location.href = 'index.html';
         return;
     }
 
-    const restaurantName = DataManager.getCurrentRestaurantName() || 'Restaurant';
+    populateRestaurantSwitcher(restaurantId);
+    await loadMenuForRestaurant(restaurantId);
+});
+
+function populateRestaurantSwitcher(currentId) {
+    const select = document.getElementById('restaurant-switcher-select');
+    if (!select) return;
+
+    select.innerHTML = allRestaurantsList.map(r => `
+        <option value="${r.id}" ${r.id === currentId ? 'selected' : ''}>
+            🍽️ ${r.name}
+        </option>
+    `).join('');
+
+    updateSwitcherBadge(currentId);
+}
+
+function updateSwitcherBadge(restaurantId) {
+    const currentResto = allRestaurantsList.find(r => r.id === restaurantId);
+    const nameEl = document.getElementById('switcher-resto-name');
+    const avatarEl = document.getElementById('switcher-resto-avatar');
     const headerTitle = document.querySelector('header h2');
-    if (headerTitle) {
-        headerTitle.innerHTML = `Notre Menu<div style="font-size:0.75rem; color:var(--primary-color); font-weight:normal;">${restaurantName}</div>`;
+
+    if (currentResto) {
+        if (nameEl) nameEl.textContent = currentResto.name;
+        if (avatarEl) {
+            avatarEl.innerHTML = currentResto.logo 
+                ? `<img src="${currentResto.logo}" alt="${currentResto.name}">`
+                : '🍽️';
+        }
+        if (headerTitle) {
+            headerTitle.innerHTML = `Notre Carte<div style="font-size:0.75rem; color:#e74c3c; font-weight:600;">${currentResto.name}</div>`;
+        }
+    }
+}
+
+async function switchRestaurantFromMenu(newRestaurantId) {
+    if (!newRestaurantId) return;
+    const targetResto = allRestaurantsList.find(r => r.id === newRestaurantId);
+    if (!targetResto) return;
+
+    // Update in session
+    DataManager.setCurrentRestaurant(targetResto.id, targetResto.name);
+    updateSwitcherBadge(targetResto.id);
+    
+    showToast(`Passage au restaurant : ${targetResto.name}`);
+    await loadMenuForRestaurant(targetResto.id);
+}
+
+async function loadMenuForRestaurant(restaurantId) {
+    const menuContainer = document.getElementById('menu-container');
+    if (menuContainer) {
+        menuContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 40px;">Chargement de la carte...</div>';
     }
 
-    const menuContainer = document.getElementById('menu-container');
-    if(menuContainer) {
-        menuContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 40px;">Chargement du menu...</div>';
-    }
-    
-    // Fetch menu from Supabase once
-    window.allProducts = await DataManager.getMenu();
-    
+    window.allProducts = await DataManager.getMenu(restaurantId);
     renderMenu();
     setupCategoryFilters();
-});
+}
 
 function renderMenu(categoryFilter = 'all') {
     const menuContainer = document.getElementById('menu-container');
@@ -39,17 +89,17 @@ function renderMenu(categoryFilter = 'all') {
         : products.filter(p => p.category === categoryFilter);
 
     if (filteredProducts.length === 0) {
-        menuContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 40px;">Aucun plat trouvé dans cette catégorie.</div>';
+        menuContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 40px; font-weight:500;">Aucun plat disponible pour cet établissement dans cette catégorie.</div>';
         return;
     }
 
     filteredProducts.forEach(product => {
-        if (!product.active) return;
+        if (product.active === false || product.available === false) return;
 
         const card = document.createElement('div');
         card.className = 'card product-card';
         card.innerHTML = `
-            <div class="product-image" style="background-image: url('${product.image}');"></div>
+            <div class="product-image" style="background-image: url('${product.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=60'}');"></div>
             <div class="product-details">
                 <div class="product-header">
                     <h3 class="product-title">${product.name}</h3>
@@ -57,7 +107,7 @@ function renderMenu(categoryFilter = 'all') {
                 </div>
                 <p class="product-desc text-muted text-sm">${product.description || ''}</p>
                 <button class="btn btn-primary btn-sm add-to-cart-btn" onclick="addToCart('${product.id}')">
-                    Ajouter
+                    + Ajouter
                 </button>
             </div>
         `;
@@ -66,23 +116,21 @@ function renderMenu(categoryFilter = 'all') {
 }
 
 function setupCategoryFilters() {
-    const products = window.allProducts || [];
-    const categories = ['all', ...new Set(products.map(p => p.category))];
+    const products = (window.allProducts || []).filter(p => p.available !== false && p.active !== false);
+    const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
     const filterContainer = document.getElementById('category-filter');
 
-    if(!filterContainer) return;
+    if (!filterContainer) return;
     filterContainer.innerHTML = '';
 
     categories.forEach(cat => {
         const btn = document.createElement('button');
         btn.className = `category-pill ${cat === 'all' ? 'active' : ''}`;
-        btn.textContent = cat === 'all' ? 'Tout' : cat;
+        btn.textContent = cat === 'all' ? 'Tous les plats' : cat;
         btn.dataset.category = cat;
 
         btn.addEventListener('click', () => {
-            // Remove active class from all
             document.querySelectorAll('.category-pill').forEach(b => b.classList.remove('active'));
-            // Add to current
             btn.classList.add('active');
             renderMenu(cat);
         });
@@ -91,7 +139,6 @@ function setupCategoryFilters() {
     });
 }
 
-// Global scope for onclick attribute
 window.addToCart = (id) => {
     DataManager.addToCart(id, 1);
     showToast('Ajouté au panier');

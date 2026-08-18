@@ -349,8 +349,13 @@
             }
             restaurants.forEach(r => {
                 const a = document.createElement('a');
-                a.href = `login.html?restaurant=${r.id}`;
+                a.href = 'menu.html';
                 a.className = 'restaurant-card';
+                a.onclick = (e) => {
+                    e.preventDefault();
+                    DataManager.setCurrentRestaurant(r.id, r.name);
+                    window.location.href = 'menu.html';
+                };
                 a.innerHTML = `
                     <div class="cover">
                         ${r.logo ? `<img src="${r.logo}" alt="${r.name}">` : '🍽️'}
@@ -358,7 +363,7 @@
                     <div class="info">
                         <div class="name">${r.name}</div>
                         <div class="address">📍 ${r.address || 'Adresse non renseignée'}</div>
-                        <span class="badge">✅ Ouvert</span>
+                        <span class="badge">✅ Voir le menu</span>
                     </div>`;
                 grid.appendChild(a);
             });

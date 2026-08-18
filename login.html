@@ -178,8 +178,11 @@
 
         async function loginClient() {
             clearError();
-            const { id: restaurantId, name: restaurantName } = getSelectedRestaurant();
-            if (!restaurantId) { showError('Veuillez choisir un restaurant.'); return; }
+            let { id: restaurantId, name: restaurantName } = getSelectedRestaurant();
+            if (!restaurantId && restaurants.length > 0) {
+                restaurantId = restaurants[0].id;
+                restaurantName = restaurants[0].name;
+            }
             const identifier = document.getElementById('client-identifier').value.trim();
             const password = document.getElementById('client-password').value;
             if (!identifier || !password) { showError('Remplissez tous les champs.'); return; }

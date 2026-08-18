@@ -7,9 +7,7 @@
     <title>Menu - Gourmet Express</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/menu.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -17,14 +15,30 @@
     <header class="header-fixed">
         <a href="index.html" class="nav-back-container">
             <span style="font-size: 24px;">←</span>
-            <span class="nav-back-text">Retour</span>
+            <span class="nav-back-text">Accueil</span>
         </a>
-        <h2 style="font-size: 1.2rem; margin: 0;">Notre Menu</h2>
-        <a href="cart.html" style="position: relative; font-size: 24px;">
+        <h2 style="font-size: 1.15rem; margin: 0; font-family:'Poppins', sans-serif;">Notre Carte</h2>
+        <a href="cart.html" style="position: relative; font-size: 24px; text-decoration: none;">
             🛒
             <span class="badge cart-counter" style="display: none;">0</span>
         </a>
     </header>
+
+    <!-- Barre dynamique de choix de restaurant -->
+    <div class="restaurant-switcher-bar" id="restaurant-switcher-bar">
+        <div class="current-resto-badge">
+            <div class="resto-avatar-img" id="switcher-resto-avatar">🍽️</div>
+            <div class="resto-texts">
+                <span class="label">Établissement</span>
+                <span class="name" id="switcher-resto-name">Gourmet Express</span>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <select id="restaurant-switcher-select" class="switcher-select" onchange="switchRestaurantFromMenu(this.value)">
+                <option value="">Changer de restaurant ▾</option>
+            </select>
+        </div>
+    </div>
 
     <div class="category-scroll" id="category-filter">
         <!-- JS renders categories here -->
