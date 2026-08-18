@@ -14,74 +14,90 @@
             padding: 0;
         }
         body {
-            background: #f4f6f9;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
             font-family: 'Inter', sans-serif;
+            color: white;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             min-height: 100vh;
-        }
-        .hero {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 28px 16px 22px;
             position: relative;
-            overflow: hidden;
-            border-bottom-left-radius: 24px;
-            border-bottom-right-radius: 24px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow-x: hidden;
         }
-        .hero::before {
+        body::before {
             content: '';
             position: absolute;
             inset: 0;
             background: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=60') center/cover;
             opacity: 0.15;
             pointer-events: none;
+            z-index: 0;
         }
-        .hero-content {
+        #session-header {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            padding: 6px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 0.85rem;
+        }
+        .main-container {
             position: relative;
             z-index: 1;
-            max-width: 600px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 20px 10px;
+            max-width: 960px;
+            margin: 0 auto;
+            width: 100%;
         }
-        .hero h1 {
+        .hero-content {
+            text-align: center;
+            max-width: 600px;
+            margin-bottom: 18px;
+        }
+        .hero-content h1 {
             font-family: 'Poppins', sans-serif;
             font-size: clamp(1.6rem, 3.8vw, 2.5rem);
             font-weight: 800;
             color: white;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             line-height: 1.15;
         }
-        .hero h1 span.brand-title {
+        .hero-content h1 span.brand-title {
             display: inline-flex;
             align-items: center;
             gap: 6px;
         }
-        .hero h1 span.brand-title .accent {
+        .hero-content h1 span.brand-title .accent {
             color: #e74c3c;
         }
         .brand-subtitle {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 600;
             letter-spacing: 2px;
             color: rgba(255,255,255,0.6);
-            margin-top: 3px;
+            margin-top: 2px;
             font-family: 'Inter', sans-serif;
             text-transform: uppercase;
         }
-        .hero p {
+        .hero-content p {
             color: rgba(255,255,255,0.8);
-            font-size: clamp(0.85rem, 1.8vw, 0.98rem);
-            margin-bottom: 18px;
-            max-width: 480px;
-            margin-left: auto;
-            margin-right: auto;
+            font-size: clamp(0.82rem, 1.6vw, 0.95rem);
+            margin-top: 8px;
+            margin-bottom: 16px;
             line-height: 1.45;
         }
         .hero-btns {
@@ -104,9 +120,10 @@
         .btn-hero-primary:hover {
             background: #c0392b;
             transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(231,76,60,0.45);
         }
         .btn-hero-secondary {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.12);
             color: white;
             padding: 9px 22px;
             border-radius: 30px;
@@ -118,58 +135,63 @@
             backdrop-filter: blur(4px);
         }
         .btn-hero-secondary:hover {
-            background: rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.22);
             transform: translateY(-1px);
         }
         
-        .section {
-            padding: 16px 20px 10px;
-            max-width: 880px;
-            margin: 0 auto;
+        /* Restaurants Section inside the Hero View */
+        .restaurants-section {
             width: 100%;
+            margin-top: 12px;
         }
         .section-title {
             font-family: 'Poppins', sans-serif;
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 12px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 10px;
             text-align: center;
+            letter-spacing: 0.5px;
         }
         .restaurants-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 12px;
+            width: 100%;
         }
         .restaurant-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 14px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
-            padding: 8px 12px;
-            gap: 10px;
-            border: 1px solid rgba(0,0,0,0.04);
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
         }
         .restaurant-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.35);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
         }
         .restaurant-card .cover {
-            width: 46px;
-            height: 46px;
-            min-width: 46px;
-            border-radius: 10px;
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 12px;
             overflow: hidden;
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
         }
         .restaurant-card .cover img {
             width: 100%;
@@ -182,100 +204,104 @@
         }
         .restaurant-card .name {
             font-weight: 700;
-            font-size: 0.88rem;
-            color: #1a1a2e;
+            font-size: 0.92rem;
+            color: #ffffff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 1px;
+            margin-bottom: 2px;
         }
         .restaurant-card .address {
-            font-size: 0.72rem;
-            color: #888;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .restaurant-card .badge { 
             display: inline-block;
-            background: #d1fae5;
-            color: #059669;
-            font-size: 0.65rem;
-            padding: 1px 6px;
-            border-radius: 10px;
-            margin-top: 2px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-size: 0.68rem;
+            padding: 1px 7px;
+            border-radius: 12px;
+            margin-top: 3px;
             font-weight: 600;
         }
         .loading-card {
-            background: #e8eaed;
-            border-radius: 12px;
-            height: 52px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            height: 58px;
             animation: pulse 1.5s infinite;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
         footer {
+            position: relative;
+            z-index: 1;
             text-align: center;
             padding: 12px 16px;
-            color: #888;
-            font-size: 0.75rem;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.78rem;
         }
         footer a {
-            color: #555;
+            color: rgba(255,255,255,0.75);
             text-decoration: none;
             margin: 0 6px;
             font-weight: 500;
         }
         footer a:hover {
-            color: #1a1a2e;
+            color: white;
         }
         .brand-credit {
             margin-top: 6px;
             font-size: 0.7rem;
             letter-spacing: 0.5px;
             display: inline-block;
-            background: #1a1a2e;
-            padding: 4px 12px;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 14px;
             border-radius: 20px;
-            color: rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.1);
         }
     </style>
 </head>
 <body>
 
-    <div id="session-header" style="position: absolute; top: 14px; right: 16px; z-index: 100; display: none; align-items: center; gap: 10px; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 0.82rem;">
-        <span id="session-username" style="font-weight: 600;">Client</span>
+    <div id="session-header">
+        <span id="session-username">Client</span>
         <button onclick="handleLogout()" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 0.75rem; cursor: pointer; transition: 0.2s;">Déconnexion</button>
     </div>
 
-    <div class="hero">
+    <main class="main-container">
         <div class="hero-content">
-            <h1 style="display:flex; flex-direction:column; align-items:center;">
+            <h1>
                 <span class="brand-title">🍔 Gourmet <span class="accent">Express</span></span>
                 <span class="brand-subtitle">by ITA INNOVATE</span>
             </h1>
             <p>Découvrez nos restaurants partenaires et commandez vos plats préférés, livrés chez vous ou à emporter.</p>
             <div class="hero-btns">
-                <a href="login.html" class="btn-hero-primary">Commander maintenant</a>
-                <a href="login.html" class="btn-hero-secondary">Se connecter</a>
-                <a href="register.html" class="btn-hero-secondary">Créer un compte</a>
+                <a href="login.html" class="btn-hero-primary" id="btn-order">Commander maintenant</a>
+                <a href="login.html" class="btn-hero-secondary" id="btn-login">Se connecter</a>
+                <a href="register.html" class="btn-hero-secondary" id="btn-register">Créer un compte</a>
             </div>
         </div>
-    </div>
 
-    <div class="section">
-        <h2 class="section-title">Nos Restaurants</h2>
-        <div class="restaurants-grid" id="restaurants-grid">
-            <div class="loading-card"></div>
-            <div class="loading-card"></div>
-            <div class="loading-card"></div>
-        </div>
-    </div>
+        <section class="restaurants-section">
+            <h2 class="section-title">Nos Restaurants</h2>
+            <div class="restaurants-grid" id="restaurants-grid">
+                <div class="loading-card"></div>
+                <div class="loading-card"></div>
+                <div class="loading-card"></div>
+            </div>
+        </section>
+    </main>
 
     <footer>
         <p>&copy; 2026 Gourmet Express. Tous droits réservés. • <a href="admin/index.html">Administration</a> • <a href="superadmin/index.html">Plateforme</a></p>
         <p class="brand-credit">
-            <span>Réalisé par</span> <a href="http://www.itainnovate.com" target="_blank" class="blink-orange" style="text-decoration:none; color:#f39c12; font-weight:600;">ITA INNOVATE</a>
+            <span style="color:rgba(255,255,255,0.7);">Réalisé par</span> <a href="http://www.itainnovate.com" target="_blank" class="blink-orange" style="text-decoration:none; color:#f39c12; font-weight:600;">ITA INNOVATE</a>
         </p>
     </footer>
 
@@ -290,9 +316,10 @@
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            // Session Detection for Header
+            // Session Detection for Header & CTA adaptation
             const client = DataManager.getCurrentClient();
             const staff = DataManager.getCurrentStaff();
+            
             if (client || staff) {
                 const header = document.getElementById('session-header');
                 const username = document.getElementById('session-username');
@@ -305,13 +332,30 @@
                         username.textContent = `Bienvenue, ${fullName || 'Client'}`;
                     }
                 }
+
+                const btnOrder = document.getElementById('btn-order');
+                const btnLogin = document.getElementById('btn-login');
+                const btnRegister = document.getElementById('btn-register');
+
+                if (client) {
+                    if (btnOrder) btnOrder.href = 'client/index.html';
+                    if (btnLogin) btnLogin.style.display = 'none';
+                    if (btnRegister) {
+                        btnRegister.textContent = 'Mon Compte';
+                        btnRegister.href = 'client/profile.html';
+                    }
+                } else if (staff) {
+                    if (btnOrder) btnOrder.href = 'admin/index.html';
+                    if (btnLogin) btnLogin.style.display = 'none';
+                    if (btnRegister) btnRegister.style.display = 'none';
+                }
             }
 
             const grid = document.getElementById('restaurants-grid');
             const restaurants = await DataManager.getRestaurants(true);
             grid.innerHTML = '';
             if (restaurants.length === 0) {
-                grid.innerHTML = '<p style="color:#888; text-align: center; width: 100%; font-size:0.85rem;">Aucun restaurant disponible pour le moment.</p>';
+                grid.innerHTML = '<p style="color:rgba(255,255,255,0.6); text-align: center; width: 100%; font-size:0.85rem;">Aucun restaurant disponible pour le moment.</p>';
                 return;
             }
             restaurants.forEach(r => {
