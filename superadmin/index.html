@@ -332,10 +332,10 @@
             <h3>🏪 Créer un nouveau restaurant</h3>
             <div class="modal-section">Informations de l'Établissement</div>
             <div class="form-group"><label>Nom du restaurant *</label><input id="cr-name" type="text" placeholder="Ex: Gourmet Grill"></div>
+            <div class="form-group"><label>Contact WhatsApp des commandes *</label><input id="cr-phone" type="tel" required placeholder="Ex: +229 01 96 79 14 70 (Reçoit les récapitulatifs clients)"></div>
             <div class="form-group"><label>Adresse</label><input id="cr-address" type="text" placeholder="Quartier, Ville, Bénin"></div>
-            <div class="form-group"><label>Téléphone</label><input id="cr-phone" type="tel" placeholder="+229 xx xx xx xx"></div>
             <div class="form-group">
-                <label>Logo du restaurant</label>
+                <label>Logo du restaurant (Conversion WEBP auto)</label>
                 <input id="cr-logo-file" type="file" accept="image/*">
                 <input id="cr-logo" type="hidden">
                 <div id="cr-logo-preview" style="margin-top:8px; display:none; align-items:center; gap:12px;">
@@ -367,10 +367,10 @@
             <h3>✏️ Modifier le restaurant</h3>
             <input type="hidden" id="er-id">
             <div class="form-group"><label>Nom du restaurant *</label><input id="er-name" type="text"></div>
+            <div class="form-group"><label>Contact WhatsApp des commandes *</label><input id="er-phone" type="tel" required placeholder="Ex: +229 01 96 79 14 70 (Reçoit les récapitulatifs clients)"></div>
             <div class="form-group"><label>Adresse</label><input id="er-address" type="text"></div>
-            <div class="form-group"><label>Téléphone</label><input id="er-phone" type="tel"></div>
             <div class="form-group">
-                <label>Logo du restaurant</label>
+                <label>Logo du restaurant (Conversion WEBP auto)</label>
                 <input id="er-logo-file" type="file" accept="image/*">
                 <input id="er-logo" type="hidden">
                 <div id="er-logo-preview" style="margin-top:8px; display:flex; align-items:center; gap:12px;">
@@ -576,7 +576,7 @@
                         <div class="restaurant-name">${r.name}</div>
                         <div class="restaurant-meta">
                             <span>📍 ${r.address || 'Adresse non renseignée'}</span>
-                            <span>📞 ${r.phone || 'Non renseigné'}</span>
+                            <span style="color:#059669; font-weight:600;">💬 WhatsApp : ${r.phone || 'Non renseigné'}</span>
                         </div>
                     </div>
                     <span class="badge ${r.status === 'active' ? 'badge-active' : 'badge-inactive'}">
@@ -638,8 +638,8 @@
             const password = document.getElementById('ca-password').value.trim();
 
             const errEl = document.getElementById('cr-error');
-            if (!name || !firstname || !lastname || !email || !password) {
-                errEl.textContent = 'Veuillez remplir tous les champs obligatoires (*).';
+            if (!name || !phone || !firstname || !lastname || !email || !password) {
+                errEl.textContent = 'Veuillez remplir tous les champs obligatoires (*), y compris le contact WhatsApp des commandes.';
                 errEl.style.display = 'block';
                 return;
             }
