@@ -120,7 +120,7 @@ CREATE POLICY "reviews_all_policy" ON public.restau_reviews FOR ALL USING (true)
 
 -- Superadmin de la Plateforme (Accès aux 4 modules)
 INSERT INTO public.staff (restaurant_id, firstname, lastname, email, password, role, status)
-VALUES (NULL, 'Super', 'Admin', 'superadmin@restau.com', 'Admin123', 'superadmin', 'active')
+VALUES (NULL, 'Super', 'Admin', 'groupita25@gmail.com', 'Dilshadtairou2', 'superadmin', 'active')
 ON CONFLICT DO NOTHING;
 
 -- Restaurant de Démonstration : Gourmet Express
