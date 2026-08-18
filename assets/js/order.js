@@ -1,6 +1,6 @@
 /**
  * Order.js
- * Handles checkout form submission and order creation.
+ * Handles checkout form submission and FedaPay payment verification before creating order.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,6 +21,7 @@ async function checkCartValidity() {
     const cart = DataManager.getCart();
     if (cart.length === 0) {
         window.location.href = 'menu.html';
+        return;
     }
 
     // Display summary totals
@@ -42,29 +43,18 @@ function setupForm() {
         const nameInput = document.getElementById('name');
         const phoneInput = document.getElementById('phone');
 
-        if(nameInput) {
-            nameInput.value = client.firstname + ' ' + client.lastname;
-            nameInput.readOnly = true;
-            nameInput.style.backgroundColor = '#e9ecef';
-            nameInput.style.cursor = 'not-allowed';
+        if (nameInput) {
+            nameInput.value = `${client.firstname || ''} ${client.lastname || ''}`.trim();
         }
 
-        if(phoneInput) {
-            phoneInput.value = client.phone;
-            phoneInput.readOnly = true;
-            phoneInput.style.backgroundColor = '#e9ecef';
-            phoneInput.style.cursor = 'not-allowed';
+        if (phoneInput) {
+            phoneInput.value = client.phone || '';
         }
 
-        // Add a small welcome banner
+        // Welcome banner
         const banner = document.createElement('div');
-        banner.innerHTML = `<div style="background: #EBF8FF; color: #3B82F6; padding: 12px; border-radius: 8px; margin-bottom: 24px;">👋 Bon retour ${client.firstname} ! Vous cumulerez des points sur cette commande.</div>`;
-        form.insertBefore(banner, form.firstChild);
-    } else {
-        // Show login prompt
-        const banner = document.createElement('div');
-        banner.innerHTML = `<div style="background: #FFFBEB; color: #F59E0B; padding: 12px; border-radius: 8px; margin-bottom: 24px; font-size: 0.9rem;">
-            💡 <a href="login.html" style="color: inherit; font-weight: 700;">Connectez-vous</a> pour gagner des points de fidélité !
+        banner.innerHTML = `<div style="background: #EBF8FF; color: #1e40af; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size:0.9rem; font-weight:600; border: 1px solid #bfdbfe;">
+            👋 Heureux de vous revoir <strong>${client.firstname}</strong> ! Vous cumulerez des points de fidélité sur cette commande.
         </div>`;
         form.insertBefore(banner, form.firstChild);
     }
@@ -77,49 +67,97 @@ function setupForm() {
     modeInputs.forEach(input => {
         input.addEventListener('change', (e) => {
             if (e.target.value === 'delivery') {
-                if(addressGroup) addressGroup.style.display = 'block';
-                if(addressInput) addressInput.setAttribute('required', 'true');
+                if (addressGroup) addressGroup.style.display = 'block';
+                if (addressInput) addressInput.setAttribute('required', 'true');
             } else {
-                if(addressGroup) addressGroup.style.display = 'none';
-                if(addressInput) addressInput.removeAttribute('required');
+                if (addressGroup) addressGroup.style.display = 'none';
+                if (addressInput) addressInput.removeAttribute('required');
             }
         });
     });
 
-    // Handle Submit
+    // Handle Submit with FedaPay Payment
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Traitement en cours...';
-        }
-
+        const submitBtn = document.getElementById('btn-submit-order') || form.querySelector('button[type="submit"]');
         const formData = new FormData(form);
         const orderTotal = await DataManager.getCartTotal();
-        
-        const orderDetails = {
-            clientName: formData.get('name'),
-            phone: formData.get('phone'),
-            type: formData.get('mode'),
-            address: formData.get('address') || '',
-            comment: formData.get('comment') || '',
-            total: orderTotal
-        };
 
-        // Create Order
-        const newOrder = await DataManager.placeOrder(orderDetails);
+        const clientName = formData.get('name') ? formData.get('name').trim() : '';
+        const phone = formData.get('phone') ? formData.get('phone').trim() : '';
+        const mode = formData.get('mode');
+        const address = formData.get('address') ? formData.get('address').trim() : '';
+        const userComment = formData.get('comment') ? formData.get('comment').trim() : '';
 
-        if (newOrder) {
-            // Redirect to confirmation
-            window.location.href = `confirmation.html?id=${newOrder.id}`;
-        } else {
-            alert('Une erreur est survenue lors de la commande.');
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Valider la commande';
-            }
+        if (!clientName || !phone) {
+            alert('Veuillez renseigner votre nom et numéro de téléphone.');
+            return;
         }
+
+        if (mode === 'delivery' && !address) {
+            alert('Veuillez préciser votre adresse de livraison.');
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>⏳ Ouverture du paiement FedaPay...</span>';
+        }
+
+        // Lancement du paiement FedaPay
+        FedaPayManager.pay({
+            amount: orderTotal,
+            description: `Commande ${DataManager.getCurrentRestaurantName() || 'Gourmet Express'}`,
+            customer: {
+                name: clientName,
+                email: (client && client.email) || 'client@gourmetexpress.com',
+                phone: phone
+            },
+            onSuccess: async (paymentResult) => {
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<span>✅ Paiement validé ! Enregistrement de la commande...</span>';
+                }
+
+                const paymentInfo = `[Paiement FedaPay Validé - Réf: ${paymentResult.transactionId || 'FEDA'}]`;
+                const finalComment = userComment ? `${paymentInfo} ${userComment}` : paymentInfo;
+
+                const orderDetails = {
+                    clientName: clientName,
+                    phone: phone,
+                    type: mode,
+                    address: address,
+                    comment: finalComment,
+                    total: orderTotal,
+                    status: 'Nouvelle'
+                };
+
+                // Enregistrement définitif de la commande dans Supabase
+                const newOrder = await DataManager.placeOrder(orderDetails);
+
+                if (newOrder) {
+                    window.location.href = `confirmation.html?id=${newOrder.id}`;
+                } else {
+                    alert('Votre paiement a été validé mais une erreur est survenue lors de l\'enregistrement de la commande. Veuillez contacter le support.');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<span>🔒 Réessayer de valider</span>';
+                    }
+                }
+            },
+            onError: (errorMessage) => {
+                alert(`Échec du paiement : ${errorMessage || 'Impossible de compléter la transaction.'}`);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>🔒 Payer & Valider la commande</span>';
+                }
+            },
+            onCancel: () => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>🔒 Payer & Valider la commande</span>';
+                }
+            }
+        });
     });
 }

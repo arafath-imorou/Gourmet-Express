@@ -4,11 +4,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commander - Gourmet Express</title>
+    <title>Paiement & Commande - Gourmet Express</title>
     <link rel="stylesheet" href="assets/css/style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .payment-box {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        }
+        .payment-logos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 16px;
+        }
+        .payment-badge {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-fedapay-pay {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+            transition: all 0.2s;
+        }
+        .btn-fedapay-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+        }
+        .btn-fedapay-pay:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,20 +68,18 @@
             <span style="font-size: 24px;">←</span>
             <span class="nav-back-text">Retour</span>
         </a>
-        <h2 style="font-size: 1.2rem; margin: 0;">Finaliser la commande</h2>
+        <h2 style="font-size: 1.2rem; margin: 0; font-family:'Poppins', sans-serif;">Paiement & Validation</h2>
     </header>
 
-    <div class="container" style="padding-top: 16px;">
+    <div class="container" style="padding-top: 16px; padding-bottom: 40px; max-width: 600px;">
 
-        <div class="card"
-            style="padding: 16px; margin-bottom: 24px; background: #fffcf8; border-left: 4px solid var(--secondary-color);">
-            <div class="text-sm text-muted">Montant à payer</div>
-            <div class="font-bold" style="font-size: 1.5rem; color: var(--primary-color);" id="summary-total">0 FCFA
-            </div>
+        <div class="card" style="padding: 16px; margin-bottom: 24px; background: #fffcf8; border-left: 4px solid var(--secondary-color);">
+            <div class="text-sm text-muted">Montant total à régler</div>
+            <div class="font-bold" style="font-size: 1.6rem; color: var(--primary-color);" id="summary-total">Calcul...</div>
         </div>
 
         <form id="order-form">
-            <h3 class="mb-4">Vos Coordonnées</h3>
+            <h3 class="mb-4" style="font-size:1.1rem; color:#1e293b;">1. Vos Coordonnées</h3>
 
             <div class="input-group">
                 <label for="name">Nom complet *</label>
@@ -38,50 +87,70 @@
             </div>
 
             <div class="input-group">
-                <label for="phone">Numéro de téléphone *</label>
-                <input type="tel" id="phone" name="phone" required placeholder="Ex: 0707070707">
+                <label for="phone">Numéro de téléphone (Mobile Money) *</label>
+                <input type="tel" id="phone" name="phone" required placeholder="Ex: 0197000000">
             </div>
 
-            <h3 class="mb-4" style="margin-top: 32px;">Mode de réception</h3>
+            <h3 class="mb-4" style="margin-top: 24px; font-size:1.1rem; color:#1e293b;">2. Mode de réception</h3>
 
-            <div class="input-group">
-                <label
-                    style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
+            <div class="input-group" style="display:flex; gap:8px;">
+                <label style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
                     <input type="radio" name="mode" value="takeaway" checked>
                     <div style="font-weight: 600; margin-top: 4px;">À emporter</div>
                 </label>
-                <label
-                    style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
+                <label style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
                     <input type="radio" name="mode" value="dinein">
                     <div style="font-weight: 600; margin-top: 4px;">Sur place</div>
                 </label>
-                <label
-                    style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
+                <label style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
                     <input type="radio" name="mode" value="delivery">
                     <div style="font-weight: 600; margin-top: 4px;">Livraison</div>
                 </label>
             </div>
-    </div>
 
-    <div class="input-group" id="address-group" style="display: none;">
-        <label for="address">Adresse de livraison *</label>
-        <textarea id="address" name="address" rows="2" placeholder="Quartier, repère..."></textarea>
-    </div>
+            <div class="input-group" id="address-group" style="display: none;">
+                <label for="address">Adresse exacte de livraison *</label>
+                <textarea id="address" name="address" rows="2" placeholder="Quartier, repère, numéro de maison..."></textarea>
+            </div>
 
-    <div class="input-group" style="max-width: 50%; margin: 0 auto;">
-        <label for="comment">Instructions (Optionnel)</label>
-        <textarea id="comment" name="comment" rows="2" placeholder="Sans oignons, sauce à part..."></textarea>
-    </div>
+            <div class="input-group">
+                <label for="comment">Instructions particulières (Optionnel)</label>
+                <textarea id="comment" name="comment" rows="2" placeholder="Ex: Sans piment, sauce à part..."></textarea>
+            </div>
 
-    <button type="submit" class="btn btn-primary" style="margin-top: 24px; padding: 16px;">
-        Envoyer la commande 🚀
-    </button>
-    </form>
+            <!-- Bloc Paiement FedaPay Obligatoire -->
+            <div class="payment-box">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:1.4rem;">🔒</span>
+                        <strong style="font-size:1.05rem; color:#0f172a;">Paiement Sécurisé FedaPay</strong>
+                    </div>
+                    <span style="background:#ecfdf5; color:#065f46; font-size:0.75rem; font-weight:700; padding:4px 8px; border-radius:6px;">Requis avant validation</span>
+                </div>
+                
+                <p style="font-size:0.85rem; color:#64748b; margin: 8px 0 12px;">
+                    La commande sera transmise au restaurant uniquement après confirmation de votre règlement.
+                </p>
+
+                <div class="payment-logos">
+                    <span class="payment-badge">🟡 MTN MoMo</span>
+                    <span class="payment-badge">🟢 Moov Money</span>
+                    <span class="payment-badge">🔵 Celtiis Cash</span>
+                    <span class="payment-badge">💳 Visa / Mastercard</span>
+                </div>
+
+                <button type="submit" class="btn-fedapay-pay" id="btn-submit-order">
+                    <span>🔒 Payer & Valider la commande</span>
+                </button>
+            </div>
+
+        </form>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/supabase.js"></script>
     <script src="assets/js/data.js"></script>
+    <script src="assets/js/fedapay.js"></script>
     <script src="assets/js/app.js"></script>
     <script src="assets/js/order.js"></script>
 </body>
