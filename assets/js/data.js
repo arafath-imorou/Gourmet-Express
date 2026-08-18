@@ -115,11 +115,14 @@ const DataManager = {
 
     // ==================== STAFF ====================
     loginStaff: async (email, password, restaurantId) => {
+        const cleanEmail = email ? email.toLowerCase().trim() : '';
+        const cleanPassword = password ? password.trim() : '';
+
         // 1. Check if superadmin
         const { data: superadmins } = await window.supabaseClient.from('staff')
             .select('*, restaurants(id, name, logo, slug)')
-            .eq('email', email.toLowerCase().trim())
-            .eq('password', password)
+            .eq('email', cleanEmail)
+            .eq('password', cleanPassword)
             .eq('role', 'superadmin')
             .eq('status', 'active');
 
@@ -139,8 +142,8 @@ const DataManager = {
         // 2. Check regular restaurant staff
         let q = window.supabaseClient.from('staff')
             .select('*, restaurants(id, name, logo, slug)')
-            .eq('email', email.toLowerCase().trim())
-            .eq('password', password)
+            .eq('email', cleanEmail)
+            .eq('password', cleanPassword)
             .eq('status', 'active');
 
         if (restaurantId) {
