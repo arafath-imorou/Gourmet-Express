@@ -5,99 +5,191 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gourmet Express - Plateforme de Restaurants</title>
     <link rel="stylesheet" href="assets/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #f0f2f5; font-family: 'Inter', sans-serif; }
-        .hero {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
-            min-height: 65vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center;
-            padding: 40px 20px; position: relative; overflow: hidden;
-            border-bottom-left-radius: 32px; border-bottom-right-radius: 32px;
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
-        .hero::before {
-            content: ''; position: absolute; inset: 0;
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+            font-family: 'Inter', sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
             background: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=60') center/cover;
             opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
         }
-        .hero-content { position: relative; z-index: 1; }
-        .hero h1 { font-family: 'Poppins', sans-serif; font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; color: white; margin-bottom: 12px; }
-        .hero h1 span { color: #e74c3c; }
-        .hero p { color: rgba(255,255,255,0.75); font-size: clamp(1rem, 3vw, 1.2rem); margin-bottom: 36px; max-width: 520px; }
-        .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-        .btn-hero-primary { background: #e74c3c; color: white; padding: 14px 36px; border-radius: 50px; font-weight: 700; font-size: 1rem; text-decoration: none; transition: all 0.2s; }
-        .btn-hero-primary:hover { background: #c0392b; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(231,76,60,0.4); }
-        .btn-hero-secondary { background: rgba(255,255,255,0.15); color: white; padding: 14px 36px; border-radius: 50px; font-weight: 600; font-size: 1rem; text-decoration: none; border: 2px solid rgba(255,255,255,0.3); transition: all 0.2s; backdrop-filter: blur(4px); }
-        .btn-hero-secondary:hover { background: rgba(255,255,255,0.25); }
-        .section { padding: 40px 20px; max-width: 900px; margin: 0 auto; }
-        .section-title { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; text-align: center; }
-        .restaurants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-        .restaurant-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.08); text-decoration: none; color: inherit; transition: all 0.2s; display: block; }
-        .restaurant-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
-        .restaurant-card .cover { height: 140px; background: linear-gradient(135deg, #e74c3c, #c0392b); display: flex; align-items: center; justify-content: center; font-size: 3rem; }
-        .restaurant-card .cover img { width: 100%; height: 100%; object-fit: cover; }
-        .restaurant-card .info { padding: 16px; }
-        .restaurant-card .name { font-weight: 700; font-size: 1.05rem; color: #1a1a2e; margin-bottom: 4px; }
-        .restaurant-card .address { font-size: 0.82rem; color: #888; }
-        .restaurant-card .badge { 
-            display: inline-block; background: #d1fae5; color: #059669; font-size: 0.75rem; padding: 2px 8px; border-radius: 20px; margin-top: 8px; font-weight: 600; 
-            animation: vibrate 1.8s infinite ease-in-out;
-            box-shadow: 0 0 0 rgba(5, 150, 105, 0);
+        #session-header {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 0.9rem;
         }
-        @keyframes vibrate {
-            0%, 100% { transform: translateX(0) scale(1); }
-            10% { transform: translateX(-1px) rotate(-1deg) scale(1.03); }
-            20% { transform: translateX(1px) rotate(1deg) scale(1.03); }
-            30% { transform: translateX(-1px) rotate(-1deg) scale(1.03); }
-            40% { transform: translateX(1px) rotate(1deg) scale(1.03); }
-            50% { transform: translateX(0) scale(1.06); box-shadow: 0 0 12px rgba(5, 150, 105, 0.45); }
+        .hero {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px 20px 40px;
         }
-        .loading-card { background: #f5f5f5; border-radius: 16px; height: 200px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .info-strip { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 32px; }
-        .info-chip { background: white; padding: 12px 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
-        .info-chip .icon { font-size: 1.3rem; }
-        footer { text-align: center; padding: 24px; color: #aaa; font-size: 0.8rem; }
-        footer a { color: #ccc; text-decoration: none; margin: 0 8px; }
+        .hero-content {
+            max-width: 680px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hero h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(2.2rem, 7vw, 3.8rem);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.2;
+        }
+        .hero h1 span.brand-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .hero h1 span.brand-title .accent {
+            color: #e74c3c;
+        }
+        .brand-subtitle {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 6px;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+        }
+        .hero p {
+            color: rgba(255,255,255,0.8);
+            font-size: clamp(1rem, 3.2vw, 1.25rem);
+            margin-bottom: 36px;
+            max-width: 540px;
+            line-height: 1.6;
+        }
+        .hero-btns {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn-hero-primary {
+            background: #e74c3c;
+            color: white;
+            padding: 15px 38px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(231,76,60,0.35);
+        }
+        .btn-hero-primary:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231,76,60,0.5);
+        }
+        .btn-hero-secondary {
+            background: rgba(255,255,255,0.12);
+            color: white;
+            padding: 15px 34px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-decoration: none;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.25s ease;
+            backdrop-filter: blur(6px);
+        }
+        .btn-hero-secondary:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+        }
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 24px 20px;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+        }
+        footer a {
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            margin: 0 8px;
+            transition: color 0.2s;
+        }
+        footer a:hover {
+            color: white;
+        }
+        .brand-credit {
+            margin-top: 14px;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            display: inline-block;
+            background: rgba(0,0,0,0.35);
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
     </style>
 </head>
 <body>
 
-    <div id="session-header" style="position: absolute; top: 20px; right: 20px; z-index: 100; display: none; align-items: center; gap: 12px; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 0.9rem;">
-        <span id="session-username" style="font-weight: 600;">Client</span>
+    <div id="session-header">
+        <span id="session-username">Client</span>
         <button onclick="handleLogout()" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: 0.2s;">Déconnexion</button>
     </div>
 
-    <div class="hero">
+    <main class="hero">
         <div class="hero-content">
-            <h1 style="display:flex; flex-direction:column; align-items:center; line-height:1.2;">
-                <span>🍔 Gourmet <span style="color:#e74c3c;">Express</span></span>
-                <span style="font-size:1.1rem; font-weight:600; letter-spacing:2px; color:rgba(255,255,255,0.6); margin-top:4px; font-family:'Inter', sans-serif; text-transform:uppercase;">by ITA INNOVATE</span>
+            <h1>
+                <span class="brand-title">🍔 Gourmet <span class="accent">Express</span></span>
+                <span class="brand-subtitle">by ITA INNOVATE</span>
             </h1>
             <p>Découvrez nos restaurants partenaires et commandez vos plats préférés, livrés chez vous ou à emporter.</p>
             <div class="hero-btns">
-                <a href="login.html" class="btn-hero-primary">Commander maintenant</a>
-                <a href="login.html" class="btn-hero-secondary">Se connecter</a>
-                <a href="register.html" class="btn-hero-secondary">Créer un compte</a>
+                <a href="login.html" class="btn-hero-primary" id="btn-order">Commander maintenant</a>
+                <a href="login.html" class="btn-hero-secondary" id="btn-login">Se connecter</a>
+                <a href="register.html" class="btn-hero-secondary" id="btn-register">Créer un compte</a>
             </div>
         </div>
-    </div>
-
-    <div class="section">
-        <div class="info-strip">
-            <div class="info-chip"><span class="icon">📍</span><div><strong>Parakou, Bénin</strong><div style="font-size:0.78rem;color:#888;">& environs</div></div></div>
-            <div class="info-chip"><span class="icon">🕒</span><div><strong>Lun – Dim</strong><div style="font-size:0.78rem;color:#888;">10h00 – 03h00</div></div></div>
-            <div class="info-chip"><span class="icon">🛵</span><div><strong>Livraison rapide</strong><div style="font-size:0.78rem;color:#888;">30 min en moyenne</div></div></div>
-        </div>
-
-        <h2 class="section-title">Nos Restaurants</h2>
-        <div class="restaurants-grid" id="restaurants-grid">
-            <div class="loading-card"></div>
-            <div class="loading-card"></div>
-            <div class="loading-card"></div>
-        </div>
-    </div>
+    </main>
 
     <footer>
         <p>&copy; 2026 Gourmet Express. Tous droits réservés.</p>
@@ -105,7 +197,10 @@
             <a href="admin/index.html">Administration</a> •
             <a href="superadmin/index.html">Plateforme</a>
         </p>
-        <p style="margin-top:14px; font-size:0.75rem; letter-spacing:1px; display:inline-block; background:#1a1a2e; padding:6px 14px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.15);"><span style="color:#ffffff; font-weight:500;">Réalisé par</span> <a href="http://www.itainnovate.com" target="_blank" class="blink-orange" style="text-decoration:none;">ITA INNOVATE</a></p>
+        <p class="brand-credit">
+            <span style="color:rgba(255,255,255,0.8); font-weight:500;">Réalisé par</span>
+            <a href="http://www.itainnovate.com" target="_blank" class="blink-orange" style="text-decoration:none; color:#f39c12; font-weight:600;">ITA INNOVATE</a>
+        </p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -118,10 +213,11 @@
             window.location.reload();
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            // Session Detection for Header
+        window.addEventListener('DOMContentLoaded', () => {
+            // Session Detection for Header & CTA adaptation
             const client = DataManager.getCurrentClient();
             const staff = DataManager.getCurrentStaff();
+            
             if (client || staff) {
                 const header = document.getElementById('session-header');
                 const username = document.getElementById('session-username');
@@ -134,30 +230,25 @@
                         username.textContent = `Bienvenue, ${fullName || 'Client'}`;
                     }
                 }
-            }
 
-            const grid = document.getElementById('restaurants-grid');
-            const restaurants = await DataManager.getRestaurants(true);
-            grid.innerHTML = '';
-            if (restaurants.length === 0) {
-                grid.innerHTML = '<p style="color:#888; text-align: center; width: 100%;">Aucun restaurant disponible pour le moment.</p>';
-                return;
+                // If user is already logged in, redirect CTA directly
+                const btnOrder = document.getElementById('btn-order');
+                const btnLogin = document.getElementById('btn-login');
+                const btnRegister = document.getElementById('btn-register');
+
+                if (client) {
+                    if (btnOrder) btnOrder.href = 'client/index.html';
+                    if (btnLogin) btnLogin.style.display = 'none';
+                    if (btnRegister) {
+                        btnRegister.textContent = 'Mon Compte';
+                        btnRegister.href = 'client/profile.html';
+                    }
+                } else if (staff) {
+                    if (btnOrder) btnOrder.href = 'admin/index.html';
+                    if (btnLogin) btnLogin.style.display = 'none';
+                    if (btnRegister) btnRegister.style.display = 'none';
+                }
             }
-            restaurants.forEach(r => {
-                const a = document.createElement('a');
-                a.href = `login.html?restaurant=${r.id}`;
-                a.className = 'restaurant-card';
-                a.innerHTML = `
-                    <div class="cover">
-                        ${r.logo ? `<img src="${r.logo}" alt="${r.name}">` : '🍽️'}
-                    </div>
-                    <div class="info">
-                        <div class="name">${r.name}</div>
-                        <div class="address">📍 ${r.address || 'Adresse non renseignée'}</div>
-                        <span class="badge">✅ Ouvert</span>
-                    </div>`;
-                grid.appendChild(a);
-            });
         });
     </script>
 </body>
