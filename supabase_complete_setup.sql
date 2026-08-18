@@ -150,3 +150,18 @@ INSERT INTO public.restau_menu (id, restaurant_id, name, price, image, category,
 ('5', '11111111-1111-1111-1111-111111111111', 'Tacos Poulet', 5000, 'https://images.unsplash.com/photo-1613514785940-daed07799d9b?auto=format&fit=crop&w=500&q=60', 'Tacos', true, true, 'Poulet mariné, frites, sauce fromagère.'),
 ('6', '11111111-1111-1111-1111-111111111111', 'Jus d''Orange Frais', 2500, 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60', 'Boissons', true, true, 'Presse minute 33cl.')
 ON CONFLICT (id) DO NOTHING;
+
+-- 8. TABLE DES REVERSEMENTS / REMBOURSEMENTS AUX RESTAURANTS
+CREATE TABLE IF NOT EXISTS public.restaurant_payouts (
+    id text PRIMARY KEY,
+    restaurant_id uuid REFERENCES public.restaurants(id) ON DELETE CASCADE,
+    amount numeric NOT NULL,
+    method text DEFAULT 'MTN Mobile Money',
+    reference text,
+    date timestamptz DEFAULT now(),
+    created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.restaurant_payouts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "payouts_all_policy" ON public.restaurant_payouts FOR ALL USING (true) WITH CHECK (true);
+

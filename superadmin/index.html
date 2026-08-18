@@ -243,41 +243,41 @@
             </div>
         </section>
 
-        <!-- ==================== 3. ADMINISTRATION MODULE (CHIFFRES) ==================== -->
+        <!-- ==================== 3. ADMINISTRATION MODULE (CHIFFRES & REVERSEMENTS) ==================== -->
         <section id="section-administration" style="display:none;">
             <div class="page-header">
                 <div>
-                    <h1>📈 Administration & Chiffres Clés</h1>
-                    <p>Statistiques financières, chiffres d'affaires et performances détaillées par restaurant.</p>
+                    <h1>📈 Administration, Commissions & Reversements</h1>
+                    <p>Statistiques financières, prélèvement automatique de la commission ITA (5%) et reversements aux restaurants.</p>
                 </div>
             </div>
 
-            <div class="stats-row">
+            <div class="stats-row" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
                 <div class="stat-card">
-                    <div class="label">Chiffre d'Affaires Global</div>
-                    <div class="value" id="admin-total-revenue" style="color:#e74c3c;">—</div>
-                    <div class="sub-value">Commandes terminées</div>
+                    <div class="label">Chiffre d'Affaires Brut</div>
+                    <div class="value" id="admin-total-revenue" style="color:#0f172a;">—</div>
+                    <div class="sub-value">Ventes totales enregistrées</div>
                 </div>
-                <div class="stat-card">
-                    <div class="label">Total Commandes</div>
-                    <div class="value" id="admin-total-orders">—</div>
-                    <div class="sub-value" id="admin-completed-orders">— livrées</div>
+                <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+                    <div class="label">Commission ITA INNOVATE (5%)</div>
+                    <div class="value" id="admin-total-commission" style="color:#d97706;">—</div>
+                    <div class="sub-value">Gains plateforme (5% auto)</div>
                 </div>
-                <div class="stat-card">
-                    <div class="label">Restaurants Actifs</div>
-                    <div class="value" id="admin-active-restaurants">—</div>
-                    <div class="sub-value" id="admin-total-restaurants">— au total</div>
+                <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+                    <div class="label">Total Reversé aux Restaurants</div>
+                    <div class="value" id="admin-total-paidout" style="color:#2563eb;">—</div>
+                    <div class="sub-value" id="admin-total-payouts-count">— règlements effectués</div>
                 </div>
-                <div class="stat-card">
-                    <div class="label">Panier Moyen Global</div>
-                    <div class="value" id="admin-avg-order">—</div>
-                    <div class="sub-value">par commande</div>
+                <div class="stat-card" style="border-left: 4px solid #10b981;">
+                    <div class="label">Solde Restant à Reverser</div>
+                    <div class="value" id="admin-total-remaining" style="color:#059669;">—</div>
+                    <div class="sub-value">Part nette due aux restaurants (95%)</div>
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card" style="margin-bottom: 24px;">
                 <div class="card-header">
-                    <span class="card-title">Performance Financière par Établissement</span>
+                    <span class="card-title">Performance Financière & Solde par Établissement</span>
                 </div>
                 <div style="overflow-x:auto;">
                     <table id="admin-stats-table">
@@ -285,15 +285,39 @@
                             <tr>
                                 <th>Restaurant</th>
                                 <th>Commandes</th>
-                                <th>Terminées</th>
-                                <th>Annulées</th>
-                                <th>Chiffre d'Affaires</th>
-                                <th>Panier Moyen</th>
-                                <th>Statut</th>
+                                <th>CA Brut (100%)</th>
+                                <th style="color:#d97706; background:#fffbeb;">Commission ITA (5%)</th>
+                                <th style="color:#2563eb; background:#eff6ff;">Part Nette Resto (95%)</th>
+                                <th>Déjà Reversé</th>
+                                <th style="color:#059669; background:#ecfdf5;">Solde Restant Dû</th>
+                                <th style="text-align:center;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="admin-stats-tbody">
-                            <tr><td colspan="7" style="text-align:center; padding:20px; color:#888;">Chargement des chiffres...</td></tr>
+                            <tr><td colspan="8" style="text-align:center; padding:20px; color:#888;">Chargement des chiffres...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Historique des reversements -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📜 Historique des Reversements & Remboursements Effectués</span>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date & Heure</th>
+                                <th>Restaurant</th>
+                                <th>Montant Reversé</th>
+                                <th>Mode de Transfert</th>
+                                <th>Référence / Note</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-payouts-tbody">
+                            <tr><td colspan="5" style="text-align:center; padding:20px; color:#888;">Aucun reversement enregistré pour le moment.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -492,6 +516,89 @@
             
             <div class="modal-footer" style="margin-top:20px;">
                 <button class="btn-cancel" onclick="closeModal('modal-view-client')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: Reversement / Remboursement Restaurant -->
+    <div class="modal-overlay" id="modal-payout">
+        <div class="modal" style="max-width:540px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                <h3 style="margin:0; font-size:1.2rem;">💳 Reversement / Remboursement Restaurant</h3>
+                <button onclick="closeModal('modal-payout')" style="border:none; background:none; font-size:1.6rem; cursor:pointer; color:#888;">&times;</button>
+            </div>
+
+            <input type="hidden" id="payout-resto-id">
+
+            <!-- Récapitulatif financier en direct de l'établissement -->
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:18px;">
+                <div style="font-size:1.1rem; font-weight:800; color:#0f172a; margin-bottom:10px;" id="payout-resto-name">Restaurant</div>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.85rem;">
+                    <div>
+                        <span style="color:#64748b;">CA Brut (100%) :</span>
+                        <strong style="color:#0f172a; display:block;" id="payout-ca-brut">0 F</strong>
+                    </div>
+                    <div>
+                        <span style="color:#64748b;">Commission ITA (5%) :</span>
+                        <strong style="color:#d97706; display:block;" id="payout-ita-com">0 F</strong>
+                    </div>
+                    <div>
+                        <span style="color:#64748b;">Part Nette Resto (95%) :</span>
+                        <strong style="color:#2563eb; display:block;" id="payout-net-share">0 F</strong>
+                    </div>
+                    <div>
+                        <span style="color:#64748b;">Total Déjà Reversé :</span>
+                        <strong style="color:#64748b; display:block;" id="payout-already-paid">0 F</strong>
+                    </div>
+                </div>
+
+                <div style="margin-top:12px; padding-top:10px; border-top:1px dashed #cbd5e1; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; color:#0f172a; font-size:0.95rem;">Solde disponible à reverser :</span>
+                    <span style="font-weight:800; font-size:1.2rem; color:#059669;" id="payout-current-balance">0 F</span>
+                </div>
+            </div>
+
+            <!-- Formulaire de reversement -->
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <label style="margin-bottom:0;">Montant à reverser (FCFA) *</label>
+                    <button type="button" onclick="setFullPayoutAmount()" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:6px; cursor:pointer;">
+                        ⚡ Tout reverser
+                    </button>
+                </div>
+                <input id="payout-amount" type="number" min="1" step="100" placeholder="Ex: 50000" oninput="updatePayoutPreview()" style="font-size:1.1rem; font-weight:700; color:#0f172a;">
+            </div>
+
+            <div class="form-group">
+                <label>Mode de transfert / Paiement *</label>
+                <select id="payout-method" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-weight:600;">
+                    <option value="MTN Mobile Money">🟡 MTN Mobile Money (MoMo)</option>
+                    <option value="Moov Money">🟢 Moov Money</option>
+                    <option value="Celtiis Cash">🔵 Celtiis Cash</option>
+                    <option value="Virement Bancaire">🏦 Virement Bancaire</option>
+                    <option value="Espèces">💵 Espèces / Main propre</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Référence / Note de versement</label>
+                <input id="payout-reference" type="text" placeholder="Ex: Règlement semaine 33 / Réf transaction #48920">
+            </div>
+
+            <!-- Visualisation du nouveau solde restant -->
+            <div id="payout-preview-box" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:16px; font-size:0.9rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#166534; font-weight:600;">Nouveau solde restant après versement :</span>
+                    <strong style="color:#15803d; font-size:1.1rem;" id="payout-preview-balance">0 F</strong>
+                </div>
+            </div>
+
+            <div id="payout-error" style="color:#e74c3c; font-size:0.85rem; margin-bottom:12px; display:none; font-weight:600;"></div>
+
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('modal-payout')">Annuler</button>
+                <button class="btn-primary" style="background:#059669;" onclick="submitPayout()">✅ Valider le reversement</button>
             </div>
         </div>
     </div>
@@ -922,39 +1029,34 @@
             await onRestaurantMenuSelectChange(currentSelectedMenuRestaurantId);
         }
 
-        // ==================== 3. ADMINISTRATION LOGIC (CHIFFRES) ====================
+        // ==================== 3. ADMINISTRATION LOGIC (CHIFFRES & REVERSEMENTS) ====================
+        let currentPayoutTargetResto = null;
+
         async function loadAdministrationStats() {
             allStats = await DataManager.getAllRestaurantsStats();
-            
-            const { data: allOrders } = await window.supabaseClient.from('restau_orders').select('*');
-            const orders = allOrders || [];
-            
-            const totalRevenue = orders.filter(o => o.status === 'Terminée').reduce((s, o) => s + (o.total || 0), 0);
-            const totalOrders = orders.length;
-            const completedOrders = orders.filter(o => o.status === 'Terminée').length;
-            const activeRestaurants = allRestaurants.filter(r => r.status === 'active').length;
-            const avgOrder = completedOrders > 0 ? Math.round(totalRevenue / completedOrders) : 0;
+            const allPayouts = await DataManager.getPayouts();
+
+            const totalRevenue = allStats.reduce((s, r) => s + (r.grossRevenue || 0), 0);
+            const totalCommission = Math.round(totalRevenue * 0.05);
+            const totalPaidOut = allPayouts.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+            const totalNetShare = totalRevenue - totalCommission;
+            const totalRemaining = Math.max(0, totalNetShare - totalPaidOut);
 
             document.getElementById('admin-total-revenue').textContent = new Intl.NumberFormat('fr-FR').format(totalRevenue) + ' F';
-            document.getElementById('admin-total-orders').textContent = totalOrders;
-            document.getElementById('admin-completed-orders').textContent = `${completedOrders} livrées`;
-            document.getElementById('admin-active-restaurants').textContent = activeRestaurants;
-            document.getElementById('admin-total-restaurants').textContent = `${allRestaurants.length} au total`;
-            document.getElementById('admin-avg-order').textContent = new Intl.NumberFormat('fr-FR').format(avgOrder) + ' F';
+            document.getElementById('admin-total-commission').textContent = new Intl.NumberFormat('fr-FR').format(totalCommission) + ' F';
+            document.getElementById('admin-total-paidout').textContent = new Intl.NumberFormat('fr-FR').format(totalPaidOut) + ' F';
+            document.getElementById('admin-total-payouts-count').textContent = `${allPayouts.length} versement(s) effectué(s)`;
+            document.getElementById('admin-total-remaining').textContent = new Intl.NumberFormat('fr-FR').format(totalRemaining) + ' F';
 
             // Detailed Table
             const tbody = document.getElementById('admin-stats-tbody');
             if (!allStats.length) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#888;">Aucune donnée statistique.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#888;">Aucun établissement enregistré.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = allStats.map(r => {
-                const restoOrders = orders.filter(o => o.restaurant_id === r.id);
-                const comp = restoOrders.filter(o => o.status === 'Terminée').length;
-                const canc = restoOrders.filter(o => o.status === 'Annulée').length;
-                const rev = restoOrders.filter(o => o.status === 'Terminée').reduce((s, o) => s + (o.total || 0), 0);
-                const avg = comp > 0 ? Math.round(rev / comp) : 0;
+                const canPayout = (r.remainingBalance || 0) > 0;
 
                 return `
                     <tr>
@@ -963,22 +1065,142 @@
                                 <div style="width:36px; height:36px; border-radius:8px; overflow:hidden; background:#eee; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">
                                     ${r.logo ? `<img src="${r.logo}" style="width:100%;height:100%;object-fit:cover;">` : '🍽️'}
                                 </div>
-                                <span style="font-weight:700; color:#1a1a2e;">${r.name}</span>
+                                <div>
+                                    <div style="font-weight:700; color:#1a1a2e;">${r.name}</div>
+                                    <div style="font-size:0.75rem; color:#64748b;">${r.phone || 'Sans tél'}</div>
+                                </div>
                             </div>
                         </td>
-                        <td style="font-weight:600;">${restoOrders.length}</td>
-                        <td><span class="badge badge-active">${comp}</span></td>
-                        <td><span class="badge badge-inactive">${canc}</span></td>
-                        <td style="font-weight:800; color:#e74c3c;">${new Intl.NumberFormat('fr-FR').format(rev)} F</td>
-                        <td style="font-weight:600; color:#555;">${new Intl.NumberFormat('fr-FR').format(avg)} F</td>
-                        <td>
-                            <span class="badge ${r.status === 'active' ? 'badge-active' : 'badge-inactive'}">
-                                ${r.status === 'active' ? 'Actif' : 'Inactif'}
-                            </span>
+                        <td style="font-weight:600;">
+                            ${r.orderCount || 0}
+                            <span style="font-size:0.75rem; color:#10b981; display:block;">${r.completedOrdersCount || 0} livrées</span>
+                        </td>
+                        <td style="font-weight:700; color:#0f172a;">${new Intl.NumberFormat('fr-FR').format(r.grossRevenue || 0)} F</td>
+                        <td style="font-weight:700; color:#d97706; background:#fffbeb;">${new Intl.NumberFormat('fr-FR').format(r.itaCommission || 0)} F</td>
+                        <td style="font-weight:700; color:#2563eb; background:#eff6ff;">${new Intl.NumberFormat('fr-FR').format(r.restaurantNet || 0)} F</td>
+                        <td style="font-weight:600; color:#64748b;">${new Intl.NumberFormat('fr-FR').format(r.totalPaidOut || 0)} F</td>
+                        <td style="font-weight:800; color:#059669; background:#ecfdf5; font-size:1.05rem;">
+                            ${new Intl.NumberFormat('fr-FR').format(r.remainingBalance || 0)} F
+                        </td>
+                        <td style="text-align:center;">
+                            <button class="btn-sm btn-menu-view" style="background:#059669; color:white;" onclick="openPayoutModal('${r.id}')">
+                                💳 Reverser
+                            </button>
                         </td>
                     </tr>
                 `;
             }).join('');
+
+            // Render Payouts History
+            const payoutsTbody = document.getElementById('admin-payouts-tbody');
+            if (payoutsTbody) {
+                if (!allPayouts.length) {
+                    payoutsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#888;">Aucun reversement effectué pour le moment.</td></tr>';
+                } else {
+                    payoutsTbody.innerHTML = allPayouts.map(p => {
+                        const targetResto = allRestaurants.find(r => r.id === p.restaurant_id) || allStats.find(r => r.id === p.restaurant_id);
+                        const restoName = targetResto ? targetResto.name : 'Restaurant inconnu';
+                        const d = p.date ? new Date(p.date) : new Date();
+                        const dateFormatted = d.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+                        return `
+                            <tr>
+                                <td style="font-size:0.85rem; color:#64748b; font-weight:600;">${dateFormatted}</td>
+                                <td><strong>${restoName}</strong></td>
+                                <td style="font-weight:800; color:#059669;">${new Intl.NumberFormat('fr-FR').format(p.amount || 0)} F</td>
+                                <td><span class="badge badge-active">${p.method || 'Mobile Money'}</span></td>
+                                <td style="color:#555; font-size:0.85rem;">${p.reference || '—'}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+
+        function openPayoutModal(restoId) {
+            currentPayoutTargetResto = allStats.find(r => r.id === restoId);
+            if (!currentPayoutTargetResto) {
+                alert('Établissement introuvable.');
+                return;
+            }
+
+            document.getElementById('payout-resto-id').value = restoId;
+            document.getElementById('payout-resto-name').textContent = currentPayoutTargetResto.name;
+            document.getElementById('payout-ca-brut').textContent = new Intl.NumberFormat('fr-FR').format(currentPayoutTargetResto.grossRevenue || 0) + ' F';
+            document.getElementById('payout-ita-com').textContent = new Intl.NumberFormat('fr-FR').format(currentPayoutTargetResto.itaCommission || 0) + ' F';
+            document.getElementById('payout-net-share').textContent = new Intl.NumberFormat('fr-FR').format(currentPayoutTargetResto.restaurantNet || 0) + ' F';
+            document.getElementById('payout-already-paid').textContent = new Intl.NumberFormat('fr-FR').format(currentPayoutTargetResto.totalPaidOut || 0) + ' F';
+            document.getElementById('payout-current-balance').textContent = new Intl.NumberFormat('fr-FR').format(currentPayoutTargetResto.remainingBalance || 0) + ' F';
+            
+            document.getElementById('payout-amount').value = '';
+            document.getElementById('payout-reference').value = '';
+            document.getElementById('payout-error').style.display = 'none';
+            
+            updatePayoutPreview();
+            openModal('modal-payout');
+        }
+
+        function setFullPayoutAmount() {
+            if (!currentPayoutTargetResto) return;
+            document.getElementById('payout-amount').value = currentPayoutTargetResto.remainingBalance || 0;
+            updatePayoutPreview();
+        }
+
+        function updatePayoutPreview() {
+            if (!currentPayoutTargetResto) return;
+            const currentBal = currentPayoutTargetResto.remainingBalance || 0;
+            const enteredAmount = parseFloat(document.getElementById('payout-amount').value) || 0;
+            const previewEl = document.getElementById('payout-preview-balance');
+            const newBal = Math.max(0, currentBal - enteredAmount);
+
+            previewEl.textContent = new Intl.NumberFormat('fr-FR').format(newBal) + ' F';
+            
+            const errEl = document.getElementById('payout-error');
+            if (enteredAmount > currentBal && currentBal > 0) {
+                errEl.textContent = `Attention : Le montant saisi dépasse le solde disponible (${new Intl.NumberFormat('fr-FR').format(currentBal)} F).`;
+                errEl.style.display = 'block';
+            } else {
+                errEl.style.display = 'none';
+            }
+        }
+
+        async function submitPayout() {
+            if (!currentPayoutTargetResto) return;
+            const restoId = currentPayoutTargetResto.id;
+            const amountInput = document.getElementById('payout-amount');
+            const amount = parseFloat(amountInput.value);
+            const method = document.getElementById('payout-method').value;
+            const reference = document.getElementById('payout-reference').value.trim();
+            const errEl = document.getElementById('payout-error');
+
+            if (isNaN(amount) || amount <= 0) {
+                errEl.textContent = 'Veuillez saisir un montant valide supérieur à 0 F.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            const currentBal = currentPayoutTargetResto.remainingBalance || 0;
+            if (amount > currentBal && currentBal > 0) {
+                if (!confirm(`Le montant (${new Intl.NumberFormat('fr-FR').format(amount)} F) dépasse le solde actuel dû (${new Intl.NumberFormat('fr-FR').format(currentBal)} F). Souhaitez-vous quand même valider ?`)) {
+                    return;
+                }
+            }
+
+            const res = await DataManager.createPayout({
+                restaurant_id: restoId,
+                amount: amount,
+                method: method,
+                reference: reference
+            });
+
+            if (res.success) {
+                closeModal('modal-payout');
+                await loadAdministrationStats();
+                alert(`✅ Reversement de ${new Intl.NumberFormat('fr-FR').format(amount)} FCFA enregistré avec succès pour "${currentPayoutTargetResto.name}" ! Le solde restant a été mis à jour.`);
+            } else {
+                errEl.textContent = 'Erreur lors de l\'enregistrement du reversement.';
+                errEl.style.display = 'block';
+            }
         }
 
         // ==================== 4. CLIENTS LOGIC ====================

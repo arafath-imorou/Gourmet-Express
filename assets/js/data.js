@@ -8,7 +8,8 @@ const STORAGE_KEYS = {
     CLIENT_SESSION: 'restaurant_client_session',
     STAFF_SESSION: 'restaurant_staff_session',
     CURRENT_RESTAURANT_ID: 'restaurant_current_id',
-    CURRENT_RESTAURANT_NAME: 'restaurant_current_name'
+    CURRENT_RESTAURANT_NAME: 'restaurant_current_name',
+    PAYOUTS: 'restaurant_payouts_local'
 };
 
 const DataManager = {
@@ -153,11 +154,89 @@ const DataManager = {
     getAllRestaurantsStats: async () => {
         const { data: restaurants } = await window.supabaseClient.from('restaurants').select('*');
         const { data: orders } = await window.supabaseClient.from('restau_orders').select('total, status, restaurant_id');
-        return (restaurants || []).map(r => ({
-            ...r,
-            orderCount: (orders || []).filter(o => o.restaurant_id === r.id).length,
-            revenue: (orders || []).filter(o => o.restaurant_id === r.id && o.status === 'Terminée').reduce((s, o) => s + (o.total || 0), 0)
-        }));
+        const payouts = await DataManager.getPayouts();
+
+        return (restaurants || []).map(r => {
+            const restoOrders = (orders || []).filter(o => o.restaurant_id === r.id);
+            const grossRevenue = restoOrders
+                .filter(o => o.status === 'Terminée' || o.status === 'En cours' || o.status === 'Nouvelle')
+                .reduce((s, o) => s + (o.total || 0), 0);
+            
+            const completedRevenue = restoOrders
+                .filter(o => o.status === 'Terminée')
+                .reduce((s, o) => s + (o.total || 0), 0);
+
+            // 5% Commission pour ITA INNOVATE
+            const itaCommission = Math.round(grossRevenue * 0.05);
+            // 95% Part nette revenant au restaurant
+            const restaurantNet = grossRevenue - itaCommission;
+
+            // Total déjà reversé
+            const totalPaidOut = (payouts || [])
+                .filter(p => p.restaurant_id === r.id)
+                .reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+
+            // Solde restant à reverser
+            const remainingBalance = Math.max(0, restaurantNet - totalPaidOut);
+
+            return {
+                ...r,
+                orderCount: restoOrders.length,
+                completedOrdersCount: restoOrders.filter(o => o.status === 'Terminée').length,
+                cancelledOrdersCount: restoOrders.filter(o => o.status === 'Annulée').length,
+                grossRevenue: grossRevenue,
+                revenue: grossRevenue, // alias
+                itaCommission: itaCommission,
+                restaurantNet: restaurantNet,
+                totalPaidOut: totalPaidOut,
+                remainingBalance: remainingBalance
+            };
+        });
+    },
+
+    // ==================== REVERSEMENTS / PAYOUTS ====================
+    getPayouts: async (restaurantId) => {
+        try {
+            let q = window.supabaseClient.from('restaurant_payouts').select('*').order('date', { ascending: false });
+            if (restaurantId) q = q.eq('restaurant_id', restaurantId);
+            const { data, error } = await q;
+            if (!error && data && Array.isArray(data)) {
+                return data;
+            }
+        } catch (e) {
+            console.warn('Supabase payouts fallback:', e);
+        }
+        const local = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAYOUTS) || '[]');
+        if (restaurantId) return local.filter(p => p.restaurant_id === restaurantId);
+        return local;
+    },
+
+    createPayout: async ({ restaurant_id, amount, method, reference }) => {
+        const newPayout = {
+            id: 'REV-' + Date.now().toString().slice(-6),
+            restaurant_id,
+            amount: parseFloat(amount) || 0,
+            method: method || 'MTN MoMo',
+            reference: reference || '',
+            date: new Date().toISOString()
+        };
+
+        try {
+            const { data, error } = await window.supabaseClient.from('restaurant_payouts').insert([newPayout]).select();
+            if (!error && data && data.length > 0) {
+                const local = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAYOUTS) || '[]');
+                local.unshift(data[0]);
+                localStorage.setItem(STORAGE_KEYS.PAYOUTS, JSON.stringify(local));
+                return { success: true, payout: data[0] };
+            }
+        } catch (e) {
+            console.warn('Supabase insert payout fallback:', e);
+        }
+
+        const local = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAYOUTS) || '[]');
+        local.unshift(newPayout);
+        localStorage.setItem(STORAGE_KEYS.PAYOUTS, JSON.stringify(local));
+        return { success: true, payout: newPayout };
     },
 
     // ==================== STAFF ====================
