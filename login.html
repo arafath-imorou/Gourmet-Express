@@ -13,25 +13,28 @@
         .login-logo .brand { font-family: 'Poppins', sans-serif; font-size: 1.8rem; font-weight: 700; color: white; }
         .login-logo .tagline { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 4px; }
         .login-card { background: white; border-radius: 20px; padding: 36px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); }
-        .tab-toggle { display: flex; background: #f0f2f5; border-radius: 12px; padding: 4px; margin-bottom: 28px; gap: 4px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 9px; background: transparent; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; color: #666; }
-        .tab-btn.active { background: white; color: var(--primary-color, #e74c3c); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+        .tab-toggle { display: flex; background: #f0f2f5; border-radius: 12px; padding: 4px; margin-bottom: 24px; gap: 4px; }
+        .tab-btn { flex: 1; padding: 10px 6px; border: none; border-radius: 9px; background: transparent; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; color: #666; text-align: center; }
+        .tab-btn.active { background: white; color: #e74c3c; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+        .tab-btn.active-superadmin { background: linear-gradient(135deg, #a55eea, #8854d0); color: white !important; box-shadow: 0 4px 12px rgba(136, 84, 208, 0.35); }
+        
         .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-weight: 500; font-size: 0.85rem; color: #555; margin-bottom: 6px; }
+        .form-group label { display: block; font-weight: 600; font-size: 0.85rem; color: #555; margin-bottom: 6px; }
         .form-group select, .form-group input { width: 100%; padding: 12px 14px; border: 2px solid #eee; border-radius: 10px; font-size: 0.95rem; font-family: 'Inter', sans-serif; transition: border-color 0.2s; box-sizing: border-box; background: white; }
-        .form-group select:focus, .form-group input:focus { outline: none; border-color: var(--primary-color, #e74c3c); }
+        .form-group select:focus, .form-group input:focus { outline: none; border-color: #e74c3c; }
+        
         .btn-login { width: 100%; padding: 14px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
         .btn-login:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(231,76,60,0.4); }
+        .btn-login-super { background: linear-gradient(135deg, #a55eea, #8854d0); box-shadow: 0 4px 16px rgba(136, 84, 208, 0.4); }
+        .btn-login-super:hover { background: linear-gradient(135deg, #8854d0, #6c5ce7); box-shadow: 0 8px 22px rgba(136, 84, 208, 0.55); }
         .btn-login:disabled { opacity: 0.7; transform: none; }
-        .error-box { background: #fdecea; color: #c0392b; padding: 12px; border-radius: 10px; font-size: 0.88rem; margin-bottom: 16px; display: none; text-align: center; }
+        
+        .error-box { background: #fdecea; color: #c0392b; padding: 12px; border-radius: 10px; font-size: 0.88rem; margin-bottom: 16px; display: none; text-align: center; font-weight: 600; }
         .link-row { text-align: center; margin-top: 20px; font-size: 0.88rem; color: #777; }
-        .link-row a { color: var(--primary-color, #e74c3c); font-weight: 600; text-decoration: none; }
-        .superadmin-note { text-align: center; margin-top: 14px; font-size: 0.8rem; color: #aaa; }
-        .superadmin-note a { color: #aaa; text-decoration: underline; cursor: pointer; }
+        .link-row a { color: #e74c3c; font-weight: 600; text-decoration: none; }
         .back-link { text-align: center; margin-bottom: 20px; }
         .back-link a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem; }
         .back-link a:hover { color: white; }
-        .restaurant-logo-preview { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; margin-right: 10px; display: none; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -45,19 +48,20 @@
         </div>
 
         <div class="login-card">
-            <!-- Tabs -->
+            <!-- 3 Tabs -->
             <div class="tab-toggle">
-                <button class="tab-btn active" id="tab-client" onclick="switchTab('client')">👤 Je suis client</button>
+                <button class="tab-btn active" id="tab-client" onclick="switchTab('client')">👤 Client</button>
                 <button class="tab-btn" id="tab-staff" onclick="switchTab('staff')">🔑 Personnel</button>
+                <button class="tab-btn" id="tab-superadmin" onclick="switchTab('superadmin')">🛡️ Superadmin</button>
             </div>
 
             <div id="error-box" class="error-box"></div>
 
-            <!-- Restaurant selector (visible for both tabs) -->
+            <!-- Restaurant selector (visible for client and staff) -->
             <div class="form-group" id="restaurant-group">
-                <label>Restaurant</label>
+                <label>Restaurant partenaire</label>
                 <select id="restaurant-select">
-                    <option value="">⏳ Chargement...</option>
+                    <option value="">⏳ Chargement des restaurants...</option>
                 </select>
             </div>
 
@@ -69,28 +73,45 @@
                 </div>
                 <div class="form-group">
                     <label>Mot de passe</label>
-                    <input type="password" id="client-password">
+                    <input type="password" id="client-password" placeholder="••••••••">
                 </div>
                 <button class="btn-login" id="btn-client-login" onclick="loginClient()">Se connecter</button>
-                <div class="link-row">Pas de compte ? <a href="register.html">S'inscrire</a></div>
+                <div class="link-row">Pas encore de compte ? <a href="register.html">Créer un compte</a></div>
             </div>
 
             <!-- Staff Form -->
             <div id="form-staff" style="display:none;">
                 <div class="form-group">
-                    <label>Email</label>
+                    <label>Email professionnel</label>
                     <input type="email" id="staff-email" placeholder="admin@restaurant.com">
                 </div>
                 <div class="form-group">
                     <label>Mot de passe</label>
-                    <input type="password" id="staff-password">
+                    <input type="password" id="staff-password" placeholder="••••••••">
                 </div>
-                <button class="btn-login" id="btn-staff-login" onclick="loginStaff()">Accéder au tableau de bord</button>
+                <button class="btn-login" id="btn-staff-login" onclick="loginStaff()">Accéder au restaurant</button>
             </div>
 
-            <div class="superadmin-note">Superadmin ? <a onclick="loginAsSuperAdmin()">Connexion plateforme</a></div>
+            <!-- Superadmin Form -->
+            <div id="form-superadmin" style="display:none;">
+                <div style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:10px; padding:10px 14px; margin-bottom:16px; font-size:0.82rem; color:#6d28d9; font-weight:600;">
+                    🛡️ Accès global aux 4 modules : Restaurants, Menus, Administration et Clients.
+                </div>
+                <div class="form-group">
+                    <label>Email administrateur plateforme</label>
+                    <input type="email" id="super-email" value="superadmin@restau.com" placeholder="superadmin@restau.com">
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="super-password" placeholder="••••••••">
+                </div>
+                <button class="btn-login btn-login-super" id="btn-super-login" onclick="loginSuperAdminDirect()">Accéder à la Plateforme (4 Modules)</button>
+            </div>
         </div>
-        <div style="text-align:center; margin-top:24px; font-size:0.75rem; letter-spacing:1px; font-weight:700;"><span style="color:#ffffff; font-weight:500;">Réalisé par</span> <a href="http://www.itainnovate.com" target="_blank" class="blink-orange" style="text-decoration:none;">ITA INNOVATE</a></div>
+
+        <div style="text-align:center; margin-top:24px; font-size:0.75rem; letter-spacing:1px; font-weight:700;">
+            <span style="color:#ffffff; font-weight:500;">Réalisé par</span> <a href="http://www.itainnovate.com" target="_blank" class="blink-orange" style="text-decoration:none; color:#f39c12;">ITA INNOVATE</a>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -100,7 +121,6 @@
         let currentTab = 'client';
         let restaurants = [];
 
-        // Check if already logged in
         window.addEventListener('DOMContentLoaded', async () => {
             const client = DataManager.getCurrentClient();
             const staff = DataManager.getCurrentStaff();
@@ -122,12 +142,24 @@
 
         function switchTab(tab) {
             currentTab = tab;
+            clearError();
+
             document.getElementById('tab-client').classList.toggle('active', tab === 'client');
             document.getElementById('tab-staff').classList.toggle('active', tab === 'staff');
+            
+            const tabSuper = document.getElementById('tab-superadmin');
+            if (tab === 'superadmin') {
+                tabSuper.classList.add('active-superadmin');
+            } else {
+                tabSuper.classList.remove('active-superadmin');
+            }
+
             document.getElementById('form-client').style.display = tab === 'client' ? 'block' : 'none';
             document.getElementById('form-staff').style.display = tab === 'staff' ? 'block' : 'none';
-            document.getElementById('restaurant-group').style.display = 'block';
-            clearError();
+            document.getElementById('form-superadmin').style.display = tab === 'superadmin' ? 'block' : 'none';
+            
+            // Hide restaurant group for superadmin
+            document.getElementById('restaurant-group').style.display = tab === 'superadmin' ? 'none' : 'block';
         }
 
         function showError(msg) {
@@ -167,7 +199,6 @@
         async function loginStaff() {
             clearError();
             const { id: restaurantId } = getSelectedRestaurant();
-            if (!restaurantId) { showError('Veuillez choisir un restaurant.'); return; }
             const email = document.getElementById('staff-email').value.trim();
             const password = document.getElementById('staff-password').value;
             if (!email || !password) { showError('Remplissez tous les champs.'); return; }
@@ -175,43 +206,51 @@
             const btn = document.getElementById('btn-staff-login');
             btn.disabled = true; btn.textContent = 'Connexion...';
 
-            const result = await DataManager.loginStaff(email, password, restaurantId);
+            const result = await DataManager.loginStaff(email, password, restaurantId || null);
             if (result.success) {
                 redirectStaff(result.staff);
             } else {
                 showError(result.message);
-                btn.disabled = false; btn.textContent = 'Accéder au tableau de bord';
+                btn.disabled = false; btn.textContent = 'Accéder au restaurant';
             }
         }
 
-        async function loginAsSuperAdmin() {
+        async function loginSuperAdminDirect() {
             clearError();
-            const email = prompt('Email superadmin:');
-            if (!email) return;
-            const password = prompt('Mot de passe:');
-            if (!password) return;
+            const email = document.getElementById('super-email').value.trim();
+            const password = document.getElementById('super-password').value;
+            if (!email || !password) { showError('Veuillez renseigner votre email et mot de passe superadmin.'); return; }
+
+            const btn = document.getElementById('btn-super-login');
+            btn.disabled = true; btn.textContent = 'Authentification...';
+
             const result = await DataManager.loginStaff(email, password, null);
-            if (result.success) redirectStaff(result.staff);
-            else showError(result.message);
+            if (result.success && result.staff.role === 'superadmin') {
+                window.location.href = 'superadmin/index.html';
+            } else if (result.success) {
+                redirectStaff(result.staff);
+            } else {
+                showError(result.message || 'Identifiants superadmin invalides.');
+                btn.disabled = false; btn.textContent = 'Accéder à la Plateforme (4 Modules)';
+            }
         }
 
         function redirectStaff(staff) {
             if (staff.role === 'superadmin') { window.location.href = 'superadmin/index.html'; return; }
             if (staff.role === 'admin') { window.location.href = 'admin/index.html'; return; }
             if (staff.role === 'agent') {
-                // Redirect based on agent_role
                 const agentRole = staff.agent_role;
                 if (agentRole === 'cuisinier') { window.location.href = 'admin/kitchen.html'; return; }
                 if (agentRole === 'livreur') { window.location.href = 'admin/delivery.html'; return; }
-                window.location.href = 'admin/index.html'; // caissier, serveur, administrateur
+                window.location.href = 'admin/index.html';
             }
         }
 
-        // Enter key support
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 if (currentTab === 'client') loginClient();
-                else loginStaff();
+                else if (currentTab === 'staff') loginStaff();
+                else if (currentTab === 'superadmin') loginSuperAdminDirect();
             }
         });
     </script>

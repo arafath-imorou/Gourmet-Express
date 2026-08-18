@@ -168,6 +168,7 @@
             <a href="agents.html" id="nav-agents" style="display:none;">Agents</a>
             <a href="clients.html">Clients</a>
             <div style="flex:1"></div>
+            <a href="../superadmin/index.html" style="background:#f3e8ff; color:#7e22ce; padding:6px 12px; border-radius:8px; font-weight:700; text-decoration:none; margin-right:12px; font-size:0.85rem; border:1px solid #d8b4fe;">🏪 Plateforme Superadmin</a>
             <button onclick="logout()"
                 style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 600;">Déconnexion</button>
         </div>
@@ -314,6 +315,10 @@
         // Multi-restaurant auth guard
         document.addEventListener('DOMContentLoaded', () => {
             const staff = DataManager.getCurrentStaff();
+            if (staff && staff.role === 'superadmin') {
+                window.location.href = '../superadmin/index.html';
+                return;
+            }
             const loginOverlay = document.getElementById('login-overlay');
             const dashboardContent = document.getElementById('dashboard-content');
             if (staff && (staff.role === 'admin' || staff.role === 'agent')) {

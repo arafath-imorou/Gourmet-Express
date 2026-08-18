@@ -115,26 +115,46 @@ const DataManager = {
 
     // ==================== STAFF ====================
     loginStaff: async (email, password, restaurantId) => {
+        // 1. Check if superadmin
+        const { data: superadmins } = await window.supabaseClient.from('staff')
+            .select('*, restaurants(id, name, logo, slug)')
+            .eq('email', email.toLowerCase().trim())
+            .eq('password', password)
+            .eq('role', 'superadmin')
+            .eq('status', 'active');
+
+        if (superadmins && superadmins.length > 0) {
+            const m = superadmins[0];
+            const session = {
+                id: m.id, role: 'superadmin', agent_role: null,
+                restaurant_id: null,
+                restaurant_name: 'Plateforme Gourmet Express',
+                restaurant_logo: null,
+                firstname: m.firstname, lastname: m.lastname, email: m.email
+            };
+            localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
+            return { success: true, staff: session };
+        }
+
+        // 2. Check regular restaurant staff
         let q = window.supabaseClient.from('staff')
             .select('*, restaurants(id, name, logo, slug)')
             .eq('email', email.toLowerCase().trim())
             .eq('password', password)
             .eq('status', 'active');
 
-        if (!restaurantId) {
-            q = q.eq('role', 'superadmin').is('restaurant_id', null);
-        } else {
+        if (restaurantId) {
             q = q.eq('restaurant_id', restaurantId);
         }
 
         const { data, error } = await q;
-        if (error || !data || data.length === 0) return { success: false, message: 'Identifiants incorrects.' };
+        if (error || !data || data.length === 0) return { success: false, message: 'Identifiants incorrects ou restaurant non correspondant.' };
 
         const m = data[0];
         const session = {
             id: m.id, role: m.role, agent_role: m.agent_role,
             restaurant_id: m.restaurant_id,
-            restaurant_name: m.restaurants ? m.restaurants.name : 'Plateforme',
+            restaurant_name: m.restaurants ? m.restaurants.name : 'Restaurant',
             restaurant_logo: m.restaurants ? m.restaurants.logo : null,
             firstname: m.firstname, lastname: m.lastname, email: m.email
         };

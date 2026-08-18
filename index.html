@@ -95,7 +95,7 @@
             line-height: 1.55;
         }
         
-        /* Boutons descendus vers le bas de la bannière */
+        /* Boutons descendus vers le bas de la bannière avec couleurs distinctes */
         .hero-btns {
             display: flex;
             gap: 14px;
@@ -104,37 +104,52 @@
             margin-top: auto;
             margin-bottom: 6px;
         }
-        .btn-hero-primary {
-            background: #e74c3c;
-            color: white;
-            padding: 13px 32px;
+        .btn-hero {
+            padding: 13px 28px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 0.96rem;
+            font-size: 0.95rem;
             text-decoration: none;
-            transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(231,76,60,0.4);
-        }
-        .btn-hero-primary:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(231,76,60,0.55);
-        }
-        .btn-hero-secondary {
-            background: rgba(255,255,255,0.15);
+            transition: all 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             color: white;
-            padding: 13px 30px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.96rem;
-            text-decoration: none;
-            border: 1.5px solid rgba(255,255,255,0.35);
-            transition: all 0.2s;
-            backdrop-filter: blur(4px);
         }
-        .btn-hero-secondary:hover {
-            background: rgba(255,255,255,0.28);
+        .btn-hero:hover {
             transform: translateY(-2px);
+        }
+        .btn-hero-order {
+            background: linear-gradient(135deg, #ff6b6b, #ee5253);
+            box-shadow: 0 4px 16px rgba(238, 82, 83, 0.45);
+        }
+        .btn-hero-order:hover {
+            background: linear-gradient(135deg, #ee5253, #c0392b);
+            box-shadow: 0 6px 22px rgba(238, 82, 83, 0.6);
+        }
+        .btn-hero-login {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.45);
+        }
+        .btn-hero-login:hover {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            box-shadow: 0 6px 22px rgba(59, 130, 246, 0.6);
+        }
+        .btn-hero-register {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45);
+        }
+        .btn-hero-register:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            box-shadow: 0 6px 22px rgba(16, 185, 129, 0.6);
+        }
+        .btn-hero-admin {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.45);
+        }
+        .btn-hero-admin:hover {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            box-shadow: 0 6px 22px rgba(139, 92, 246, 0.6);
         }
         
         /* Section Restaurants */
@@ -274,9 +289,9 @@
             <p>Découvrez nos restaurants partenaires et commandez vos plats préférés, livrés chez vous ou à emporter.</p>
             
             <div class="hero-btns">
-                <a href="login.html" class="btn-hero-primary">Commander maintenant</a>
-                <a href="login.html" class="btn-hero-secondary">Se connecter</a>
-                <a href="register.html" class="btn-hero-secondary">Créer un compte</a>
+                <a href="#restaurants-grid" class="btn-hero btn-hero-order">🛍️ Commander maintenant</a>
+                <a href="login.html" class="btn-hero btn-hero-login">🔑 Se connecter</a>
+                <a href="register.html" class="btn-hero btn-hero-register">✨ Créer un compte</a>
             </div>
         </div>
     </div>
