@@ -529,16 +529,20 @@
         function setupImageFileInput(fileInputId, hiddenInputId, imgPreviewId, containerId) {
             const fileInput = document.getElementById(fileInputId);
             if (!fileInput) return;
-            fileInput.addEventListener('change', function(e) {
+            fileInput.addEventListener('change', async function(e) {
                 const file = e.target.files[0];
                 if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(evt) {
-                        document.getElementById(hiddenInputId).value = evt.target.result;
-                        document.getElementById(imgPreviewId).src = evt.target.result;
+                    try {
+                        const isLogo = fileInputId.includes('logo');
+                        const maxDim = isLogo ? 400 : 800;
+                        const webpDataUrl = await DataManager.convertToWebP(file, maxDim, 0.82);
+                        document.getElementById(hiddenInputId).value = webpDataUrl;
+                        document.getElementById(imgPreviewId).src = webpDataUrl;
                         document.getElementById(containerId).style.display = 'flex';
-                    };
-                    reader.readAsDataURL(file);
+                    } catch (err) {
+                        console.error('Erreur conversion WEBP:', err);
+                        alert('Erreur lors du traitement de l\'image.');
+                    }
                 }
             });
         }

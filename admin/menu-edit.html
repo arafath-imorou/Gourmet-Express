@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editer Plat - Gourmet Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
         .admin-nav {
             display: flex;
@@ -33,7 +31,7 @@
     <div class="admin-nav">
         <a href="menu.html">← Annuler</a>
         <div style="font-weight: 700; flex:1; text-align: center;">Edition Plat</div>
-        <div style="width: 60px;"></div> <!-- Spacer -->
+        <div style="width: 60px;"></div>
     </div>
 
     <div class="container" style="max-width: 600px;">
@@ -45,37 +43,39 @@
 
                 <div class="input-group">
                     <label>Nom du plat</label>
-                    <input type="text" id="name" required>
+                    <input type="text" id="name" required placeholder="Ex: Burger Spécial">
                 </div>
 
                 <div class="input-group">
                     <label>Prix (FCFA)</label>
-                    <input type="number" id="price" required>
+                    <input type="number" id="price" required placeholder="Ex: 5000">
                 </div>
 
                 <div class="input-group">
                     <label>Catégorie</label>
-                    <input type="text" id="category" required list="categories">
+                    <input type="text" id="category" required list="categories" placeholder="Ex: Burgers">
                     <datalist id="categories">
                         <option value="Burgers">
                         <option value="Pizzas">
                         <option value="Salades">
                         <option value="Boissons">
                         <option value="Desserts">
+                        <option value="Tacos">
                     </datalist>
                 </div>
 
                 <div class="input-group">
-                    <label>URL Image</label>
-                    <input type="url" id="image" required placeholder="https://...">
+                    <label>Photo du plat (Conversion WEBP automatique)</label>
+                    <input type="file" id="image-file" accept="image/*" style="margin-bottom: 8px;">
+                    <input type="hidden" id="image" required>
                     <div id="image-preview"
-                        style="margin-top: 8px; height: 150px; background: #f0f0f0; border-radius: 8px; background-size: cover; background-position: center; display: none;">
+                        style="margin-top: 8px; height: 160px; background: #f0f0f0; border-radius: 8px; background-size: cover; background-position: center; display: none;">
                     </div>
                 </div>
 
                 <div class="input-group">
                     <label>Description</label>
-                    <textarea id="description" rows="3"></textarea>
+                    <textarea id="description" rows="3" placeholder="Ingrédients, accompagnements..."></textarea>
                 </div>
 
                 <div class="input-group">
@@ -85,7 +85,7 @@
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <button type="submit" class="btn btn-primary" id="btn-save-menu">Enregistrer le plat</button>
             </form>
         </div>
     </div>
@@ -99,27 +99,38 @@
         const id = params.get('id');
         const form = document.getElementById('product-form');
 
-        // Load data if editing
-        if (id) {
-            document.getElementById('page-title').textContent = 'Modifier le plat';
-            const menu = DataManager.getMenu();
-            const product = menu.find(p => p.id === id);
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (id) {
+                document.getElementById('page-title').textContent = 'Modifier le plat';
+                const menu = await DataManager.getMenu();
+                const product = menu.find(p => p.id === id);
 
-            if (product) {
-                document.getElementById('product-id').value = product.id;
-                document.getElementById('name').value = product.name;
-                document.getElementById('price').value = product.price;
-                document.getElementById('category').value = product.category;
-                document.getElementById('image').value = product.image;
-                document.getElementById('description').value = product.description || '';
-                document.getElementById('active').checked = product.active;
-
-                updatePreview(product.image);
+                if (product) {
+                    document.getElementById('product-id').value = product.id;
+                    document.getElementById('name').value = product.name;
+                    document.getElementById('price').value = product.price;
+                    document.getElementById('category').value = product.category;
+                    document.getElementById('image').value = product.image;
+                    document.getElementById('description').value = product.description || '';
+                    document.getElementById('active').checked = product.active !== false;
+                    updatePreview(product.image);
+                }
             }
-        }
+        });
 
-        // Image Preview
-        document.getElementById('image').addEventListener('input', (e) => updatePreview(e.target.value));
+        // Image upload with automatic WEBP conversion
+        document.getElementById('image-file').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                try {
+                    const webpDataUrl = await DataManager.convertToWebP(file, 800, 0.82);
+                    document.getElementById('image').value = webpDataUrl;
+                    updatePreview(webpDataUrl);
+                } catch (err) {
+                    alert('Erreur lors de la conversion de l\'image en WebP.');
+                }
+            }
+        });
 
         function updatePreview(url) {
             const preview = document.getElementById('image-preview');
@@ -131,33 +142,31 @@
             }
         }
 
-        // Handle Save
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btn = document.getElementById('btn-save-menu');
+            btn.disabled = true;
+            btn.textContent = 'Enregistrement...';
 
-            const menu = DataManager.getMenu();
             const productId = document.getElementById('product-id').value;
-
-            const newProduct = {
-                id: productId || Date.now().toString(),
-                name: document.getElementById('name').value,
-                price: parseInt(document.getElementById('price').value),
-                category: document.getElementById('category').value,
-                image: document.getElementById('image').value,
-                description: document.getElementById('description').value,
-                active: document.getElementById('active').checked
+            const itemData = {
+                name: document.getElementById('name').value.trim(),
+                price: parseFloat(document.getElementById('price').value),
+                category: document.getElementById('category').value.trim(),
+                image: document.getElementById('image').value || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=60',
+                description: document.getElementById('description').value.trim(),
+                active: document.getElementById('active').checked,
+                available: document.getElementById('active').checked,
+                restaurant_id: DataManager.getCurrentRestaurantId()
             };
 
             if (productId) {
-                // Update existing
-                const index = menu.findIndex(p => p.id === productId);
-                if (index !== -1) menu[index] = newProduct;
+                await DataManager.updateMenuItem(productId, itemData);
             } else {
-                // Add new
-                menu.push(newProduct);
+                itemData.id = 'ITEM-' + Date.now().toString().slice(-6);
+                await DataManager.addMenuItem(itemData);
             }
 
-            DataManager.saveMenu(menu);
             window.location.href = 'menu.html';
         });
     </script>
