@@ -37,12 +37,40 @@ function setupForm() {
     const form = document.getElementById('order-form');
     if (!form) return;
 
-    // Welcome banner if logged in
+    // Auto-fill and lock if logged in
     const client = DataManager.getCurrentClient();
     if (client) {
+        const nameInput = document.getElementById('name');
+        const phoneInput = document.getElementById('phone');
+        const paymentPhoneInput = document.getElementById('payment_phone');
+
+        if (nameInput) {
+            nameInput.value = `${client.firstname || ''} ${client.lastname || ''}`.trim();
+            nameInput.readOnly = true;
+            nameInput.style.backgroundColor = '#f1f5f9';
+            nameInput.style.color = '#334155';
+            nameInput.style.borderColor = '#cbd5e1';
+            nameInput.style.cursor = 'not-allowed';
+            nameInput.style.fontWeight = '600';
+        }
+
+        if (phoneInput) {
+            phoneInput.value = client.phone || '';
+            phoneInput.readOnly = true;
+            phoneInput.style.backgroundColor = '#f1f5f9';
+            phoneInput.style.color = '#334155';
+            phoneInput.style.borderColor = '#cbd5e1';
+            phoneInput.style.cursor = 'not-allowed';
+            phoneInput.style.fontWeight = '600';
+        }
+
+        if (paymentPhoneInput && client.phone) {
+            paymentPhoneInput.value = client.phone;
+        }
+
         const banner = document.createElement('div');
         banner.innerHTML = `<div style="background: #EBF8FF; color: #1e40af; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size:0.9rem; font-weight:600; border: 1px solid #bfdbfe;">
-            👋 Connecté en tant que <strong>${client.firstname || 'Client'}</strong>. Veuillez renseigner vos coordonnées pour cette commande.
+            👋 Heureux de vous revoir <strong>${client.firstname}</strong> ! Vous cumulerez des points de fidélité sur cette commande.
         </div>`;
         form.insertBefore(banner, form.firstChild);
     }
@@ -72,29 +100,14 @@ function setupForm() {
         const formData = new FormData(form);
         const orderTotal = await DataManager.getCartTotal();
 
-        const clientName = formData.get('name') ? formData.get('name').trim() : '';
-        const clientEmail = formData.get('email') ? formData.get('email').trim() : '';
-        const phone = formData.get('phone') ? formData.get('phone').trim() : '';
+        const clientName = formData.get('name') ? formData.get('name').trim() : `${client?.firstname || ''} ${client?.lastname || ''}`.trim();
+        const clientEmail = (client && client.email) || 'client@gourmetexpress.com';
+        const phone = formData.get('phone') ? formData.get('phone').trim() : (client?.phone || '');
         const paymentPhone = formData.get('payment_phone') ? formData.get('payment_phone').trim() : phone;
         const mode = formData.get('mode');
         const address = formData.get('address') ? formData.get('address').trim() : '';
         const userComment = formData.get('comment') ? formData.get('comment').trim() : '';
         const paymentNetwork = formData.get('payment_network') || 'MTN MoMo';
-
-        if (!clientName) {
-            alert('Veuillez renseigner votre Nom et Prénom.');
-            return;
-        }
-
-        if (!clientEmail) {
-            alert('Veuillez renseigner votre adresse Email.');
-            return;
-        }
-
-        if (!phone) {
-            alert('Veuillez renseigner votre numéro WhatsApp.');
-            return;
-        }
 
         if (!paymentPhone) {
             alert('Veuillez renseigner le numéro Mobile Money pour le débit.');

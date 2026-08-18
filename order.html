@@ -89,27 +89,15 @@
         <form id="order-form">
             <h3 class="mb-4" style="font-size:1.1rem; color:#1e293b;">1. Vos Coordonnées</h3>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px;">
-                <div class="input-group" style="margin-bottom: 0;">
-                    <label for="name">Nom et Prénom(s) *</label>
-                    <input type="text" id="name" name="name" required placeholder="Ex: Yasminatou SOUROKOU" value="">
-                </div>
-
-                <div class="input-group" style="margin-bottom: 0;">
-                    <label for="email">Adresse Email *</label>
-                    <input type="email" id="email" name="email" required placeholder="Ex: exemple@gmail.com" value="">
-                </div>
-            </div>
-
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 16px;">
                 <div class="input-group" style="margin-bottom: 0;">
-                    <label for="phone">Numéro de téléphone (Whatsapp) *</label>
-                    <input type="tel" id="phone" name="phone" required placeholder="Ex: 0169310405" value="">
+                    <label for="name">Nom complet *</label>
+                    <input type="text" id="name" name="name" required placeholder="Nom et Prénom" readonly>
                 </div>
 
                 <div class="input-group" style="margin-bottom: 0;">
-                    <label for="payment_phone">Numéro Mobile Money (Débit) *</label>
-                    <input type="tel" id="payment_phone" name="payment_phone" required placeholder="Ex: 0169310405" value="">
+                    <label for="phone">Numéro de téléphone (Whatsapp) *</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="Numéro WhatsApp" readonly>
                 </div>
             </div>
 
@@ -165,6 +153,12 @@
                     <label style="display:flex; align-items:center; gap:8px; border: 2px solid #3b82f6; background: #eff6ff; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #1e40af;">
                         <input type="radio" name="payment_network" value="Celtiis Cash" style="accent-color:#2563eb;"> 🔵 Celtiis Cash
                     </label>
+                </div>
+
+                <!-- Saisie du numéro Mobile Money pour le débit -->
+                <div class="input-group" style="margin-bottom: 16px;">
+                    <label for="payment_phone">Numéro Mobile Money pour le débit (Paiement) *</label>
+                    <input type="tel" id="payment_phone" name="payment_phone" placeholder="Ex: 0169310405" value="" style="background: white !important; color: #0f172a !important; cursor: text !important; font-weight: 600;">
                 </div>
 
                 <button type="submit" class="btn-fedapay-pay" id="btn-submit-order">
