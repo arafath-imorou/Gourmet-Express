@@ -92,6 +92,17 @@ const DataManager = {
         const { error } = await window.supabaseClient.from('restaurants').update(data).eq('id', id);
         return !error;
     },
+    deleteRestaurant: async (id) => {
+        try {
+            await window.supabaseClient.from('restau_menu').delete().eq('restaurant_id', id);
+            await window.supabaseClient.from('staff').delete().eq('restaurant_id', id);
+            const { error } = await window.supabaseClient.from('restaurants').delete().eq('id', id);
+            return !error;
+        } catch (e) {
+            console.error('Error deleting restaurant:', e);
+            return false;
+        }
+    },
     getAllRestaurantsStats: async () => {
         const { data: restaurants } = await window.supabaseClient.from('restaurants').select('*');
         const { data: orders } = await window.supabaseClient.from('restau_orders').select('total, status, restaurant_id');

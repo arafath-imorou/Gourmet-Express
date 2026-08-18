@@ -4,221 +4,460 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Superadmin - Gourmet Express</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: #f0f2f5; min-height: 100vh; }
-        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 240px; background: #1a1a2e; color: white; padding: 0; z-index: 100; display: flex; flex-direction: column; }
-        .sidebar-brand { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-brand .title { font-family: 'Poppins', sans-serif; font-size: 1.1rem; font-weight: 700; }
-        .sidebar-brand .sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
-        .sidebar-nav { flex: 1; padding: 16px 0; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
-        .nav-item .icon { font-size: 1.1rem; width: 20px; }
-        .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
-        .logout-btn { display: block; text-align: center; padding: 10px; background: rgba(231,76,60,0.2); color: #e74c3c; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.85rem; border: none; width: 100%; }
-        .logout-btn:hover { background: rgba(231,76,60,0.35); }
-        .main { margin-left: 240px; padding: 32px; }
-        .page-header { margin-bottom: 32px; }
-        .page-header h1 { font-family: 'Poppins', sans-serif; font-size: 1.6rem; font-weight: 700; color: #1a1a2e; }
-        .page-header p { color: #888; margin-top: 4px; }
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
-        .stat-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-        .stat-card .label { font-size: 0.8rem; color: #888; font-weight: 500; margin-bottom: 8px; }
-        .stat-card .value { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 700; color: #1a1a2e; }
-        .stat-card .sub-value { font-size: 0.8rem; color: #10b981; margin-top: 4px; }
-        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .card-title { font-weight: 700; font-size: 1.05rem; color: #1a1a2e; }
-        .btn-primary { background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
-        .btn-primary:hover { background: #c0392b; }
-        .btn-secondary { background: #f0f2f5; color: #444; padding: 8px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
-        .restaurant-row { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f0f2f5; }
-        .restaurant-row:last-child { border-bottom: none; }
-        .restaurant-avatar { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #e74c3c, #c0392b); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; overflow: hidden; }
-        .restaurant-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .restaurant-info { flex: 1; }
-        .restaurant-name { font-weight: 700; color: #1a1a2e; font-size: 0.95rem; }
-        .restaurant-meta { font-size: 0.8rem; color: #888; margin-top: 2px; }
-        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; min-height: 100vh; color: #1a1a2e; }
+        
+        /* Sidebar */
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 250px; background: #1a1a2e; color: white; padding: 0; z-index: 100; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
+        .sidebar-brand { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .sidebar-brand .title { font-family: 'Poppins', sans-serif; font-size: 1.15rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 8px; }
+        .sidebar-brand .title span { color: #e74c3c; }
+        .sidebar-brand .sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+        
+        .sidebar-nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 6px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 13px 18px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; background: none; width: 100%; text-align: left; border-radius: 12px; }
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+        .nav-item.active { background: #e74c3c; color: white; box-shadow: 0 4px 14px rgba(231,76,60,0.4); }
+        .nav-item .icon { font-size: 1.2rem; width: 24px; text-align: center; }
+        
+        .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
+        .logout-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: rgba(231,76,60,0.15); color: #e74c3c; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(231,76,60,0.3); width: 100%; transition: all 0.2s; }
+        .logout-btn:hover { background: #e74c3c; color: white; }
+        
+        /* Main Layout */
+        .main { margin-left: 250px; padding: 32px 40px; min-height: 100vh; }
+        .page-header { margin-bottom: 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+        .page-header h1 { font-family: 'Poppins', sans-serif; font-size: 1.65rem; font-weight: 700; color: #1a1a2e; }
+        .page-header p { color: #666; margin-top: 4px; font-size: 0.9rem; }
+        
+        /* Stats / KPIs */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin-bottom: 28px; }
+        .stat-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); position: relative; overflow: hidden; }
+        .stat-card .label { font-size: 0.82rem; color: #888; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-family: 'Poppins', sans-serif; font-size: 1.85rem; font-weight: 800; color: #1a1a2e; }
+        .stat-card .sub-value { font-size: 0.78rem; color: #10b981; margin-top: 4px; font-weight: 600; }
+        
+        /* Card / Containers */
+        .card { background: white; border-radius: 18px; padding: 24px; box-shadow: 0 2px 14px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.04); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+        .card-title { font-weight: 700; font-size: 1.1rem; color: #1a1a2e; display: flex; align-items: center; gap: 8px; }
+        
+        /* Buttons */
+        .btn-primary { background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary:hover { background: #c0392b; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(231,76,60,0.3); }
+        .btn-secondary { background: #f0f2f5; color: #444; padding: 9px 16px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+        .btn-secondary:hover { background: #e4e7eb; }
+        
+        .btn-sm { padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-edit { background: #eff6ff; color: #2563eb; }
+        .btn-edit:hover { background: #dbeafe; }
+        .btn-delete { background: #fee2e2; color: #dc2626; }
+        .btn-delete:hover { background: #fecaca; }
+        .btn-toggle { background: #fef3c7; color: #d97706; }
+        .btn-toggle:hover { background: #fde68a; }
+        .btn-menu-view { background: #f3e8ff; color: #7e22ce; }
+        .btn-menu-view:hover { background: #e9d5ff; }
+        
+        /* Badges */
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
         .badge-active { background: #d1fae5; color: #059669; }
         .badge-inactive { background: #fee2e2; color: #dc2626; }
-        .actions { display: flex; gap: 8px; }
-        .btn-icon { padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
-        .btn-edit { background: #eff6ff; color: #2563eb; }
-        .btn-toggle { background: #fef3c7; color: #d97706; }
-        /* Modal */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .badge-warning { background: #fef3c7; color: #d97706; }
+        
+        /* Restaurant Rows / Grids */
+        .restaurant-row { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f0f2f5; }
+        .restaurant-row:last-child { border-bottom: none; }
+        .restaurant-avatar { width: 50px; height: 50px; border-radius: 12px; background: linear-gradient(135deg, #e74c3c, #c0392b); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .restaurant-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .restaurant-info { flex: 1; }
+        .restaurant-name { font-weight: 700; color: #1a1a2e; font-size: 1rem; }
+        .restaurant-meta { font-size: 0.82rem; color: #666; margin-top: 3px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        
+        /* Menu Grid */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; margin-top: 16px; }
+        .menu-card { background: white; border: 1px solid #eee; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: all 0.2s; display: flex; flex-direction: column; }
+        .menu-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+        .menu-card-cover { height: 140px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative; overflow: hidden; }
+        .menu-card-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .menu-card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+        .menu-card-cat { font-size: 0.75rem; font-weight: 700; color: #e74c3c; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .menu-card-title { font-weight: 700; font-size: 1rem; color: #1a1a2e; margin-bottom: 6px; }
+        .menu-card-desc { font-size: 0.82rem; color: #777; line-height: 1.4; margin-bottom: 12px; flex: 1; }
+        .menu-card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #f0f2f5; }
+        .menu-card-price { font-weight: 800; font-size: 1.05rem; color: #1a1a2e; }
+        
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th { text-align: left; padding: 12px 10px; font-size: 0.82rem; color: #888; border-bottom: 2px solid #f0f2f5; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 14px 10px; font-size: 0.9rem; border-bottom: 1px solid #f0f2f5; color: #333; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafbfc; }
+        
+        /* Selectors & Filters */
+        .filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; background: #f8f9fa; padding: 12px 16px; border-radius: 12px; }
+        .search-input { flex: 1; min-width: 220px; padding: 10px 14px; border: 2px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; background: white; outline: none; }
+        .search-input:focus { border-color: #e74c3c; }
+        .select-custom { padding: 10px 14px; border: 2px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; background: white; outline: none; min-width: 200px; font-weight: 500; cursor: pointer; }
+        .select-custom:focus { border-color: #e74c3c; }
+        
+        /* Modals */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
         .modal-overlay.open { display: flex; }
-        .modal { background: white; border-radius: 20px; padding: 32px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
-        .modal h3 { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 24px; }
+        .modal { background: white; border-radius: 20px; padding: 32px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: modalIn 0.2s ease-out; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal h3 { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; color: #1a1a2e; }
         .modal-section { font-weight: 700; font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 12px; }
-        .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: #444; margin-bottom: 5px; }
-        .form-group input, .form-group select { width: 100%; padding: 11px 13px; border: 2px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #e74c3c; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #444; margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px 14px; border: 2px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #e74c3c; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .modal-footer { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
-        .btn-cancel { background: #f0f2f5; color: #444; padding: 11px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
-        @media(max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; padding: 16px; } }
+        .modal-footer { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid #f0f2f5; }
+        .btn-cancel { background: #f0f2f5; color: #555; padding: 11px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .btn-cancel:hover { background: #e4e7eb; }
+        
+        @media(max-width: 860px) {
+            .sidebar { width: 70px; }
+            .sidebar-brand .title span, .sidebar-brand .sub, .nav-item span:not(.icon), .sidebar-footer div { display: none; }
+            .sidebar-brand { padding: 16px 10px; text-align: center; }
+            .nav-item { justify-content: center; padding: 12px; }
+            .main { margin-left: 70px; padding: 20px; }
+        }
     </style>
 </head>
 <body>
-    <div id="auth-guard" style="display:none;position:fixed;inset:0;background:#1a1a2e;z-index:999;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">Vérification...</div>
+    <div id="auth-guard" style="position:fixed;inset:0;background:#1a1a2e;z-index:999;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">Vérification...</div>
 
-    <div class="sidebar">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
         <div class="sidebar-brand">
-            <div class="title">🍔 Gourmet Express</div>
-            <div class="sub">Super Administration</div>
+            <div class="title">🍔 Gourmet <span>Express</span></div>
+            <div class="sub">Plateforme Admin</div>
         </div>
         <nav class="sidebar-nav">
-            <button class="nav-item active" onclick="showSection('dashboard')"><span class="icon">📊</span> Dashboard</button>
-            <button class="nav-item" onclick="showSection('restaurants')"><span class="icon">🏪</span> Restaurants</button>
-            <button class="nav-item" onclick="showSection('clients')"><span class="icon">👥</span> Clients</button>
+            <button class="nav-item active" id="nav-restaurants" onclick="showSection('restaurants')">
+                <span class="icon">🏪</span> <span>Restaurants</span>
+            </button>
+            <button class="nav-item" id="nav-menus" onclick="showSection('menus')">
+                <span class="icon">🍔</span> <span>Menus</span>
+            </button>
+            <button class="nav-item" id="nav-administration" onclick="showSection('administration')">
+                <span class="icon">📈</span> <span>Administration</span>
+            </button>
+            <button class="nav-item" id="nav-clients" onclick="showSection('clients')">
+                <span class="icon">👥</span> <span>Clients</span>
+            </button>
         </nav>
         <div class="sidebar-footer">
-            <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-bottom:10px;" id="staff-name"></div>
+            <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-bottom:10px;" id="staff-name">Superadmin</div>
             <button class="logout-btn" onclick="logout()">🚪 Déconnexion</button>
         </div>
-    </div>
+    </aside>
 
+    <!-- Main Content -->
     <main class="main">
-        <!-- Dashboard -->
-        <section id="section-dashboard">
+
+        <!-- ==================== 1. RESTAURANTS MODULE ==================== -->
+        <section id="section-restaurants">
             <div class="page-header">
-                <h1>Tableau de bord</h1>
-                <p>Vue globale de la plateforme</p>
+                <div>
+                    <h1>🏪 Gestion des Restaurants</h1>
+                    <p>Ajoutez, modifiez, désactivez ou supprimez les restaurants partenaires de la plateforme.</p>
+                </div>
+                <button class="btn-primary" onclick="openCreateRestaurantModal()">+ Nouveau restaurant</button>
             </div>
-            <div class="stats-row">
-                <div class="stat-card"><div class="label">Restaurants</div><div class="value" id="stat-restaurants">—</div><div class="sub-value">actifs</div></div>
-                <div class="stat-card"><div class="label">Commandes totales</div><div class="value" id="stat-orders">—</div></div>
-                <div class="stat-card"><div class="label">Chiffre d'affaires</div><div class="value" id="stat-revenue">—</div><div class="sub-value">commandes terminées</div></div>
-            </div>
+
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Aperçu des restaurants</span>
-                    <button class="btn-primary" onclick="openCreateModal()">+ Nouveau restaurant</button>
+                    <span class="card-title">Liste de tous les restaurants</span>
+                    <input type="text" id="search-restaurants" placeholder="🔍 Rechercher un restaurant..." class="search-input" style="max-width:300px;" oninput="filterRestaurantsList()">
                 </div>
-                <div id="restaurants-list">Chargement...</div>
+                <div id="restaurants-list">Chargement des restaurants...</div>
             </div>
         </section>
 
-        <!-- Restaurants -->
-        <section id="section-restaurants" style="display:none;">
+        <!-- ==================== 2. MENUS MODULE ==================== -->
+        <section id="section-menus" style="display:none;">
             <div class="page-header">
-                <h1>Gestion des Restaurants</h1>
-                <p>Créer et gérer les restaurants de la plateforme</p>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Tous les restaurants</span>
-                    <button class="btn-primary" onclick="openCreateModal()">+ Nouveau restaurant</button>
+                <div>
+                    <h1>🍔 Gestion des Menus par Restaurant</h1>
+                    <p>Gérez les cartes, catégories, prix et plats spécifiques à chaque établissement.</p>
                 </div>
-                <div id="restaurants-list-2">Chargement...</div>
+                <button class="btn-primary" onclick="openAddMenuItemModal()">+ Ajouter un plat</button>
+            </div>
+
+            <div class="card">
+                <div class="filter-bar">
+                    <label style="font-weight:700; font-size:0.9rem; color:#444;">Choisir un restaurant :</label>
+                    <select id="menu-restaurant-select" class="select-custom" onchange="onRestaurantMenuSelectChange(this.value)">
+                        <option value="">Sélectionnez un restaurant...</option>
+                    </select>
+                    <input type="text" id="search-menu-items" placeholder="🔍 Rechercher un plat..." class="search-input" oninput="filterMenuItems()">
+                </div>
+
+                <div id="menu-container">
+                    <p style="color:#888; text-align:center; padding:30px;">Sélectionnez un restaurant ci-dessus pour afficher et gérer son menu.</p>
+                </div>
             </div>
         </section>
-        
-        <!-- Clients -->
+
+        <!-- ==================== 3. ADMINISTRATION MODULE (CHIFFRES) ==================== -->
+        <section id="section-administration" style="display:none;">
+            <div class="page-header">
+                <div>
+                    <h1>📈 Administration & Chiffres Clés</h1>
+                    <p>Statistiques financières, chiffres d'affaires et performances détaillées par restaurant.</p>
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="label">Chiffre d'Affaires Global</div>
+                    <div class="value" id="admin-total-revenue" style="color:#e74c3c;">—</div>
+                    <div class="sub-value">Commandes terminées</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Total Commandes</div>
+                    <div class="value" id="admin-total-orders">—</div>
+                    <div class="sub-value" id="admin-completed-orders">— livrées</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Restaurants Actifs</div>
+                    <div class="value" id="admin-active-restaurants">—</div>
+                    <div class="sub-value" id="admin-total-restaurants">— au total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Panier Moyen Global</div>
+                    <div class="value" id="admin-avg-order">—</div>
+                    <div class="sub-value">par commande</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Performance Financière par Établissement</span>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table id="admin-stats-table">
+                        <thead>
+                            <tr>
+                                <th>Restaurant</th>
+                                <th>Commandes</th>
+                                <th>Terminées</th>
+                                <th>Annulées</th>
+                                <th>Chiffre d'Affaires</th>
+                                <th>Panier Moyen</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-stats-tbody">
+                            <tr><td colspan="7" style="text-align:center; padding:20px; color:#888;">Chargement des chiffres...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 4. CLIENTS MODULE ==================== -->
         <section id="section-clients" style="display:none;">
             <div class="page-header">
-                <h1>Gestion des Clients</h1>
-                <p>Liste globale de tous les clients inscrits sur Gourmet Express</p>
-            </div>
-            <div class="card">
-                <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                    <span class="card-title">Tous les clients</span>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn-primary" style="background:#27ae60; padding:8px 14px; font-size:0.8rem;" onclick="exportToExcel()">📊 Exporter Excel</button>
-                        <button class="btn-primary" style="background:#2980b9; padding:8px 14px; font-size:0.8rem;" onclick="exportToPDF()">📄 Exporter PDF</button>
-                    </div>
+                <div>
+                    <h1>👥 Gestion des Clients</h1>
+                    <p>Suivi complet des clients, consultation des mouvements de commandes et exports.</p>
                 </div>
-                <div id="clients-list" style="overflow-x:auto;">Chargement...</div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-primary" style="background:#27ae60;" onclick="exportToExcel()">📊 Exporter Excel</button>
+                    <button class="btn-primary" style="background:#2980b9;" onclick="exportToPDF()">📄 Exporter PDF</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Tous les clients inscrits</span>
+                    <input type="text" id="search-clients" placeholder="🔍 Rechercher par nom, téléphone, email..." class="search-input" style="max-width:320px;" oninput="filterClientsList()">
+                </div>
+                <div id="clients-list" style="overflow-x:auto;">Chargement des clients...</div>
             </div>
         </section>
+
     </main>
 
-    <!-- Create Restaurant Modal -->
-    <div class="modal-overlay" id="modal-create">
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Modal 1: Create Restaurant -->
+    <div class="modal-overlay" id="modal-create-restaurant">
         <div class="modal">
-            <h3>🏪 Créer un restaurant</h3>
-            <div class="modal-section">Informations du restaurant</div>
-            <div class="form-group"><label>Nom du restaurant *</label><input id="r-name" type="text" placeholder="Ex: Chez Mamie"></div>
-            <div class="form-group"><label>Adresse</label><input id="r-address" type="text" placeholder="Rue, Quartier, Ville"></div>
-            <div class="form-group"><label>Téléphone</label><input id="r-phone" type="tel" placeholder="00 229 xx xx xx xx"></div>
+            <h3>🏪 Créer un nouveau restaurant</h3>
+            <div class="modal-section">Informations de l'Établissement</div>
+            <div class="form-group"><label>Nom du restaurant *</label><input id="cr-name" type="text" placeholder="Ex: Gourmet Grill"></div>
+            <div class="form-group"><label>Adresse</label><input id="cr-address" type="text" placeholder="Quartier, Ville, Bénin"></div>
+            <div class="form-group"><label>Téléphone</label><input id="cr-phone" type="tel" placeholder="+229 xx xx xx xx"></div>
             <div class="form-group">
                 <label>Logo du restaurant</label>
-                <input id="r-logo-file" type="file" accept="image/*" style="padding:6px 10px;">
-                <input id="r-logo" type="hidden">
-                <div id="r-logo-preview" style="margin-top:8px;display:none;align-items:center;gap:12px;">
-                    <img id="r-logo-img" style="width:50px;height:50px;border-radius:10px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-                    <span style="font-size:0.8rem;color:#888;">Aperçu du logo</span>
+                <input id="cr-logo-file" type="file" accept="image/*">
+                <input id="cr-logo" type="hidden">
+                <div id="cr-logo-preview" style="margin-top:8px; display:none; align-items:center; gap:12px;">
+                    <img id="cr-logo-img" style="width:48px; height:48px; border-radius:10px; object-fit:cover;">
+                    <span style="font-size:0.8rem; color:#888;">Aperçu du logo</span>
                 </div>
             </div>
-            <div class="form-group"><label>Description</label><input id="r-desc" type="text" placeholder="Courte description"></div>
+            <div class="form-group"><label>Description</label><textarea id="cr-desc" rows="2" placeholder="Spécialités culinaires, ambiance..."></textarea></div>
 
-            <div class="modal-section">Compte Administrateur</div>
+            <div class="modal-section">Compte Administrateur Initial</div>
             <div class="form-grid">
-                <div class="form-group"><label>Prénom *</label><input id="a-firstname" type="text"></div>
-                <div class="form-group"><label>Nom *</label><input id="a-lastname" type="text"></div>
+                <div class="form-group"><label>Prénom *</label><input id="ca-firstname" type="text" placeholder="Jean"></div>
+                <div class="form-group"><label>Nom *</label><input id="ca-lastname" type="text" placeholder="Dupont"></div>
             </div>
-            <div class="form-group"><label>Email *</label><input id="a-email" type="email" placeholder="admin@restaurant.com"></div>
-            <div class="form-group"><label>Mot de passe *</label><input id="a-password" type="text" placeholder="Mot de passe initial"></div>
+            <div class="form-group"><label>Email de connexion *</label><input id="ca-email" type="email" placeholder="admin@restaurant.com"></div>
+            <div class="form-group"><label>Mot de passe initial *</label><input id="ca-password" type="text" placeholder="Mot de passe sécurisé"></div>
 
-            <div id="modal-error" style="color:#e74c3c;font-size:0.85rem;margin-top:8px;display:none;"></div>
+            <div id="cr-error" style="color:#e74c3c; font-size:0.85rem; margin-top:8px; display:none; font-weight:600;"></div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal()">Annuler</button>
-                <button class="btn-primary" onclick="createRestaurant()">Créer le restaurant</button>
+                <button class="btn-cancel" onclick="closeModal('modal-create-restaurant')">Annuler</button>
+                <button class="btn-primary" onclick="submitCreateRestaurant()">Créer le restaurant</button>
             </div>
         </div>
     </div>
 
-    <!-- View Client Modal -->
+    <!-- Modal 2: Edit Restaurant -->
+    <div class="modal-overlay" id="modal-edit-restaurant">
+        <div class="modal">
+            <h3>✏️ Modifier le restaurant</h3>
+            <input type="hidden" id="er-id">
+            <div class="form-group"><label>Nom du restaurant *</label><input id="er-name" type="text"></div>
+            <div class="form-group"><label>Adresse</label><input id="er-address" type="text"></div>
+            <div class="form-group"><label>Téléphone</label><input id="er-phone" type="tel"></div>
+            <div class="form-group">
+                <label>Logo du restaurant</label>
+                <input id="er-logo-file" type="file" accept="image/*">
+                <input id="er-logo" type="hidden">
+                <div id="er-logo-preview" style="margin-top:8px; display:flex; align-items:center; gap:12px;">
+                    <img id="er-logo-img" style="width:48px; height:48px; border-radius:10px; object-fit:cover;">
+                    <span style="font-size:0.8rem; color:#888;">Logo actuel</span>
+                </div>
+            </div>
+            <div class="form-group"><label>Description</label><textarea id="er-desc" rows="2"></textarea></div>
+
+            <div id="er-error" style="color:#e74c3c; font-size:0.85rem; margin-top:8px; display:none; font-weight:600;"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('modal-edit-restaurant')">Annuler</button>
+                <button class="btn-primary" onclick="submitEditRestaurant()">Enregistrer les modifications</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Add / Edit Menu Item -->
+    <div class="modal-overlay" id="modal-menu-item">
+        <div class="modal">
+            <h3 id="mitem-modal-title">🍔 Ajouter un plat au menu</h3>
+            <input type="hidden" id="mitem-id">
+            
+            <div class="form-group">
+                <label>Restaurant associé *</label>
+                <select id="mitem-restaurant" class="select-custom" style="width:100%;">
+                    <!-- Options injected dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group"><label>Nom du plat *</label><input id="mitem-name" type="text" placeholder="Ex: Burger Gourmet Classic"></div>
+            
+            <div class="form-grid">
+                <div class="form-group"><label>Prix (FCFA) *</label><input id="mitem-price" type="number" placeholder="Ex: 3500"></div>
+                <div class="form-group">
+                    <label>Catégorie *</label>
+                    <input id="mitem-category" type="text" list="cat-suggestions" placeholder="Ex: Burgers">
+                    <datalist id="cat-suggestions">
+                        <option value="Burgers">
+                        <option value="Pizzas">
+                        <option value="Plats Locaux">
+                        <option value="Salades">
+                        <option value="Grillades">
+                        <option value="Boissons">
+                        <option value="Desserts">
+                    </datalist>
+                </div>
+            </div>
+
+            <div class="form-group"><label>Description</label><textarea id="mitem-desc" rows="2" placeholder="Ingrédients, accompagnements..."></textarea></div>
+            
+            <div class="form-group">
+                <label>Photo du plat</label>
+                <input id="mitem-image-file" type="file" accept="image/*">
+                <input id="mitem-image" type="hidden">
+                <div id="mitem-image-preview" style="margin-top:8px; display:none; align-items:center; gap:12px;">
+                    <img id="mitem-image-img" style="width:60px; height:60px; border-radius:10px; object-fit:cover;">
+                    <span style="font-size:0.8rem; color:#888;">Aperçu de la photo</span>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top:10px;">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                    <input type="checkbox" id="mitem-available" checked style="width:18px; height:18px;">
+                    <span>Plat disponible à la commande</span>
+                </label>
+            </div>
+
+            <div id="mitem-error" style="color:#e74c3c; font-size:0.85rem; margin-top:8px; display:none; font-weight:600;"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('modal-menu-item')">Annuler</button>
+                <button class="btn-primary" onclick="submitMenuItem()">Enregistrer le plat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: View Client Profile & Orders -->
     <div class="modal-overlay" id="modal-view-client">
-        <div class="modal" style="max-width:650px;">
-            <div style="display:flex; justify-content:between; align-items:center; margin-bottom:20px;">
-                <h3 style="margin:0;">👤 Détails du Client</h3>
-                <button onclick="closeViewClientModal()" style="border:none; background:none; font-size:1.5rem; cursor:pointer; color:#888;">&times;</button>
+        <div class="modal" style="max-width:680px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">👤 Fiche Client & Mouvements</h3>
+                <button onclick="closeModal('modal-view-client')" style="border:none; background:none; font-size:1.6rem; cursor:pointer; color:#888;">&times;</button>
             </div>
             
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; background:#f8f9fa; padding:16px; border-radius:12px; margin-bottom:24px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#f8f9fa; padding:18px; border-radius:14px; margin-bottom:22px;">
                 <div>
-                    <div style="font-size:0.8rem; color:#888;">NOM COMPLET</div>
-                    <div id="vc-name" style="font-weight:700; color:#1a1a2e; font-size:1.1rem; margin-top:2px;">—</div>
+                    <div style="font-size:0.75rem; color:#888; font-weight:600; text-transform:uppercase;">Nom Complet</div>
+                    <div id="vc-name" style="font-weight:700; color:#1a1a2e; font-size:1.05rem; margin-top:2px;">—</div>
                 </div>
                 <div>
-                    <div style="font-size:0.8rem; color:#888;">ID CLIENT</div>
+                    <div style="font-size:0.75rem; color:#888; font-weight:600; text-transform:uppercase;">ID Client</div>
                     <div id="vc-id" style="font-weight:600; color:#555; margin-top:2px;">—</div>
                 </div>
                 <div>
-                    <div style="font-size:0.8rem; color:#888;">EMAIL</div>
+                    <div style="font-size:0.75rem; color:#888; font-weight:600; text-transform:uppercase;">Email</div>
                     <div id="vc-email" style="font-weight:500; color:#555; margin-top:2px;">—</div>
                 </div>
                 <div>
-                    <div style="font-size:0.8rem; color:#888;">TÉLÉPHONE</div>
+                    <div style="font-size:0.75rem; color:#888; font-weight:600; text-transform:uppercase;">Téléphone</div>
                     <div id="vc-phone" style="font-weight:500; color:#555; margin-top:2px;">—</div>
                 </div>
                 <div>
-                    <div style="font-size:0.8rem; color:#888;">POINTS FIDÉLITÉ</div>
-                    <div id="vc-points" style="font-weight:600; color:#10b981; margin-top:2px;">—</div>
+                    <div style="font-size:0.75rem; color:#888; font-weight:600; text-transform:uppercase;">Points Fidélité</div>
+                    <div id="vc-points" style="font-weight:700; color:#10b981; margin-top:2px;">—</div>
                 </div>
                 <div>
-                    <div style="font-size:0.8rem; color:#888;">STATUT DU COMPTE</div>
-                    <div style="margin-top:4px;"><span id="vc-status" class="badge">—</span></div>
+                    <div style="font-size:0.75rem; color:#888; font-weight:600; text-transform:uppercase;">Statut Compte</div>
+                    <div style="margin-top:3px;"><span id="vc-status" class="badge">—</span></div>
                 </div>
             </div>
 
-            <h4 style="font-family:'Poppins', sans-serif; font-size:1rem; margin-bottom:12px; color:#1a1a2e;">🛍️ Historique des Commandes</h4>
-            <div id="vc-orders-list" style="max-height:250px; overflow-y:auto; border:1px solid #eee; border-radius:10px; padding:8px;">
+            <h4 style="font-family:'Poppins', sans-serif; font-size:1rem; margin-bottom:12px; color:#1a1a2e; display:flex; justify-content:space-between; align-items:center;">
+                <span>🛍️ Historique des Commandes</span>
+                <span id="vc-orders-count" style="font-size:0.8rem; font-weight:600; color:#888;">0 commande(s)</span>
+            </h4>
+            <div id="vc-orders-list" style="max-height:280px; overflow-y:auto; border:1px solid #eee; border-radius:12px; padding:10px;">
                 Chargement des commandes...
             </div>
             
-            <div class="modal-footer" style="margin-top:24px;">
-                <button class="btn-cancel" onclick="closeViewClientModal()">Fermer</button>
+            <div class="modal-footer" style="margin-top:20px;">
+                <button class="btn-cancel" onclick="closeModal('modal-view-client')">Fermer</button>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
@@ -226,88 +465,545 @@
     <script src="../assets/js/supabase.js"></script>
     <script src="../assets/js/data.js"></script>
     <script>
+        let allRestaurants = [];
         let allStats = [];
+        let allClients = [];
+        let currentSelectedMenuRestaurantId = null;
+        let currentMenuItems = [];
 
-            window.addEventListener('DOMContentLoaded', async () => {
-                const staff = DataManager.getCurrentStaff();
-                if (!staff || staff.role !== 'superadmin') { window.location.href = '../login.html'; return; }
-                document.getElementById('auth-guard').style.display = 'none';
-                document.getElementById('staff-name').textContent = staff.firstname + ' ' + staff.lastname;
-                
-                // Read logo file and convert to base64
-                const logoFileInput = document.getElementById('r-logo-file');
-                if (logoFileInput) {
-                    logoFileInput.addEventListener('change', function(e) {
-                        const file = e.target.files[0];
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = function(evt) {
-                                document.getElementById('r-logo').value = evt.target.result;
-                                document.getElementById('r-logo-img').src = evt.target.result;
-                                document.getElementById('r-logo-preview').style.display = 'flex';
-                            };
-                            reader.readAsDataURL(file);
-                        }
-                    });
+        window.addEventListener('DOMContentLoaded', async () => {
+            const staff = DataManager.getCurrentStaff();
+            if (!staff || staff.role !== 'superadmin') {
+                window.location.href = '../login.html';
+                return;
+            }
+            document.getElementById('auth-guard').style.display = 'none';
+            document.getElementById('staff-name').textContent = `${staff.firstname || ''} ${staff.lastname || 'Admin'}`.trim();
+            
+            setupImageFileInput('cr-logo-file', 'cr-logo', 'cr-logo-img', 'cr-logo-preview');
+            setupImageFileInput('er-logo-file', 'er-logo', 'er-logo-img', 'er-logo-preview');
+            setupImageFileInput('mitem-image-file', 'mitem-image', 'mitem-image-img', 'mitem-image-preview');
+            
+            await initPlatformData();
+        });
+
+        function setupImageFileInput(fileInputId, hiddenInputId, imgPreviewId, containerId) {
+            const fileInput = document.getElementById(fileInputId);
+            if (!fileInput) return;
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        document.getElementById(hiddenInputId).value = evt.target.result;
+                        document.getElementById(imgPreviewId).src = evt.target.result;
+                        document.getElementById(containerId).style.display = 'flex';
+                    };
+                    reader.readAsDataURL(file);
                 }
-                
-                await loadData();
             });
+        }
 
-        async function loadData() {
-            allStats = await DataManager.getAllRestaurantsStats();
-            const active = allStats.filter(r => r.status === 'active').length;
-            const totalOrders = allStats.reduce((s, r) => s + r.orderCount, 0);
-            const totalRevenue = allStats.reduce((s, r) => s + r.revenue, 0);
-            document.getElementById('stat-restaurants').textContent = active;
-            document.getElementById('stat-orders').textContent = totalOrders;
-            document.getElementById('stat-revenue').textContent = new Intl.NumberFormat('fr-FR').format(totalRevenue) + ' F';
-            renderRestaurantsList('restaurants-list');
-            renderRestaurantsList('restaurants-list-2');
+        async function initPlatformData() {
+            await loadRestaurants();
+            await loadAdministrationStats();
             await loadClients();
         }
 
+        // ==================== 1. RESTAURANTS LOGIC ====================
+        async function loadRestaurants() {
+            allRestaurants = await DataManager.getRestaurants(false);
+            renderRestaurantsList(allRestaurants);
+            populateMenuRestaurantSelect();
+        }
+
+        function renderRestaurantsList(list) {
+            const container = document.getElementById('restaurants-list');
+            if (!list || !list.length) {
+                container.innerHTML = '<p style="color:#888; text-align:center; padding:30px;">Aucun restaurant enregistré.</p>';
+                return;
+            }
+
+            container.innerHTML = list.map(r => `
+                <div class="restaurant-row">
+                    <div class="restaurant-avatar">
+                        ${r.logo ? `<img src="${r.logo}" alt="${r.name}">` : '🍽️'}
+                    </div>
+                    <div class="restaurant-info">
+                        <div class="restaurant-name">${r.name}</div>
+                        <div class="restaurant-meta">
+                            <span>📍 ${r.address || 'Adresse non renseignée'}</span>
+                            <span>📞 ${r.phone || 'Non renseigné'}</span>
+                        </div>
+                    </div>
+                    <span class="badge ${r.status === 'active' ? 'badge-active' : 'badge-inactive'}">
+                        ${r.status === 'active' ? 'Actif' : 'Inactif'}
+                    </span>
+                    <div class="actions">
+                        <button class="btn-sm btn-menu-view" onclick="switchToRestaurantMenu('${r.id}')">
+                            🍔 Menu
+                        </button>
+                        <button class="btn-sm btn-edit" onclick="openEditRestaurantModal('${r.id}')">
+                            ✏️ Modifier
+                        </button>
+                        <button class="btn-sm btn-toggle" onclick="toggleRestaurantStatus('${r.id}', '${r.status}')">
+                            ${r.status === 'active' ? 'Désactiver' : 'Activer'}
+                        </button>
+                        <button class="btn-sm btn-delete" onclick="deleteRestaurant('${r.id}', '${r.name.replace(/'/g, "\\'")}')">
+                            🗑️ Supprimer
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterRestaurantsList() {
+            const q = document.getElementById('search-restaurants').value.toLowerCase().trim();
+            const filtered = allRestaurants.filter(r => 
+                (r.name && r.name.toLowerCase().includes(q)) ||
+                (r.address && r.address.toLowerCase().includes(q)) ||
+                (r.phone && r.phone.includes(q))
+            );
+            renderRestaurantsList(filtered);
+        }
+
+        function openCreateRestaurantModal() {
+            document.getElementById('cr-name').value = '';
+            document.getElementById('cr-address').value = '';
+            document.getElementById('cr-phone').value = '';
+            document.getElementById('cr-logo').value = '';
+            document.getElementById('cr-desc').value = '';
+            document.getElementById('ca-firstname').value = '';
+            document.getElementById('ca-lastname').value = '';
+            document.getElementById('ca-email').value = '';
+            document.getElementById('ca-password').value = '';
+            document.getElementById('cr-logo-preview').style.display = 'none';
+            document.getElementById('cr-error').style.display = 'none';
+            openModal('modal-create-restaurant');
+        }
+
+        async function submitCreateRestaurant() {
+            const name = document.getElementById('cr-name').value.trim();
+            const address = document.getElementById('cr-address').value.trim();
+            const phone = document.getElementById('cr-phone').value.trim();
+            const logo = document.getElementById('cr-logo').value;
+            const description = document.getElementById('cr-desc').value.trim();
+            
+            const firstname = document.getElementById('ca-firstname').value.trim();
+            const lastname = document.getElementById('ca-lastname').value.trim();
+            const email = document.getElementById('ca-email').value.trim();
+            const password = document.getElementById('ca-password').value.trim();
+
+            const errEl = document.getElementById('cr-error');
+            if (!name || !firstname || !lastname || !email || !password) {
+                errEl.textContent = 'Veuillez remplir tous les champs obligatoires (*).';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            const result = await DataManager.createRestaurant(
+                { name, address, phone, logo, description },
+                { firstname, lastname, email, password }
+            );
+
+            if (result.success) {
+                closeModal('modal-create-restaurant');
+                await initPlatformData();
+                alert('✅ Restaurant et compte administrateur créés avec succès !');
+            } else {
+                errEl.textContent = result.message || 'Erreur lors de la création.';
+                errEl.style.display = 'block';
+            }
+        }
+
+        function openEditRestaurantModal(id) {
+            const r = allRestaurants.find(x => x.id === id);
+            if (!r) return;
+            document.getElementById('er-id').value = r.id;
+            document.getElementById('er-name').value = r.name || '';
+            document.getElementById('er-address').value = r.address || '';
+            document.getElementById('er-phone').value = r.phone || '';
+            document.getElementById('er-desc').value = r.description || '';
+            document.getElementById('er-logo').value = r.logo || '';
+            
+            const preview = document.getElementById('er-logo-preview');
+            if (r.logo) {
+                document.getElementById('er-logo-img').src = r.logo;
+                preview.style.display = 'flex';
+            } else {
+                preview.style.display = 'none';
+            }
+            document.getElementById('er-error').style.display = 'none';
+            openModal('modal-edit-restaurant');
+        }
+
+        async function submitEditRestaurant() {
+            const id = document.getElementById('er-id').value;
+            const name = document.getElementById('er-name').value.trim();
+            const address = document.getElementById('er-address').value.trim();
+            const phone = document.getElementById('er-phone').value.trim();
+            const logo = document.getElementById('er-logo').value;
+            const description = document.getElementById('er-desc').value.trim();
+
+            const errEl = document.getElementById('er-error');
+            if (!name) {
+                errEl.textContent = 'Le nom du restaurant est obligatoire.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            const success = await DataManager.updateRestaurant(id, { name, address, phone, logo, description });
+            if (success) {
+                closeModal('modal-edit-restaurant');
+                await initPlatformData();
+                alert('✅ Restaurant mis à jour avec succès !');
+            } else {
+                errEl.textContent = 'Erreur lors de la mise à jour.';
+                errEl.style.display = 'block';
+            }
+        }
+
+        async function toggleRestaurantStatus(id, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            if (!confirm(`Voulez-vous vraiment ${newStatus === 'inactive' ? 'désactiver' : 'activer'} ce restaurant ?`)) return;
+            await DataManager.updateRestaurant(id, { status: newStatus });
+            await initPlatformData();
+        }
+
+        async function deleteRestaurant(id, name) {
+            if (!confirm(`⚠️ ATTENTION : Voulez-vous vraiment SUPPRIMER DÉFINITIVEMENT le restaurant "${name}" et l'ensemble de ses menus/staff ? Cette action est irréversible.`)) return;
+            const success = await DataManager.deleteRestaurant(id);
+            if (success) {
+                await initPlatformData();
+                alert(`✅ Le restaurant "${name}" a été supprimé.`);
+            } else {
+                alert('Erreur lors de la suppression.');
+            }
+        }
+
+        // ==================== 2. MENUS LOGIC ====================
+        function populateMenuRestaurantSelect() {
+            const select = document.getElementById('menu-restaurant-select');
+            const modalSelect = document.getElementById('mitem-restaurant');
+            
+            const optionsHtml = allRestaurants.map(r => `
+                <option value="${r.id}">${r.name} (${r.status === 'active' ? 'Actif' : 'Inactif'})</option>
+            `).join('');
+
+            select.innerHTML = '<option value="">-- Sélectionnez un restaurant --</option>' + optionsHtml;
+            modalSelect.innerHTML = optionsHtml;
+
+            if (currentSelectedMenuRestaurantId) {
+                select.value = currentSelectedMenuRestaurantId;
+            }
+        }
+
+        function switchToRestaurantMenu(restaurantId) {
+            showSection('menus');
+            const select = document.getElementById('menu-restaurant-select');
+            select.value = restaurantId;
+            onRestaurantMenuSelectChange(restaurantId);
+        }
+
+        async function onRestaurantMenuSelectChange(restaurantId) {
+            currentSelectedMenuRestaurantId = restaurantId;
+            const container = document.getElementById('menu-container');
+            if (!restaurantId) {
+                container.innerHTML = '<p style="color:#888; text-align:center; padding:30px;">Sélectionnez un restaurant ci-dessus pour afficher et gérer son menu.</p>';
+                return;
+            }
+
+            container.innerHTML = '<p style="color:#888; text-align:center; padding:30px;">Chargement du menu...</p>';
+            currentMenuItems = await DataManager.getMenu(restaurantId);
+            renderMenuItems(currentMenuItems);
+        }
+
+        function renderMenuItems(items) {
+            const container = document.getElementById('menu-container');
+            if (!currentSelectedMenuRestaurantId) return;
+
+            const selectedResto = allRestaurants.find(r => r.id === currentSelectedMenuRestaurantId);
+            const restoName = selectedResto ? selectedResto.name : 'Restaurant';
+
+            if (!items || !items.length) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px;">
+                        <p style="color:#888; font-size:1.05rem;">Aucun plat n'est encore enregistré pour <strong>${restoName}</strong>.</p>
+                        <button class="btn-primary" style="margin-top:14px;" onclick="openAddMenuItemModal()">+ Ajouter le premier plat</button>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                    <div style="font-weight:700; color:#1a1a2e; font-size:1rem;">Menu de : <span style="color:#e74c3c;">${restoName}</span> (${items.length} plat(s))</div>
+                </div>
+                <div class="menu-grid">
+                    ${items.map(m => `
+                        <div class="menu-card">
+                            <div class="menu-card-cover">
+                                ${m.image ? `<img src="${m.image}" alt="${m.name}">` : '🍽️'}
+                            </div>
+                            <div class="menu-card-body">
+                                <div class="menu-card-cat">${m.category || 'Général'}</div>
+                                <div class="menu-card-title">${m.name}</div>
+                                <div class="menu-card-desc">${m.description || 'Aucune description'}</div>
+                                <div style="margin-bottom:10px;">
+                                    <span class="badge ${m.available !== false ? 'badge-active' : 'badge-inactive'}">
+                                        ${m.available !== false ? '✅ Disponible' : '❌ Épuisé'}
+                                    </span>
+                                </div>
+                                <div class="menu-card-footer">
+                                    <span class="menu-card-price">${new Intl.NumberFormat('fr-FR').format(m.price)} F</span>
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn-sm btn-edit" onclick="openEditMenuItemModal('${m.id}')">✏️</button>
+                                        <button class="btn-sm btn-toggle" onclick="toggleMenuItemAvailability('${m.id}', ${m.available !== false})">🔄</button>
+                                        <button class="btn-sm btn-delete" onclick="deleteMenuItem('${m.id}', '${m.name.replace(/'/g, "\\'")}')">🗑️</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
+        }
+
+        function filterMenuItems() {
+            const q = document.getElementById('search-menu-items').value.toLowerCase().trim();
+            const filtered = currentMenuItems.filter(m => 
+                (m.name && m.name.toLowerCase().includes(q)) ||
+                (m.category && m.category.toLowerCase().includes(q)) ||
+                (m.description && m.description.toLowerCase().includes(q))
+            );
+            renderMenuItems(filtered);
+        }
+
+        function openAddMenuItemModal() {
+            if (!allRestaurants.length) {
+                alert('Veuillez créer au moins un restaurant avant d\'ajouter un plat.');
+                return;
+            }
+            document.getElementById('mitem-modal-title').textContent = '🍔 Ajouter un plat au menu';
+            document.getElementById('mitem-id').value = '';
+            document.getElementById('mitem-name').value = '';
+            document.getElementById('mitem-price').value = '';
+            document.getElementById('mitem-category').value = '';
+            document.getElementById('mitem-desc').value = '';
+            document.getElementById('mitem-image').value = '';
+            document.getElementById('mitem-image-preview').style.display = 'none';
+            document.getElementById('mitem-available').checked = true;
+            document.getElementById('mitem-error').style.display = 'none';
+
+            const modalSelect = document.getElementById('mitem-restaurant');
+            if (currentSelectedMenuRestaurantId) {
+                modalSelect.value = currentSelectedMenuRestaurantId;
+            }
+            openModal('modal-menu-item');
+        }
+
+        function openEditMenuItemModal(id) {
+            const m = currentMenuItems.find(x => x.id === id);
+            if (!m) return;
+
+            document.getElementById('mitem-modal-title').textContent = '✏️ Modifier le plat';
+            document.getElementById('mitem-id').value = m.id;
+            document.getElementById('mitem-restaurant').value = m.restaurant_id || currentSelectedMenuRestaurantId;
+            document.getElementById('mitem-name').value = m.name || '';
+            document.getElementById('mitem-price').value = m.price || '';
+            document.getElementById('mitem-category').value = m.category || '';
+            document.getElementById('mitem-desc').value = m.description || '';
+            document.getElementById('mitem-image').value = m.image || '';
+            document.getElementById('mitem-available').checked = m.available !== false;
+            
+            const preview = document.getElementById('mitem-image-preview');
+            if (m.image) {
+                document.getElementById('mitem-image-img').src = m.image;
+                preview.style.display = 'flex';
+            } else {
+                preview.style.display = 'none';
+            }
+            document.getElementById('mitem-error').style.display = 'none';
+            openModal('modal-menu-item');
+        }
+
+        async function submitMenuItem() {
+            const id = document.getElementById('mitem-id').value;
+            const restaurantId = document.getElementById('mitem-restaurant').value;
+            const name = document.getElementById('mitem-name').value.trim();
+            const price = parseInt(document.getElementById('mitem-price').value, 10);
+            const category = document.getElementById('mitem-category').value.trim();
+            const description = document.getElementById('mitem-desc').value.trim();
+            const image = document.getElementById('mitem-image').value;
+            const available = document.getElementById('mitem-available').checked;
+
+            const errEl = document.getElementById('mitem-error');
+            if (!restaurantId || !name || isNaN(price) || price < 0 || !category) {
+                errEl.textContent = 'Veuillez remplir tous les champs obligatoires (*) avec un prix valide.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            const itemData = { restaurant_id: restaurantId, name, price, category, description, image, available };
+
+            if (id) {
+                const success = await DataManager.updateMenuItem(id, itemData);
+                if (success) {
+                    closeModal('modal-menu-item');
+                    await onRestaurantMenuSelectChange(restaurantId);
+                    alert('✅ Plat modifié avec succès !');
+                } else {
+                    errEl.textContent = 'Erreur lors de la modification.';
+                    errEl.style.display = 'block';
+                }
+            } else {
+                const added = await DataManager.addMenuItem(itemData);
+                if (added) {
+                    closeModal('modal-menu-item');
+                    document.getElementById('menu-restaurant-select').value = restaurantId;
+                    await onRestaurantMenuSelectChange(restaurantId);
+                    alert('✅ Plat ajouté avec succès !');
+                } else {
+                    errEl.textContent = 'Erreur lors de l\'ajout.';
+                    errEl.style.display = 'block';
+                }
+            }
+        }
+
+        async function toggleMenuItemAvailability(id, currentAvailable) {
+            await DataManager.updateMenuItem(id, { available: !currentAvailable });
+            await onRestaurantMenuSelectChange(currentSelectedMenuRestaurantId);
+        }
+
+        async function deleteMenuItem(id, name) {
+            if (!confirm(`Supprimer le plat "${name}" ?`)) return;
+            await DataManager.deleteMenuItem(id);
+            await onRestaurantMenuSelectChange(currentSelectedMenuRestaurantId);
+        }
+
+        // ==================== 3. ADMINISTRATION LOGIC (CHIFFRES) ====================
+        async function loadAdministrationStats() {
+            allStats = await DataManager.getAllRestaurantsStats();
+            
+            const { data: allOrders } = await window.supabaseClient.from('restau_orders').select('*');
+            const orders = allOrders || [];
+            
+            const totalRevenue = orders.filter(o => o.status === 'Terminée').reduce((s, o) => s + (o.total || 0), 0);
+            const totalOrders = orders.length;
+            const completedOrders = orders.filter(o => o.status === 'Terminée').length;
+            const activeRestaurants = allRestaurants.filter(r => r.status === 'active').length;
+            const avgOrder = completedOrders > 0 ? Math.round(totalRevenue / completedOrders) : 0;
+
+            document.getElementById('admin-total-revenue').textContent = new Intl.NumberFormat('fr-FR').format(totalRevenue) + ' F';
+            document.getElementById('admin-total-orders').textContent = totalOrders;
+            document.getElementById('admin-completed-orders').textContent = `${completedOrders} livrées`;
+            document.getElementById('admin-active-restaurants').textContent = activeRestaurants;
+            document.getElementById('admin-total-restaurants').textContent = `${allRestaurants.length} au total`;
+            document.getElementById('admin-avg-order').textContent = new Intl.NumberFormat('fr-FR').format(avgOrder) + ' F';
+
+            // Detailed Table
+            const tbody = document.getElementById('admin-stats-tbody');
+            if (!allStats.length) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#888;">Aucune donnée statistique.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = allStats.map(r => {
+                const restoOrders = orders.filter(o => o.restaurant_id === r.id);
+                const comp = restoOrders.filter(o => o.status === 'Terminée').length;
+                const canc = restoOrders.filter(o => o.status === 'Annulée').length;
+                const rev = restoOrders.filter(o => o.status === 'Terminée').reduce((s, o) => s + (o.total || 0), 0);
+                const avg = comp > 0 ? Math.round(rev / comp) : 0;
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:36px; height:36px; border-radius:8px; overflow:hidden; background:#eee; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">
+                                    ${r.logo ? `<img src="${r.logo}" style="width:100%;height:100%;object-fit:cover;">` : '🍽️'}
+                                </div>
+                                <span style="font-weight:700; color:#1a1a2e;">${r.name}</span>
+                            </div>
+                        </td>
+                        <td style="font-weight:600;">${restoOrders.length}</td>
+                        <td><span class="badge badge-active">${comp}</span></td>
+                        <td><span class="badge badge-inactive">${canc}</span></td>
+                        <td style="font-weight:800; color:#e74c3c;">${new Intl.NumberFormat('fr-FR').format(rev)} F</td>
+                        <td style="font-weight:600; color:#555;">${new Intl.NumberFormat('fr-FR').format(avg)} F</td>
+                        <td>
+                            <span class="badge ${r.status === 'active' ? 'badge-active' : 'badge-inactive'}">
+                                ${r.status === 'active' ? 'Actif' : 'Inactif'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ==================== 4. CLIENTS LOGIC ====================
         async function loadClients() {
+            allClients = await DataManager.getClients();
+            renderClientsList(allClients);
+        }
+
+        function renderClientsList(clients) {
             const container = document.getElementById('clients-list');
             if (!container) return;
-            const clients = await DataManager.getClients();
-            if (!clients.length) { container.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Aucun client inscrit.</p>'; return; }
+            if (!clients.length) {
+                container.innerHTML = '<p style="color:#888; text-align:center; padding:30px;">Aucun client enregistré.</p>';
+                return;
+            }
+
             container.innerHTML = `
-                <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                <table>
                     <thead>
-                        <tr style="border-bottom:2px solid #f0f2f5; text-align:left; font-size:0.85rem; color:#888;">
-                            <th style="padding:12px 8px;">ID</th>
-                            <th style="padding:12px 8px;">Nom complet</th>
-                            <th style="padding:12px 8px;">Téléphone</th>
-                            <th style="padding:12px 8px;">Email</th>
-                            <th style="padding:12px 8px;">Statut</th>
-                            <th style="padding:12px 8px;">Actions</th>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom complet</th>
+                            <th>Téléphone</th>
+                            <th>Email</th>
+                            <th>Points</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${clients.map(c => `
-                            <tr style="border-bottom:1px solid #f0f2f5; font-size:0.9rem;">
-                                <td style="padding:12px 8px; font-weight:600; color:#666;">${c.id}</td>
-                                <td style="padding:12px 8px; font-weight:700; color:#1a1a2e;">${c.firstname} ${c.lastname}</td>
-                                <td style="padding:12px 8px; color:#555;">${c.phone || '—'}</td>
-                                <td style="padding:12px 8px; color:#555;">${c.email || '—'}</td>
-                                <td style="padding:12px 8px;">
+                            <tr>
+                                <td style="font-weight:600; color:#666;">${c.id}</td>
+                                <td style="font-weight:700; color:#1a1a2e;">${c.firstname || ''} ${c.lastname || ''}</td>
+                                <td style="color:#555;">${c.phone || '—'}</td>
+                                <td style="color:#555;">${c.email || '—'}</td>
+                                <td style="font-weight:700; color:#10b981;">${c.points || 0} pts</td>
+                                <td>
                                     <span class="badge ${c.status === 'active' ? 'badge-active' : 'badge-inactive'}">
                                         ${c.status === 'active' ? 'Actif' : 'Bloqué'}
                                     </span>
                                 </td>
-                                <td style="padding:12px 8px; display:flex; gap:6px; align-items:center;">
-                                    <button class="btn-sm" style="padding:6px 10px; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600; background:#eff6ff; color:#2563eb;" onclick="viewClientDetails('${c.id}')">
-                                        👁️ Voir
-                                    </button>
-                                    <button class="btn-sm" style="padding:6px 10px; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600; ${c.status==='active'?'background:#fee2e2;color:#dc2626;':'background:#d1fae5;color:#059669;'}" onclick="toggleClientStatus('${c.id}', '${c.status}')">
-                                        ${c.status === 'active' ? 'Bloquer' : 'Débloquer'}
-                                    </button>
+                                <td>
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn-sm btn-edit" onclick="viewClientDetails('${c.id}')">
+                                            👁️ Mouvements
+                                        </button>
+                                        <button class="btn-sm ${c.status==='active'?'btn-delete':'btn-toggle'}" onclick="toggleClientStatus('${c.id}', '${c.status}')">
+                                            ${c.status === 'active' ? 'Bloquer' : 'Débloquer'}
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `).join('')}
                     </tbody>
                 </table>`;
+        }
+
+        function filterClientsList() {
+            const q = document.getElementById('search-clients').value.toLowerCase().trim();
+            const filtered = allClients.filter(c => 
+                (c.firstname && c.firstname.toLowerCase().includes(q)) ||
+                (c.lastname && c.lastname.toLowerCase().includes(q)) ||
+                (c.phone && c.phone.includes(q)) ||
+                (c.email && c.email.toLowerCase().includes(q)) ||
+                (c.id && c.id.toLowerCase().includes(q))
+            );
+            renderClientsList(filtered);
         }
 
         async function toggleClientStatus(id, currentStatus) {
@@ -322,11 +1018,10 @@
         }
 
         async function viewClientDetails(clientId) {
-            const clients = await DataManager.getClients();
-            const client = clients.find(c => c.id === clientId);
+            const client = allClients.find(c => c.id === clientId);
             if (!client) return;
 
-            document.getElementById('vc-name').textContent = client.firstname + ' ' + client.lastname;
+            document.getElementById('vc-name').textContent = `${client.firstname || ''} ${client.lastname || ''}`;
             document.getElementById('vc-id').textContent = client.id;
             document.getElementById('vc-email').textContent = client.email || '—';
             document.getElementById('vc-phone').textContent = client.phone || '—';
@@ -335,36 +1030,39 @@
             document.getElementById('vc-status').textContent = client.status === 'active' ? 'Actif' : 'Bloqué';
 
             const ordersContainer = document.getElementById('vc-orders-list');
-            ordersContainer.innerHTML = 'Chargement des commandes...';
+            ordersContainer.innerHTML = '<p style="text-align:center; padding:15px; color:#888;">Chargement des mouvements...</p>';
 
             const { data: orders, error } = await window.supabaseClient
                 .from('restau_orders')
                 .select('*, restaurants(name)')
-                .eq('client_id', clientId);
+                .eq('client_id', clientId)
+                .order('created_at', { ascending: false });
+
+            document.getElementById('vc-orders-count').textContent = `${(orders || []).length} commande(s)`;
 
             if (error || !orders || orders.length === 0) {
-                ordersContainer.innerHTML = '<p style="color:#888; font-size:0.9rem; text-align:center; padding:15px;">Aucune commande effectuée.</p>';
+                ordersContainer.innerHTML = '<p style="color:#888; font-size:0.9rem; text-align:center; padding:20px;">Aucune commande effectuée par ce client.</p>';
             } else {
                 ordersContainer.innerHTML = `
-                    <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:0.85rem;">
+                    <table style="font-size:0.85rem;">
                         <thead>
-                            <tr style="border-bottom:2px solid #f0f2f5; text-align:left; color:#888;">
-                                <th style="padding:8px 4px;">ID</th>
-                                <th style="padding:8px 4px;">Restaurant</th>
-                                <th style="padding:8px 4px;">Date</th>
-                                <th style="padding:8px 4px;">Total</th>
-                                <th style="padding:8px 4px;">Statut</th>
+                            <tr>
+                                <th>ID</th>
+                                <th>Restaurant</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Statut</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${orders.map(o => `
-                                <tr style="border-bottom:1px solid #f0f2f5;">
-                                    <td style="padding:8px 4px; font-weight:600; color:#555;">${o.id}</td>
-                                    <td style="padding:8px 4px; font-weight:700; color:#1a1a2e;">${o.restaurants ? o.restaurants.name : 'Gourmet Express'}</td>
-                                    <td style="padding:8px 4px; color:#666;">${o.date ? new Date(o.date).toLocaleDateString('fr-FR') : '—'}</td>
-                                    <td style="padding:8px 4px; font-weight:600; color:#e74c3c;">${new Intl.NumberFormat('fr-FR').format(o.total)} F</td>
-                                    <td style="padding:8px 4px;">
-                                        <span class="badge ${o.status === 'Terminée' ? 'badge-active' : o.status === 'Annulée' ? 'badge-inactive' : 'badge-inactive'}" style="${o.status !== 'Terminée' && o.status !== 'Annulée' ? 'background:#fef3c7;color:#d97706;' : ''}">
+                                <tr>
+                                    <td style="font-weight:700; color:#555;">#${o.id.toString().slice(-6)}</td>
+                                    <td style="font-weight:700; color:#1a1a2e;">${o.restaurants ? o.restaurants.name : 'Gourmet Express'}</td>
+                                    <td style="color:#666;">${o.created_at ? new Date(o.created_at).toLocaleDateString('fr-FR') : '—'}</td>
+                                    <td style="font-weight:700; color:#e74c3c;">${new Intl.NumberFormat('fr-FR').format(o.total)} F</td>
+                                    <td>
+                                        <span class="badge ${o.status === 'Terminée' ? 'badge-active' : o.status === 'Annulée' ? 'badge-inactive' : 'badge-warning'}">
                                             ${o.status}
                                         </span>
                                     </td>
@@ -374,25 +1072,19 @@
                     </table>`;
             }
 
-            document.getElementById('modal-view-client').classList.add('open');
-        }
-
-        function closeViewClientModal() {
-            document.getElementById('modal-view-client').classList.remove('open');
+            openModal('modal-view-client');
         }
 
         async function exportToExcel() {
-            const clients = await DataManager.getClients();
-            if (!clients.length) { alert('Aucun client à exporter.'); return; }
-            
-            // Format data for SheetJS
-            const formatted = clients.map(c => ({
+            if (!allClients.length) { alert('Aucun client à exporter.'); return; }
+            const formatted = allClients.map(c => ({
                 'ID': c.id,
-                'Nom complet': c.firstname + ' ' + c.lastname,
+                'Nom complet': `${c.firstname || ''} ${c.lastname || ''}`,
                 'Téléphone': c.phone || '—',
                 'Email': c.email || '—',
+                'Points': c.points || 0,
                 'Statut': c.status === 'active' ? 'Actif' : 'Bloqué',
-                'Date d\'inscription': c.created_at ? new Date(c.created_at).toLocaleDateString('fr-FR') : '—'
+                'Date Inscription': c.created_at ? new Date(c.created_at).toLocaleDateString('fr-FR') : '—'
             }));
 
             const worksheet = XLSX.utils.json_to_sheet(formatted);
@@ -402,25 +1094,22 @@
         }
 
         async function exportToPDF() {
-            const clients = await DataManager.getClients();
-            if (!clients.length) { alert('Aucun client à exporter.'); return; }
-
+            if (!allClients.length) { alert('Aucun client à exporter.'); return; }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            // Add title
             doc.setFontSize(16);
-            doc.text('Liste des clients - Gourmet Express', 14, 15);
+            doc.text('Liste des Clients - Gourmet Express', 14, 15);
             doc.setFontSize(10);
             doc.text('Généré le ' + new Date().toLocaleDateString('fr-FR') + ' à ' + new Date().toLocaleTimeString('fr-FR'), 14, 22);
 
-            // Setup table
-            const tableHeaders = [['ID', 'Nom complet', 'Téléphone', 'Email', 'Statut']];
-            const tableData = clients.map(c => [
+            const tableHeaders = [['ID', 'Nom complet', 'Téléphone', 'Email', 'Points', 'Statut']];
+            const tableData = allClients.map(c => [
                 c.id,
-                c.firstname + ' ' + c.lastname,
+                `${c.firstname || ''} ${c.lastname || ''}`,
                 c.phone || '—',
                 c.email || '—',
+                (c.points || 0) + ' pts',
                 c.status === 'active' ? 'Actif' : 'Bloqué'
             ]);
 
@@ -429,79 +1118,42 @@
                 head: tableHeaders,
                 body: tableData,
                 theme: 'striped',
-                headStyles: { fillColor: [231, 76, 60] }, // Gourmet Express Red
+                headStyles: { fillColor: [231, 76, 60] },
                 styles: { fontSize: 9 }
             });
 
             doc.save('clients_gourmet_express.pdf');
         }
 
-        function renderRestaurantsList(containerId) {
-            const container = document.getElementById(containerId);
-            if (!allStats.length) { container.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Aucun restaurant.</p>'; return; }
-            container.innerHTML = allStats.map(r => `
-                <div class="restaurant-row">
-                    <div class="restaurant-avatar">${r.logo ? `<img src="${r.logo}">` : '🍽️'}</div>
-                    <div class="restaurant-info">
-                        <div class="restaurant-name">${r.name}</div>
-                        <div class="restaurant-meta">${r.orderCount} commandes • ${new Intl.NumberFormat('fr-FR').format(r.revenue)} F CA</div>
-                    </div>
-                    <span class="badge ${r.status === 'active' ? 'badge-active' : 'badge-inactive'}">${r.status === 'active' ? 'Actif' : 'Inactif'}</span>
-                    <div class="actions">
-                        <button class="btn-icon btn-toggle" onclick="toggleRestaurant('${r.id}', '${r.status}')">${r.status === 'active' ? 'Désactiver' : 'Activer'}</button>
-                    </div>
-                </div>`).join('');
-        }
-
+        // ==================== NAVIGATION & MODALS ====================
         function showSection(name) {
             document.querySelectorAll('section[id^="section-"]').forEach(s => s.style.display = 'none');
-            document.getElementById('section-' + name).style.display = 'block';
+            const target = document.getElementById('section-' + name);
+            if (target) target.style.display = 'block';
+
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            const activeNav = document.getElementById('nav-' + name);
+            if (activeNav) activeNav.classList.add('active');
+
+            if (name === 'administration') {
+                loadAdministrationStats();
+            }
         }
 
-        function openCreateModal() { document.getElementById('modal-create').classList.add('open'); }
-        function closeModal() { 
-            document.getElementById('modal-create').classList.remove('open'); 
-            document.getElementById('modal-error').style.display = 'none'; 
-            const fileInput = document.getElementById('r-logo-file');
-            if (fileInput) fileInput.value = '';
-            const logoInput = document.getElementById('r-logo');
-            if (logoInput) logoInput.value = '';
-            const previewEl = document.getElementById('r-logo-preview');
-            if (previewEl) previewEl.style.display = 'none';
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('open');
         }
 
-        async function createRestaurant() {
-            const name = document.getElementById('r-name').value.trim();
-            const firstname = document.getElementById('a-firstname').value.trim();
-            const lastname = document.getElementById('a-lastname').value.trim();
-            const email = document.getElementById('a-email').value.trim();
-            const password = document.getElementById('a-password').value.trim();
-            if (!name || !firstname || !lastname || !email || !password) { showModalError('Tous les champs obligatoires (*) doivent être remplis.'); return; }
-            const result = await DataManager.createRestaurant(
-                { name, address: document.getElementById('r-address').value, phone: document.getElementById('r-phone').value, logo: document.getElementById('r-logo').value, description: document.getElementById('r-desc').value },
-                { firstname, lastname, email, password }
-            );
-            if (result.success) { closeModal(); await loadData(); alert('✅ Restaurant créé avec succès !'); }
-            else showModalError(result.message);
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('open');
         }
 
-        async function toggleRestaurant(id, currentStatus) {
-            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-            if (!confirm(`${newStatus === 'inactive' ? 'Désactiver' : 'Activer'} ce restaurant ?`)) return;
-            await DataManager.updateRestaurant(id, { status: newStatus });
-            await loadData();
+        function logout() {
+            DataManager.logout();
+            window.location.href = '../login.html';
         }
-
-        function showModalError(msg) {
-            const el = document.getElementById('modal-error');
-            el.textContent = msg; el.style.display = 'block';
-        }
-
-        function logout() { DataManager.logout(); window.location.href = '../login.html'; }
-
-        function formatPrice(p) { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(p); }
     </script>
 </body>
 </html>
