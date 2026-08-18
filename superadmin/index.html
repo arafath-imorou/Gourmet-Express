@@ -16,15 +16,31 @@
         .sidebar-brand .title span { color: #e74c3c; }
         .sidebar-brand .sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
         
-        .sidebar-nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 6px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 13px 18px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; background: none; width: 100%; text-align: left; border-radius: 12px; }
-        .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
-        .nav-item.active { background: #e74c3c; color: white; box-shadow: 0 4px 14px rgba(231,76,60,0.4); }
-        .nav-item .icon { font-size: 1.2rem; width: 24px; text-align: center; }
+        .sidebar-nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.25s; border: none; background: none; width: 100%; text-align: left; border-radius: 12px; }
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: white; transform: translateX(3px); }
+        .nav-item .icon { font-size: 1.15rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; }
+        
+        /* Distinct Navigation Colors */
+        #nav-restaurants .icon { background: rgba(238, 82, 83, 0.2); }
+        #nav-restaurants.active { background: linear-gradient(135deg, #ff6b6b, #ee5253); color: white; box-shadow: 0 4px 16px rgba(238, 82, 83, 0.45); }
+        #nav-restaurants.active .icon { background: rgba(255,255,255,0.25); }
+
+        #nav-menus .icon { background: rgba(165, 94, 234, 0.2); }
+        #nav-menus.active { background: linear-gradient(135deg, #a55eea, #8854d0); color: white; box-shadow: 0 4px 16px rgba(136, 84, 208, 0.45); }
+        #nav-menus.active .icon { background: rgba(255,255,255,0.25); }
+
+        #nav-administration .icon { background: rgba(43, 203, 186, 0.2); }
+        #nav-administration.active { background: linear-gradient(135deg, #2bcbba, #0fb9b1); color: white; box-shadow: 0 4px 16px rgba(15, 185, 177, 0.45); }
+        #nav-administration.active .icon { background: rgba(255,255,255,0.25); }
+
+        #nav-clients .icon { background: rgba(69, 170, 242, 0.2); }
+        #nav-clients.active { background: linear-gradient(135deg, #45aaf2, #2d98da); color: white; box-shadow: 0 4px 16px rgba(45, 152, 218, 0.45); }
+        #nav-clients.active .icon { background: rgba(255,255,255,0.25); }
         
         .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
-        .logout-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: rgba(231,76,60,0.15); color: #e74c3c; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(231,76,60,0.3); width: 100%; transition: all 0.2s; }
-        .logout-btn:hover { background: #e74c3c; color: white; }
+        .logout-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: rgba(231,76,60,0.15); color: #ff6b6b; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(231,76,60,0.3); width: 100%; transition: all 0.2s; }
+        .logout-btn:hover { background: #ee5253; color: white; transform: translateY(-1px); }
         
         /* Main Layout */
         .main { margin-left: 250px; padding: 32px 40px; min-height: 100vh; }
@@ -44,21 +60,44 @@
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
         .card-title { font-weight: 700; font-size: 1.1rem; color: #1a1a2e; display: flex; align-items: center; gap: 8px; }
         
-        /* Buttons */
-        .btn-primary { background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-primary:hover { background: #c0392b; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(231,76,60,0.3); }
+        /* Distinct Top Buttons */
+        .btn-primary { color: white; padding: 11px 22px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.92rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-resto-add { background: linear-gradient(135deg, #ff6b6b, #ee5253); box-shadow: 0 4px 14px rgba(238, 82, 83, 0.35); }
+        .btn-resto-add:hover { background: linear-gradient(135deg, #ee5253, #c0392b); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(238, 82, 83, 0.5); }
+        
+        .btn-menu-add { background: linear-gradient(135deg, #a55eea, #8854d0); box-shadow: 0 4px 14px rgba(136, 84, 208, 0.35); }
+        .btn-menu-add:hover { background: linear-gradient(135deg, #8854d0, #6c5ce7); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136, 84, 208, 0.5); }
+
+        .btn-excel { background: linear-gradient(135deg, #20bf6b, #0eb15b); box-shadow: 0 4px 14px rgba(32, 191, 107, 0.35); }
+        .btn-excel:hover { background: linear-gradient(135deg, #0eb15b, #088b44); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(32, 191, 107, 0.5); }
+
+        .btn-pdf { background: linear-gradient(135deg, #eb3b5a, #d12e4b); box-shadow: 0 4px 14px rgba(235, 59, 90, 0.35); }
+        .btn-pdf:hover { background: linear-gradient(135deg, #d12e4b, #b71540); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(235, 59, 90, 0.5); }
+
         .btn-secondary { background: #f0f2f5; color: #444; padding: 9px 16px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
         .btn-secondary:hover { background: #e4e7eb; }
         
-        .btn-sm { padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
-        .btn-edit { background: #eff6ff; color: #2563eb; }
-        .btn-edit:hover { background: #dbeafe; }
-        .btn-delete { background: #fee2e2; color: #dc2626; }
-        .btn-delete:hover { background: #fecaca; }
-        .btn-toggle { background: #fef3c7; color: #d97706; }
-        .btn-toggle:hover { background: #fde68a; }
-        .btn-menu-view { background: #f3e8ff; color: #7e22ce; }
-        .btn-menu-view:hover { background: #e9d5ff; }
+        /* Distinct Small Action Buttons */
+        .btn-sm { padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 700; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-sm:hover { transform: translateY(-1px); }
+        
+        .btn-menu-view { background: #f3e8ff; color: #7e22ce; border: 1.5px solid #d8b4fe; }
+        .btn-menu-view:hover { background: #e9d5ff; color: #581c87; }
+
+        .btn-edit { background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe; }
+        .btn-edit:hover { background: #dbeafe; color: #1e40af; }
+
+        .btn-delete { background: #fee2e2; color: #dc2626; border: 1.5px solid #fca5a5; }
+        .btn-delete:hover { background: #fecaca; color: #b91c1c; }
+
+        .btn-toggle-deact { background: #fef3c7; color: #b45309; border: 1.5px solid #fde68a; }
+        .btn-toggle-deact:hover { background: #fde68a; color: #92400e; }
+
+        .btn-toggle-act { background: #d1fae5; color: #047857; border: 1.5px solid #a7f3d0; }
+        .btn-toggle-act:hover { background: #a7f3d0; color: #065f46; }
+
+        .btn-client-orders { background: #e0f2fe; color: #0369a1; border: 1.5px solid #bae6fd; }
+        .btn-client-orders:hover { background: #bae6fd; color: #075985; }
         
         /* Badges */
         .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
@@ -83,7 +122,7 @@
         .menu-card-cover { height: 140px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative; overflow: hidden; }
         .menu-card-cover img { width: 100%; height: 100%; object-fit: cover; }
         .menu-card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
-        .menu-card-cat { font-size: 0.75rem; font-weight: 700; color: #e74c3c; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .menu-card-cat { font-size: 0.75rem; font-weight: 700; color: #8854d0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
         .menu-card-title { font-weight: 700; font-size: 1rem; color: #1a1a2e; margin-bottom: 6px; }
         .menu-card-desc { font-size: 0.82rem; color: #777; line-height: 1.4; margin-bottom: 12px; flex: 1; }
         .menu-card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #f0f2f5; }
@@ -99,9 +138,9 @@
         /* Selectors & Filters */
         .filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; background: #f8f9fa; padding: 12px 16px; border-radius: 12px; }
         .search-input { flex: 1; min-width: 220px; padding: 10px 14px; border: 2px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; background: white; outline: none; }
-        .search-input:focus { border-color: #e74c3c; }
+        .search-input:focus { border-color: #ff6b6b; }
         .select-custom { padding: 10px 14px; border: 2px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; background: white; outline: none; min-width: 200px; font-weight: 500; cursor: pointer; }
-        .select-custom:focus { border-color: #e74c3c; }
+        .select-custom:focus { border-color: #8854d0; }
         
         /* Modals */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
@@ -113,7 +152,7 @@
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #444; margin-bottom: 6px; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px 14px; border: 2px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; box-sizing: border-box; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #e74c3c; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #ff6b6b; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .modal-footer { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid #f0f2f5; }
         .btn-cancel { background: #f0f2f5; color: #555; padding: 11px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
@@ -167,7 +206,7 @@
                     <h1>🏪 Gestion des Restaurants</h1>
                     <p>Ajoutez, modifiez, désactivez ou supprimez les restaurants partenaires de la plateforme.</p>
                 </div>
-                <button class="btn-primary" onclick="openCreateRestaurantModal()">+ Nouveau restaurant</button>
+                <button class="btn-primary btn-resto-add" onclick="openCreateRestaurantModal()">+ Nouveau restaurant</button>
             </div>
 
             <div class="card">
@@ -186,7 +225,7 @@
                     <h1>🍔 Gestion des Menus par Restaurant</h1>
                     <p>Gérez les cartes, catégories, prix et plats spécifiques à chaque établissement.</p>
                 </div>
-                <button class="btn-primary" onclick="openAddMenuItemModal()">+ Ajouter un plat</button>
+                <button class="btn-primary btn-menu-add" onclick="openAddMenuItemModal()">+ Ajouter un plat</button>
             </div>
 
             <div class="card">
@@ -269,8 +308,8 @@
                     <p>Suivi complet des clients, consultation des mouvements de commandes et exports.</p>
                 </div>
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-primary" style="background:#27ae60;" onclick="exportToExcel()">📊 Exporter Excel</button>
-                    <button class="btn-primary" style="background:#2980b9;" onclick="exportToPDF()">📄 Exporter PDF</button>
+                    <button class="btn-primary btn-excel" onclick="exportToExcel()">📊 Exporter Excel</button>
+                    <button class="btn-primary btn-pdf" onclick="exportToPDF()">📄 Exporter PDF</button>
                 </div>
             </div>
 
@@ -317,7 +356,7 @@
             <div id="cr-error" style="color:#e74c3c; font-size:0.85rem; margin-top:8px; display:none; font-weight:600;"></div>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeModal('modal-create-restaurant')">Annuler</button>
-                <button class="btn-primary" onclick="submitCreateRestaurant()">Créer le restaurant</button>
+                <button class="btn-primary btn-resto-add" onclick="submitCreateRestaurant()">Créer le restaurant</button>
             </div>
         </div>
     </div>
@@ -344,7 +383,7 @@
             <div id="er-error" style="color:#e74c3c; font-size:0.85rem; margin-top:8px; display:none; font-weight:600;"></div>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeModal('modal-edit-restaurant')">Annuler</button>
-                <button class="btn-primary" onclick="submitEditRestaurant()">Enregistrer les modifications</button>
+                <button class="btn-primary btn-resto-add" onclick="submitEditRestaurant()">Enregistrer les modifications</button>
             </div>
         </div>
     </div>
@@ -403,7 +442,7 @@
             <div id="mitem-error" style="color:#e74c3c; font-size:0.85rem; margin-top:8px; display:none; font-weight:600;"></div>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeModal('modal-menu-item')">Annuler</button>
-                <button class="btn-primary" onclick="submitMenuItem()">Enregistrer le plat</button>
+                <button class="btn-primary btn-menu-add" onclick="submitMenuItem()">Enregistrer le plat</button>
             </div>
         </div>
     </div>
@@ -980,11 +1019,11 @@
                                 </td>
                                 <td>
                                     <div style="display:flex; gap:6px;">
-                                        <button class="btn-sm btn-edit" onclick="viewClientDetails('${c.id}')">
+                                        <button class="btn-sm btn-client-orders" onclick="viewClientDetails('${c.id}')">
                                             👁️ Mouvements
                                         </button>
-                                        <button class="btn-sm ${c.status==='active'?'btn-delete':'btn-toggle'}" onclick="toggleClientStatus('${c.id}', '${c.status}')">
-                                            ${c.status === 'active' ? 'Bloquer' : 'Débloquer'}
+                                        <button class="btn-sm ${c.status==='active'?'btn-delete':'btn-toggle-act'}" onclick="toggleClientStatus('${c.id}', '${c.status}')">
+                                            ${c.status === 'active' ? '🔒 Bloquer' : '🔓 Débloquer'}
                                         </button>
                                     </div>
                                 </td>
