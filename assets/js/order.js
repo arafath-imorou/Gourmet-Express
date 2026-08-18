@@ -37,7 +37,7 @@ function setupForm() {
     const form = document.getElementById('order-form');
     if (!form) return;
 
-    // Auto-fill if logged in
+    // Auto-fill and lock if logged in
     const client = DataManager.getCurrentClient();
     if (client) {
         const nameInput = document.getElementById('name');
@@ -45,10 +45,22 @@ function setupForm() {
 
         if (nameInput) {
             nameInput.value = `${client.firstname || ''} ${client.lastname || ''}`.trim();
+            nameInput.readOnly = true;
+            nameInput.style.backgroundColor = '#f1f5f9';
+            nameInput.style.color = '#334155';
+            nameInput.style.borderColor = '#cbd5e1';
+            nameInput.style.cursor = 'not-allowed';
+            nameInput.style.fontWeight = '600';
         }
 
         if (phoneInput) {
             phoneInput.value = client.phone || '';
+            phoneInput.readOnly = true;
+            phoneInput.style.backgroundColor = '#f1f5f9';
+            phoneInput.style.color = '#334155';
+            phoneInput.style.borderColor = '#cbd5e1';
+            phoneInput.style.cursor = 'not-allowed';
+            phoneInput.style.fontWeight = '600';
         }
 
         // Welcome banner
