@@ -4,9 +4,9 @@
  */
 
 const FedaPayConfig = {
-    // Clé publique FedaPay (Par défaut: Clé Sandbox de test - Remplaçable par votre clé Live pk_live_...)
-    PUBLIC_KEY: 'pk_sandbox_A7p10w_NfS9qQ3uNfPzYmXqK', 
-    ENVIRONMENT: 'sandbox', // 'sandbox' ou 'live'
+    // Clé publique FedaPay de production
+    PUBLIC_KEY: 'pk_live_qvj-Hs7lfW8CaXJOw6MWCp-9', 
+    ENVIRONMENT: 'live', // Mode production actif
     CURRENCY: 'XOF'
 };
 
