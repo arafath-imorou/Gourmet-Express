@@ -89,15 +89,27 @@
         <form id="order-form">
             <h3 class="mb-4" style="font-size:1.1rem; color:#1e293b;">1. Vos Coordonnées</h3>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 16px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px;">
                 <div class="input-group" style="margin-bottom: 0;">
-                    <label for="name">Nom complet *</label>
-                    <input type="text" id="name" name="name" required placeholder="Ex: Jean Kouassi">
+                    <label for="name">Nom et Prénom(s) *</label>
+                    <input type="text" id="name" name="name" required placeholder="Ex: Yasminatou SOUROKOU" value="">
                 </div>
 
                 <div class="input-group" style="margin-bottom: 0;">
+                    <label for="email">Adresse Email *</label>
+                    <input type="email" id="email" name="email" required placeholder="Ex: exemple@gmail.com" value="">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 16px;">
+                <div class="input-group" style="margin-bottom: 0;">
                     <label for="phone">Numéro de téléphone (Whatsapp) *</label>
-                    <input type="tel" id="phone" name="phone" required placeholder="Ex: 0197000000">
+                    <input type="tel" id="phone" name="phone" required placeholder="Ex: 0169310405" value="">
+                </div>
+
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label for="payment_phone">Numéro Mobile Money (Débit) *</label>
+                    <input type="tel" id="payment_phone" name="payment_phone" required placeholder="Ex: 0169310405" value="">
                 </div>
             </div>
 

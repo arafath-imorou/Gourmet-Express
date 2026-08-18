@@ -62,8 +62,8 @@ const FedaPayManager = {
                         }
                     },
                     customer: {
-                        firstname: customer.firstname || customer.name || 'Client',
-                        lastname: customer.lastname || '',
+                        firstname: customer.firstname || (customer.name ? customer.name.split(' ')[0] : 'Client'),
+                        lastname: customer.lastname || (customer.name ? customer.name.split(' ').slice(1).join(' ') : 'Client') || 'Client',
                         email: customer.email || 'client@gourmetexpress.com',
                         phone_number: {
                             number: (customer.phone || '00000000').replace(/[^0-9]/g, ''),
