@@ -276,7 +276,7 @@
 
     <div id="session-header" style="position: absolute; top: 16px; right: 18px; z-index: 100; display: none; align-items: center; gap: 10px; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 0.85rem;">
         <span id="session-username" style="font-weight: 600;">Client</span>
-        <button onclick="handleLogout()" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 0.75rem; cursor: pointer; transition: 0.2s;">Déconnexion</button>
+        <button onclick="handleLogout()" style="background: #e74c3c; color: white; border: none; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; cursor: pointer; transition: 0.2s;">Déconnexion</button>
     </div>
 
     <div class="hero">
@@ -288,10 +288,11 @@
             
             <p>Découvrez nos restaurants partenaires et commandez vos plats préférés, livrés chez vous ou à emporter.</p>
             
-            <div class="hero-btns">
-                <a href="#restaurants-grid" class="btn-hero btn-hero-order">Commander maintenant</a>
-                <a href="login.html" class="btn-hero btn-hero-login">Se connecter</a>
-                <a href="register.html" class="btn-hero btn-hero-register">Créer un compte</a>
+            <div class="hero-btns" id="hero-btns-container">
+                <a href="#restaurants-grid" class="btn-hero btn-hero-order" id="btn-hero-order">🍽️ Commander maintenant</a>
+                <a href="login.html" class="btn-hero btn-hero-login" id="btn-hero-login">🔑 Se connecter</a>
+                <a href="register.html" class="btn-hero btn-hero-register" id="btn-hero-register">📝 Créer un compte</a>
+                <a href="client/index.html" class="btn-hero btn-hero-login" id="btn-hero-account" style="display:none;">👤 Voir mon compte</a>
             </div>
         </div>
     </div>
@@ -323,19 +324,42 @@
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            // Session Detection for Header
+            // Session Detection for Header and Hero Buttons
             const client = DataManager.getCurrentClient();
             const staff = DataManager.getCurrentStaff();
+
             if (client || staff) {
                 const header = document.getElementById('session-header');
                 const username = document.getElementById('session-username');
+                const btnLogin = document.getElementById('btn-hero-login');
+                const btnRegister = document.getElementById('btn-hero-register');
+                const btnAccount = document.getElementById('btn-hero-account');
+
+                // 1. Masquer les boutons "Se connecter" et "Créer un compte"
+                if (btnLogin) btnLogin.style.display = 'none';
+                if (btnRegister) btnRegister.style.display = 'none';
+
+                // 2. Afficher "Voir mon compte"
+                if (btnAccount) {
+                    btnAccount.style.display = 'inline-flex';
+                    if (staff) {
+                        btnAccount.href = staff.role === 'superadmin' ? 'superadmin/index.html' : 'admin/index.html';
+                        btnAccount.innerHTML = '🛡️ Administration';
+                    } else if (client) {
+                        btnAccount.href = 'client/index.html';
+                        btnAccount.innerHTML = '👤 Voir mon compte';
+                    }
+                }
+
+                // 3. Afficher le badge de bienvenue en haut à droite
                 if (header && username) {
                     header.style.display = 'flex';
                     if (staff) {
-                        username.textContent = `Bienvenue, ${staff.name || 'Admin'}`;
+                        const name = staff.firstname ? `${staff.firstname} ${staff.lastname || ''}` : (staff.name || 'Admin');
+                        username.textContent = `👋 Bienvenue, ${name}`;
                     } else if (client) {
                         const fullName = `${client.firstname || ''} ${client.lastname || ''}`.trim();
-                        username.textContent = `Bienvenue, ${fullName || 'Client'}`;
+                        username.textContent = `👋 Bienvenue, ${fullName || 'Client'}`;
                     }
                 }
             }
