@@ -6,32 +6,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mon Profil - Gourmet Express</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        body {
+            background: #f8fafc;
+            font-family: 'Aptos', 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+        }
+
+        .client-header {
+            background: white;
+            padding: 14px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
         .form-card {
             background: white;
-            padding: 24px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
+            padding: 28px;
+            border-radius: 16px;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
         }
     </style>
 </head>
 
-<body style="background: #f0f2f5;">
+<body>
 
-    <div class="client-header"
-        style="background: white; padding: 16px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 16px;">
-        <a href="index.html" style="text-decoration: none; font-size: 1.2rem;">←</a>
-        <div style="font-weight: 700;">Mon Profil</div>
+    <div class="client-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <a href="index.html" style="text-decoration: none; font-size: 1.1rem; color:#64748b; font-weight:700;">← Retour</a>
+            <div style="font-weight: 800; color:#0f172a; font-size:1.1rem;">Mon Profil</div>
+        </div>
+        <a href="orders.html" style="text-decoration:none; font-weight:700; color:#e63946; font-size:0.9rem;">📜 Mes Commandes</a>
     </div>
 
-    <div class="container" style="max-width: 600px; padding-top: 24px;">
+    <div class="container" style="max-width: 600px; padding: 24px 16px 40px 16px;">
         <div class="form-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h3 class="mb-0">Informations personnelles</h3>
-                <button id="btn-edit" class="btn btn-secondary" style="width: auto; padding: 8px 16px;"
+                <h3 style="font-size: 1.3rem; font-weight: 800; margin: 0; color: #0f172a;">Informations personnelles</h3>
+                <button id="btn-edit" class="btn btn-secondary" style="width: auto; padding: 8px 16px; font-weight: 700; border-radius: 10px;"
                     onclick="enableEdit()">✏️ Modifier</button>
             </div>
 
@@ -56,16 +72,12 @@
                         style="background: #f9f9f9; border-color: transparent;">
                 </div>
 
-                <div id="edit-actions" style="display: none; gap: 12px;">
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">Enregistrer</button>
-                    <button type="button" class="btn btn-secondary" style="flex: 1;"
+                <div id="edit-actions" style="display: none; gap: 12px; margin-top: 12px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; font-weight: 700; border-radius: 10px;">Enregistrer</button>
+                    <button type="button" class="btn btn-secondary" style="flex: 1; font-weight: 700; border-radius: 10px;"
                         onclick="cancelEdit()">Annuler</button>
                 </div>
             </form>
-        </div>
-
-        <div class="text-center mt-4 text-muted text-sm">
-            Membre depuis le: <span id="join-date"></span>
         </div>
     </div>
 
@@ -74,23 +86,19 @@
     <script src="../assets/js/data.js"></script>
     <script>
         const client = DataManager.getCurrentClient();
-        const isAdmin = sessionStorage.getItem('admin_token') === 'valid';
 
-        if (!client && !isAdmin) {
+        if (!client) {
             window.location.href = '../login.html';
-        } else if (!client && isAdmin) {
-            window.location.href = '../admin/index.html';
         }
 
         function populateForm() {
-            document.getElementById('firstname').value = client.firstname;
-            document.getElementById('lastname').value = client.lastname;
-            document.getElementById('email').value = client.email;
-            document.getElementById('phone').value = client.phone;
+            document.getElementById('firstname').value = client.firstname || '';
+            document.getElementById('lastname').value = client.lastname || '';
+            document.getElementById('email').value = client.email || '';
+            document.getElementById('phone').value = client.phone || '';
         }
 
         populateForm();
-        document.getElementById('join-date').textContent = new Date(client.joinDate).toLocaleDateString();
 
         function enableEdit() {
             document.getElementById('btn-edit').style.display = 'none';
@@ -100,12 +108,12 @@
                 const el = document.getElementById(id);
                 el.disabled = false;
                 el.style.background = 'white';
-                el.style.borderColor = '#ddd';
+                el.style.borderColor = '#cbd5e1';
             });
-            document.getElementById('firstname').focus();
         }
 
         function cancelEdit() {
+            populateForm();
             document.getElementById('btn-edit').style.display = 'block';
             document.getElementById('edit-actions').style.display = 'none';
 
@@ -115,32 +123,26 @@
                 el.style.background = '#f9f9f9';
                 el.style.borderColor = 'transparent';
             });
-            populateForm(); // Reset values
         }
 
-        document.getElementById('profile-form').addEventListener('submit', (e) => {
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const newPhone = document.getElementById('phone').value;
-            const newFirstname = document.getElementById('firstname').value;
-            const newLastname = document.getElementById('lastname').value;
 
-            // Logic to update client... 
-            const clients = DataManager.getClients();
-            const index = clients.findIndex(c => c.id === client.id);
-            if (index !== -1) {
-                clients[index].phone = newPhone;
-                clients[index].firstname = newFirstname;
-                clients[index].lastname = newLastname;
+            const updates = {
+                firstname: document.getElementById('firstname').value.trim(),
+                lastname: document.getElementById('lastname').value.trim(),
+                phone: document.getElementById('phone').value.trim()
+            };
 
-                DataManager.saveClients(clients);
+            const { error } = await window.supabaseClient.from('restau_clients').update(updates).eq('id', client.id);
 
-                // Update session
-                client.phone = newPhone;
-                client.firstname = newFirstname;
-                client.lastname = newLastname;
-                localStorage.setItem(STORAGE_KEYS.CURRENT_SESSION, JSON.stringify(client));
-
-                alert('Profil mis à jour !');
+            if (error) {
+                alert('Erreur lors de la mise à jour.');
+            } else {
+                Object.assign(client, updates);
+                localStorage.setItem('restaurant_client_session', JSON.stringify(client));
+                cancelEdit();
+                alert('✅ Profil mis à jour avec succès !');
             }
         });
     </script>

@@ -6,314 +6,240 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Commandes - Gourmet Express</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        body {
+            background: #f8fafc;
+            font-family: 'Aptos', 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+        }
+
+        .client-nav {
+            background: white;
+            padding: 14px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
         .order-card {
             background: white;
-            padding: 16px;
-            border-radius: var(--radius-md);
-            margin-bottom: 12px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .order-status {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .status-Nouvelle {
-            background: #EBF8FF;
-            color: #3B82F6;
-        }
-
-        .status-En {
-            background: #FFFBEB;
-            color: #F59E0B;
-        }
-
-        /* En cours */
-        .status-Terminée {
-            background: #D1FAE5;
-            color: #10B981;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-card {
-            background: white;
-            padding: 24px;
-            border-radius: var(--radius-lg);
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .star-rating {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
+            border-radius: 14px;
+            border: 1.5px solid #e2e8f0;
+            padding: 20px;
             margin-bottom: 16px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+            transition: all 0.2s;
         }
 
-        .star-rating span {
-            font-size: 2rem;
+        .order-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+        }
+
+        .badge-status {
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .badge-Nouvelle { background: #fef3c7; color: #b45309; }
+        .badge-EnCours { background: #e0f2fe; color: #0369a1; }
+        .badge-Terminée { background: #dcfce7; color: #15803d; }
+        .badge-Annulée { background: #fee2e2; color: #b91c1c; }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            border: 1.5px solid #e2e8f0;
+            background: white;
+            color: #64748b;
             cursor: pointer;
-            color: #ddd;
-            transition: color 0.2s;
+            transition: all 0.2s;
         }
 
-        .star-rating span.active {
-            color: #FFD700;
+        .filter-tab.active {
+            background: #e63946;
+            color: white;
+            border-color: #e63946;
         }
     </style>
 </head>
 
-<body style="background: #f0f2f5;">
+<body>
 
-    <div class="client-header"
-        style="background: white; padding: 16px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 16px;">
-        <a href="index.html" style="text-decoration: none; font-size: 1.2rem;">←</a>
-        <div style="font-weight: 700;">Mes Commandes</div>
+    <!-- Client Header -->
+    <div class="client-nav">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <a href="index.html" style="text-decoration:none; font-size:1.1rem; color:#64748b; font-weight:700;">← Retour</a>
+            <span style="font-weight:800; color:#0f172a; font-size:1.1rem;">Mes Commandes</span>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <a href="../menu.html" class="btn btn-primary btn-sm" style="width:auto; padding:8px 16px; font-weight:700; border-radius:10px; text-decoration:none;">🍽️ Commander</a>
+            <button onclick="logout()" style="background:#f1f5f9; border:none; color:#475569; padding:8px 14px; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.88rem;">🚪 Déconnexion</button>
+        </div>
     </div>
 
-    <div class="container" style="max-width: 600px; padding-top: 24px;">
+    <div class="container" style="max-width: 800px; padding: 24px 16px 40px 16px;">
+        
+        <div style="margin-bottom: 20px;">
+            <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">📜 Historique de vos Commandes</h1>
+            <p style="color: #64748b; font-size: 0.95rem; margin: 0;">Suivez le statut de vos commandes en temps réel et contactez les restaurants.</p>
+        </div>
+
+        <!-- Filter tabs -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px;">
+            <button class="filter-tab active" onclick="setFilter('all', this)">Toutes (<span id="count-all">0</span>)</button>
+            <button class="filter-tab" onclick="setFilter('active', this)">En cours (<span id="count-active">0</span>)</button>
+            <button class="filter-tab" onclick="setFilter('completed', this)">Livrées / Terminées (<span id="count-completed">0</span>)</button>
+            <button class="filter-tab" onclick="setFilter('cancelled', this)">Annulées (<span id="count-cancelled">0</span>)</button>
+        </div>
+
+        <!-- Orders List Container -->
         <div id="orders-list">
-            <!-- Rendered by JS -->
-            <p class="text-center text-muted">Chargement...</p>
-        </div>
-    </div>
-
-    <!-- Review Modal -->
-    <div id="review-modal" class="modal-overlay">
-        <div class="modal-card">
-            <h3 class="mb-4 text-center">Noter la commande</h3>
-            <div class="star-rating" id="star-container">
-                <span data-value="1">★</span>
-                <span data-value="2">★</span>
-                <span data-value="3">★</span>
-                <span data-value="4">★</span>
-                <span data-value="5">★</span>
-            </div>
-            <textarea id="review-comment" class="input-field" rows="3" placeholder="Votre avis (optionnel)..."
-                style="width: 100%; border: 1px solid #ddd; padding: 8px; border-radius: 8px; margin-bottom: 16px;"></textarea>
-
-            <div style="display: flex; gap: 8px;">
-                <button onclick="closeReviewModal()" class="btn btn-secondary" style="flex: 1;">Annuler</button>
-                <button onclick="submitReview()" class="btn btn-primary" style="flex: 1;">Envoyer</button>
+            <div style="background:white; border-radius:14px; border:1.5px solid #e2e8f0; padding:30px; text-align:center; color:#64748b;">
+                Chargement de vos commandes...
             </div>
         </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../assets/js/supabase.js"></script>
     <script src="../assets/js/data.js"></script>
     <script>
-        // Auth Check
-        const client = DataManager.getCurrentClient();
-        const isAdmin = sessionStorage.getItem('admin_token') === 'valid';
+        let allClientOrders = [];
+        let currentFilter = 'all';
 
-        if (!client && !isAdmin) {
-            window.location.href = '../login.html';
-        }
-
-        function renderOrders() {
-            const container = document.getElementById('orders-list');
-            const allOrders = DataManager.getOrders();
-
-            // If admin, they probably shouldn't be here, but let's show all orders or redirect
-            // For now, if admin and no client session, show empty or all
-            const myOrders = client ? allOrders.filter(o => o.clientId === client.id) : (isAdmin ? allOrders : []);
-
-            container.innerHTML = '';
-
-            if (myOrders.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #888;">
-                        <div style="font-size: 3rem; margin-bottom: 16px;">🍽️</div>
-                        <p>Vous n'avez pas encore passé de commande.</p>
-                        <a href="../menu.html" class="btn btn-primary" style="margin-top: 16px; display: inline-block;">Voir le menu</a>
-                    </div>
-                `;
+        document.addEventListener('DOMContentLoaded', async () => {
+            const client = DataManager.getCurrentClient();
+            if (!client) {
+                window.location.href = '../login.html';
                 return;
             }
 
-            myOrders.forEach(order => {
-                const date = new Date(order.date).toLocaleDateString();
-                const time = new Date(order.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                const config = getStatusConfig(order.status);
-
-                const div = document.createElement('div');
-                div.className = 'order-card';
-
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span class="font-bold">#${order.id.split('-')[1]}</span>
-                        <span class="text-muted text-sm">${date} à ${time}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div class="font-bold">${formatPrice(order.total)}</div>
-                            <div class="text-sm text-muted">${order.items.length} articles</div>
-                        </div>
-                        <span style="background: ${config.bg}; color: ${config.color}; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">${order.status}</span>
-                    </div>
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: right;">
-                        <a href="order-detail.html?id=${order.id}" class="btn btn-secondary btn-sm" style="width: auto;">Voir détails</a>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function formatPrice(price) {
-            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(price);
-        }
-
-        function getStatusConfig(status) {
-            switch (status) {
-                case 'ENVOYÉE': return { bg: '#EBF8FF', color: '#3B82F6' };
-                case 'APPROUVÉE': return { bg: '#FFFBEB', color: '#F59E0B' };
-                case 'EN PRÉPARATION': return { bg: '#FFFBEB', color: '#F59E0B' };
-                case 'PRÊTE': return { bg: '#D1FAE5', color: '#10B981' };
-                case 'EN LIVRAISON': return { bg: '#FFFBEB', color: '#F59E0B' };
-                case 'LIVRÉE': return { bg: '#D1FAE5', color: '#10B981' };
-                case 'ANNULÉE': return { bg: '#F3F4F6', color: '#9CA3AF' };
-                default: return { bg: '#F3F4F6', color: '#9CA3AF' };
-            }
-        }
-
-        // Logic
-        let currentOrderIdToRate = null;
-        let currentRating = 0;
-
-        function renderOrders() {
-            const container = document.getElementById('orders-list');
-            const allOrders = DataManager.getOrders();
-            // Filter for current client
-            const myOrders = allOrders.filter(o => o.clientId === client.id);
-
-            container.innerHTML = '';
-
-            if (myOrders.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #888;">
-                        <div style="font-size: 3rem; margin-bottom: 16px;">🍽️</div>
-                        <p>Vous n'avez pas encore passé de commande.</p>
-                        <a href="../menu.html" class="btn btn-primary" style="margin-top: 16px; display: inline-block;">Voir le menu</a>
-                    </div>
-                `;
-                return;
-            }
-
-            myOrders.forEach(order => {
-                const date = new Date(order.date).toLocaleDateString();
-                const time = new Date(order.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const config = getStatusConfig(order.status);
-
-                // Review Logic
-                const review = DataManager.getReviewByOrder(order.id);
-                let reviewAction = '';
-
-                if (order.status === 'LIVRÉE') {
-                    if (review) {
-                        reviewAction = `<div style="text-align: right; margin-top: 8px; color: #FFD700;">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>`;
-                    } else {
-                        reviewAction = `<div style="text-align: right; margin-top: 8px;"><button onclick="openReviewModal('${order.id}')" class="btn btn-secondary btn-sm" style="background: white; border: 1px solid #FFD700; color: #DAA520;">⭐ Noter</button></div>`;
-                    }
-                }
-
-                const div = document.createElement('div');
-                div.className = 'order-card';
-
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span class="font-bold">#${order.id.split('-')[1]}</span>
-                        <span class="text-muted text-sm">${date} à ${time}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div class="font-bold">${formatPrice(order.total)}</div>
-                            <div class="text-sm text-muted">${order.items.length} articles</div>
-                        </div>
-                        <span style="background: ${config.bg}; color: ${config.color}; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">${order.status}</span>
-                    </div>
-                    ${reviewAction}
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: right;">
-                        <a href="order-detail.html?id=${order.id}" class="btn btn-secondary btn-sm" style="width: auto;">Voir détails</a>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // --- Review Modal Logic ---
-        function openReviewModal(orderId) {
-            currentOrderIdToRate = orderId;
-            currentRating = 0;
-            updateStarDisplay();
-            document.getElementById('review-comment').value = '';
-            document.getElementById('review-modal').style.display = 'flex';
-        }
-
-        function closeReviewModal() {
-            document.getElementById('review-modal').style.display = 'none';
-            currentOrderIdToRate = null;
-        }
-
-        // Star Interaction
-        document.querySelectorAll('.star-rating span').forEach(star => {
-            star.addEventListener('click', (e) => {
-                currentRating = parseInt(e.target.getAttribute('data-value'));
-                updateStarDisplay();
-            });
+            await loadOrders(client);
         });
 
-        function updateStarDisplay() {
-            document.querySelectorAll('.star-rating span').forEach(star => {
-                const val = parseInt(star.getAttribute('data-value'));
-                if (val <= currentRating) star.classList.add('active');
-                else star.classList.remove('active');
-            });
+        async function loadOrders(client) {
+            allClientOrders = await DataManager.getClientOrders(client.id, client.phone);
+            updateCounters();
+            renderOrders();
         }
 
-        function submitReview() {
-            if (!currentOrderIdToRate) return;
-            if (currentRating === 0) {
-                alert('Veuillez sélectionner une note (étoiles).');
+        function updateCounters() {
+            document.getElementById('count-all').textContent = allClientOrders.length;
+            document.getElementById('count-active').textContent = allClientOrders.filter(o => o.status === 'Nouvelle' || o.status === 'En cours').length;
+            document.getElementById('count-completed').textContent = allClientOrders.filter(o => o.status === 'Terminée').length;
+            document.getElementById('count-cancelled').textContent = allClientOrders.filter(o => o.status === 'Annulée').length;
+        }
+
+        function setFilter(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('orders-list');
+            
+            let filtered = allClientOrders;
+            if (currentFilter === 'active') {
+                filtered = allClientOrders.filter(o => o.status === 'Nouvelle' || o.status === 'En cours');
+            } else if (currentFilter === 'completed') {
+                filtered = allClientOrders.filter(o => o.status === 'Terminée');
+            } else if (currentFilter === 'cancelled') {
+                filtered = allClientOrders.filter(o => o.status === 'Annulée');
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="background:white; border-radius:14px; border:1.5px solid #e2e8f0; padding:40px 20px; text-align:center;">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">🍽️</div>
+                        <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Aucune commande trouvée</h4>
+                        <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 18px;">Vous n'avez pas de commande dans cette catégorie.</p>
+                        <a href="../menu.html" class="btn btn-primary" style="width: auto; display: inline-block; padding: 10px 24px; font-weight: 700; border-radius: 10px; text-decoration: none;">Voir la carte</a>
+                    </div>
+                `;
                 return;
             }
 
-            const comment = document.getElementById('review-comment').value;
+            container.innerHTML = filtered.map(order => {
+                const d = new Date(order.date);
+                const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const restoName = order.restaurants ? order.restaurants.name : 'Restaurant Partenaire';
+                const statusClass = getStatusClass(order.status);
+                
+                // Restaurant WhatsApp contact
+                const restoWa = order.restaurants?.whatsapp_phone || order.restaurants?.phone || '';
+                const cleanWa = restoWa.replace(/[^0-9]/g, '');
+                const waUrl = cleanWa ? `https://wa.me/229${cleanWa.replace(/^229/, '')}?text=${encodeURIComponent(`Bonjour ${restoName}, je vous contacte au sujet de ma commande N° ${order.id}`)}` : null;
 
-            DataManager.addReview({
-                orderId: currentOrderIdToRate,
-                clientId: client.id,
-                rating: currentRating,
-                comment: comment
-            });
+                // Items list
+                const itemsHtml = (order.items && Array.isArray(order.items)) ? order.items.map(it => `
+                    <div style="display:flex; justify-content:space-between; font-size:0.9rem; color:#334155; padding:4px 0;">
+                        <span>• ${it.quantity}x ${it.frozenName || it.name || 'Produit'}</span>
+                        <span style="font-weight:600;">${new Intl.NumberFormat('fr-FR').format((it.frozenPrice || it.price || 0) * (it.quantity || 1))} F CFA</span>
+                    </div>
+                `).join('') : '<div style="color:#888; font-size:0.85rem;">Détail non disponible</div>';
 
-            closeReviewModal();
-            renderOrders(); // Refresh to show stars
-            alert('Merci pour votre avis !');
+                return `
+                    <div class="order-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                            <div>
+                                <span style="font-weight: 800; color: #0f172a; font-size: 1.1rem;">#${order.id}</span>
+                                <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;">📅 ${dateStr}</span>
+                            </div>
+                            <span class="badge-status ${statusClass}">${order.status}</span>
+                        </div>
+
+                        <div style="margin-bottom: 12px; font-size: 0.95rem; color: #0f172a; font-weight:700;">
+                            🏪 ${restoName}
+                        </div>
+
+                        <div style="background:#f8fafc; border-radius:10px; padding:12px; margin-bottom:14px; border:1px solid #f1f5f9;">
+                            <div style="font-size:0.8rem; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Articles :</div>
+                            ${itemsHtml}
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <div style="font-size:0.8rem; color:#64748b;">Total Payé</div>
+                                <div style="font-weight: 800; font-size: 1.2rem; color: #e63946;">
+                                    ${new Intl.NumberFormat('fr-FR').format(order.total || 0)} F CFA
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                ${waUrl ? `
+                                    <a href="${waUrl}" target="_blank" class="btn btn-secondary btn-sm" style="width:auto; padding:8px 14px; background:#25D366; color:white; border:none; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
+                                        💬 Contacter le Restaurant
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        renderOrders();
+        function getStatusClass(status) {
+            if (status === 'Nouvelle') return 'badge-Nouvelle';
+            if (status === 'En cours') return 'badge-EnCours';
+            if (status === 'Terminée') return 'badge-Terminée';
+            if (status === 'Annulée') return 'badge-Annulée';
+            return 'badge-Nouvelle';
+        }
+
+        function logout() {
+            DataManager.logoutClient();
+            window.location.href = '../index.html';
+        }
     </script>
 </body>
 

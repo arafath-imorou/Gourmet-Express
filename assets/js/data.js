@@ -444,6 +444,29 @@ const DataManager = {
         if (error) return [];
         return data || [];
     },
+    getClientOrders: async (clientId, phone) => {
+        try {
+            let query = window.supabaseClient
+                .from('restau_orders')
+                .select('*, restaurants(id, name, logo, phone, whatsapp_phone)')
+                .order('date', { ascending: false });
+            
+            if (clientId && phone) {
+                const cleanPhone = phone.trim();
+                query = query.or(`client_id.eq.${clientId},phone.eq.${cleanPhone}`);
+            } else if (clientId) {
+                query = query.eq('client_id', clientId);
+            } else if (phone) {
+                query = query.eq('phone', phone.trim());
+            }
+            
+            const { data, error } = await query;
+            if (!error && data) return data;
+        } catch (e) {
+            console.error('Erreur getClientOrders:', e);
+        }
+        return [];
+    },
     placeOrder: async (orderDetails) => {
         const restaurantId = DataManager.getCurrentRestaurantId();
         const menu = await DataManager.getMenu(restaurantId);

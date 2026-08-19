@@ -20,6 +20,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     populateRestaurantSwitcher(restaurantId);
     await loadMenuForRestaurant(restaurantId);
+
+    // Show client orders link if logged in
+    const client = DataManager.getCurrentClient();
+    if (client) {
+        const btn = document.getElementById('client-orders-header-btn');
+        if (btn) btn.style.display = 'inline-block';
+    }
 });
 
 function populateRestaurantSwitcher(currentId) {
