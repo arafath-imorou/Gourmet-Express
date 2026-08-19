@@ -5,17 +5,19 @@
     --primary-dark: #C42B37;
     --secondary-color: #F4A261;
     /* Orange / Chaleureux */
-    --background-color: #F8F9FA;
+    --background-color: #F8FAFC;
     --surface-color: #FFFFFF;
-    --text-primary: #1D3557;
-    --text-secondary: #6C757D;
-    --success-color: #2A9D8F;
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --font-heading: 'Poppins', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --text-primary: #0F172A;
+    --text-secondary: #64748B;
+    --success-color: #10B981;
+    --border-color: #E2E8F0;
+    --border-visible: 1.5px solid #E2E8F0;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --font-heading: 'Aptos', 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    --font-body: 'Aptos', 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
 }
 
 /* --- Reset & Global --- */
@@ -30,9 +32,9 @@ body {
     font-family: var(--font-body);
     background-color: var(--background-color);
     color: var(--text-primary);
-    line-height: 1.5;
+    line-height: 1.55;
     padding-bottom: 80px;
-    /* Space for bottom nav or just breathing room */
+    -webkit-font-smoothing: antialiased;
 }
 
 h1,
@@ -125,37 +127,43 @@ img {
 .card {
     background: var(--surface-color);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
+    border: var(--border-visible);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
     overflow: hidden;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .input-group {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .input-group label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.9rem;
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .input-group input,
 .input-group select,
 .input-group textarea {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #E5E5E5;
-    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 10px;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    background: #FFFFFF;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.input-group input:focus {
-    outline: 2px solid var(--primary-color);
-    border-color: transparent;
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.12);
 }
 
 .text-center {
