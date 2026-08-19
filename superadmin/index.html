@@ -981,34 +981,62 @@
             const available = document.getElementById('mitem-available').checked;
 
             const errEl = document.getElementById('mitem-error');
+            const submitBtn = document.querySelector('#modal-menu-item .btn-menu-add');
+
             if (!restaurantId || !name || isNaN(price) || price < 0 || !category) {
                 errEl.textContent = 'Veuillez remplir tous les champs obligatoires (*) avec un prix valide.';
                 errEl.style.display = 'block';
                 return;
             }
 
-            const itemData = { restaurant_id: restaurantId, name, price, category, description, image, available };
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Enregistrement en cours...';
+            }
 
-            if (id) {
-                const success = await DataManager.updateMenuItem(id, itemData);
-                if (success) {
-                    closeModal('modal-menu-item');
-                    await onRestaurantMenuSelectChange(restaurantId);
-                    alert('✅ Produit modifié avec succès !');
+            const itemData = {
+                id: id || 'prod_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+                restaurant_id: restaurantId,
+                name,
+                price,
+                category,
+                description,
+                image: image || null,
+                available,
+                active: true
+            };
+
+            try {
+                if (id) {
+                    const success = await DataManager.updateMenuItem(id, itemData);
+                    if (success) {
+                        closeModal('modal-menu-item');
+                        await onRestaurantMenuSelectChange(restaurantId);
+                        alert('✅ Produit modifié avec succès !');
+                    } else {
+                        errEl.textContent = 'Erreur lors de la modification du produit.';
+                        errEl.style.display = 'block';
+                    }
                 } else {
-                    errEl.textContent = 'Erreur lors de la modification.';
-                    errEl.style.display = 'block';
+                    const added = await DataManager.addMenuItem(itemData);
+                    if (added) {
+                        closeModal('modal-menu-item');
+                        document.getElementById('menu-restaurant-select').value = restaurantId;
+                        await onRestaurantMenuSelectChange(restaurantId);
+                        alert('✅ Produit ajouté avec succès !');
+                    } else {
+                        errEl.textContent = 'Erreur lors de l\'ajout du produit. Veuillez réessayer.';
+                        errEl.style.display = 'block';
+                    }
                 }
-            } else {
-                const added = await DataManager.addMenuItem(itemData);
-                if (added) {
-                    closeModal('modal-menu-item');
-                    document.getElementById('menu-restaurant-select').value = restaurantId;
-                    await onRestaurantMenuSelectChange(restaurantId);
-                    alert('✅ Produit ajouté avec succès !');
-                } else {
-                    errEl.textContent = 'Erreur lors de l\'ajout.';
-                    errEl.style.display = 'block';
+            } catch (err) {
+                console.error('Erreur submitMenuItem:', err);
+                errEl.textContent = 'Erreur technique : ' + (err.message || 'Impossible d\'enregistrer.');
+                errEl.style.display = 'block';
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Enregistrer le produit';
                 }
             }
         }

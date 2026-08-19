@@ -358,17 +358,43 @@ const DataManager = {
         return data || [];
     },
     addMenuItem: async (item) => {
-        const { data, error } = await window.supabaseClient.from('restau_menu').insert([item]).select();
-        if (error) return null;
-        return data[0];
+        const itemToInsert = {
+            id: item.id || 'prod_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+            active: item.active !== false,
+            available: item.available !== false,
+            ...item
+        };
+        try {
+            const { data, error } = await window.supabaseClient.from('restau_menu').insert([itemToInsert]).select();
+            if (error) {
+                console.error('Erreur Supabase addMenuItem:', error);
+                return null;
+            }
+            return data && data.length > 0 ? data[0] : itemToInsert;
+        } catch (err) {
+            console.error('Exception addMenuItem:', err);
+            return null;
+        }
     },
     updateMenuItem: async (id, updates) => {
-        const { error } = await window.supabaseClient.from('restau_menu').update(updates).eq('id', id);
-        return !error;
+        try {
+            const { error } = await window.supabaseClient.from('restau_menu').update(updates).eq('id', id);
+            if (error) console.error('Erreur updateMenuItem:', error);
+            return !error;
+        } catch (err) {
+            console.error('Exception updateMenuItem:', err);
+            return false;
+        }
     },
     deleteMenuItem: async (id) => {
-        const { error } = await window.supabaseClient.from('restau_menu').delete().eq('id', id);
-        return !error;
+        try {
+            const { error } = await window.supabaseClient.from('restau_menu').delete().eq('id', id);
+            if (error) console.error('Erreur deleteMenuItem:', error);
+            return !error;
+        } catch (err) {
+            console.error('Exception deleteMenuItem:', err);
+            return false;
+        }
     },
 
     // ==================== CART (localStorage) ====================
