@@ -222,10 +222,10 @@
         <section id="section-menus" style="display:none;">
             <div class="page-header">
                 <div>
-                    <h1>🍔 Gestion des Menus par Restaurant</h1>
-                    <p>Gérez les cartes, catégories, prix et plats spécifiques à chaque établissement.</p>
+                    <h1>📦 Gestion des Produits par Restaurant</h1>
+                    <p>Gérez les cartes, catégories, prix et produits spécifiques à chaque établissement.</p>
                 </div>
-                <button class="btn-primary btn-menu-add" onclick="openAddMenuItemModal()">+ Ajouter un plat</button>
+                <button class="btn-primary btn-menu-add" onclick="openAddMenuItemModal()">+ Ajouter un produit</button>
             </div>
 
             <div class="card">
@@ -234,7 +234,7 @@
                     <select id="menu-restaurant-select" class="select-custom" onchange="onRestaurantMenuSelectChange(this.value)">
                         <option value="">Sélectionnez un restaurant...</option>
                     </select>
-                    <input type="text" id="search-menu-items" placeholder="🔍 Rechercher un plat..." class="search-input" oninput="filterMenuItems()">
+                    <input type="text" id="search-menu-items" placeholder="🔍 Rechercher un produit..." class="search-input" oninput="filterMenuItems()">
                 </div>
 
                 <div id="menu-container">
@@ -415,7 +415,7 @@
     <!-- Modal 3: Add / Edit Menu Item -->
     <div class="modal-overlay" id="modal-menu-item">
         <div class="modal">
-            <h3 id="mitem-modal-title">🍔 Ajouter un plat au menu</h3>
+            <h3 id="mitem-modal-title">📦 Ajouter un produit au menu</h3>
             <input type="hidden" id="mitem-id">
             
             <div class="form-group">
@@ -425,7 +425,7 @@
                 </select>
             </div>
 
-            <div class="form-group"><label>Nom du plat *</label><input id="mitem-name" type="text" placeholder="Ex: Burger Gourmet Classic"></div>
+            <div class="form-group"><label>Nom du produit *</label><input id="mitem-name" type="text" placeholder="Ex: Burger Gourmet Classic, Coca-Cola, Glace Vanille"></div>
             
             <div class="form-grid">
                 <div class="form-group"><label>Prix (FCFA) *</label><input id="mitem-price" type="number" placeholder="Ex: 3500"></div>
@@ -439,10 +439,10 @@
                 </div>
             </div>
 
-            <div class="form-group"><label>Description</label><textarea id="mitem-desc" rows="2" placeholder="Ingrédients, accompagnements..."></textarea></div>
+            <div class="form-group"><label>Description</label><textarea id="mitem-desc" rows="2" placeholder="Ingrédients, accompagnements, saveurs..."></textarea></div>
             
             <div class="form-group">
-                <label>Photo du plat</label>
+                <label>Photo du produit (Conversion WEBP auto)</label>
                 <input id="mitem-image-file" type="file" accept="image/*">
                 <input id="mitem-image" type="hidden">
                 <div id="mitem-image-preview" style="margin-top:8px; display:none; align-items:center; gap:12px;">
@@ -454,14 +454,14 @@
             <div class="form-group" style="margin-top:10px;">
                 <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                     <input type="checkbox" id="mitem-available" checked style="width:18px; height:18px;">
-                    <span>Plat disponible à la commande</span>
+                    <span>Produit disponible à la commande</span>
                 </label>
             </div>
 
             <div id="mitem-error" style="color:#e74c3c; font-size:0.85rem; margin-top:8px; display:none; font-weight:600;"></div>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeModal('modal-menu-item')">Annuler</button>
-                <button class="btn-primary btn-menu-add" onclick="submitMenuItem()">Enregistrer le plat</button>
+                <button class="btn-primary btn-menu-add" onclick="submitMenuItem()">Enregistrer le produit</button>
             </div>
         </div>
     </div>
@@ -873,15 +873,15 @@
             if (!items || !items.length) {
                 container.innerHTML = `
                     <div style="text-align:center; padding:40px 20px;">
-                        <p style="color:#888; font-size:1.05rem;">Aucun plat n'est encore enregistré pour <strong>${restoName}</strong>.</p>
-                        <button class="btn-primary" style="margin-top:14px;" onclick="openAddMenuItemModal()">+ Ajouter le premier plat</button>
+                        <p style="color:#888; font-size:1.05rem;">Aucun produit n'est encore enregistré pour <strong>${restoName}</strong>.</p>
+                        <button class="btn-primary" style="margin-top:14px;" onclick="openAddMenuItemModal()">+ Ajouter le premier produit</button>
                     </div>`;
                 return;
             }
 
             container.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                    <div style="font-weight:700; color:#1a1a2e; font-size:1rem;">Menu de : <span style="color:#e74c3c;">${restoName}</span> (${items.length} plat(s))</div>
+                    <div style="font-weight:700; color:#1a1a2e; font-size:1rem;">Menu de : <span style="color:#e74c3c;">${restoName}</span> (${items.length} produit(s))</div>
                 </div>
                 <div class="menu-grid">
                     ${items.map(m => `
@@ -890,7 +890,7 @@
                                 ${m.image ? `<img src="${m.image}" alt="${m.name}">` : '🍽️'}
                             </div>
                             <div class="menu-card-body">
-                                <div class="menu-card-cat">${m.category || 'Général'}</div>
+                                <div class="menu-card-cat">${m.category || 'Repas'}</div>
                                 <div class="menu-card-title">${m.name}</div>
                                 <div class="menu-card-desc">${m.description || 'Aucune description'}</div>
                                 <div style="margin-bottom:10px;">
@@ -924,10 +924,10 @@
 
         function openAddMenuItemModal() {
             if (!allRestaurants.length) {
-                alert('Veuillez créer au moins un restaurant avant d\'ajouter un plat.');
+                alert('Veuillez créer au moins un restaurant avant d\'ajouter un produit.');
                 return;
             }
-            document.getElementById('mitem-modal-title').textContent = '🍔 Ajouter un plat au menu';
+            document.getElementById('mitem-modal-title').textContent = '📦 Ajouter un produit au menu';
             document.getElementById('mitem-id').value = '';
             document.getElementById('mitem-name').value = '';
             document.getElementById('mitem-price').value = '';
@@ -949,7 +949,7 @@
             const m = currentMenuItems.find(x => x.id === id);
             if (!m) return;
 
-            document.getElementById('mitem-modal-title').textContent = '✏️ Modifier le plat';
+            document.getElementById('mitem-modal-title').textContent = '✏️ Modifier le produit';
             document.getElementById('mitem-id').value = m.id;
             document.getElementById('mitem-restaurant').value = m.restaurant_id || currentSelectedMenuRestaurantId;
             document.getElementById('mitem-name').value = m.name || '';
@@ -994,7 +994,7 @@
                 if (success) {
                     closeModal('modal-menu-item');
                     await onRestaurantMenuSelectChange(restaurantId);
-                    alert('✅ Plat modifié avec succès !');
+                    alert('✅ Produit modifié avec succès !');
                 } else {
                     errEl.textContent = 'Erreur lors de la modification.';
                     errEl.style.display = 'block';
@@ -1005,7 +1005,7 @@
                     closeModal('modal-menu-item');
                     document.getElementById('menu-restaurant-select').value = restaurantId;
                     await onRestaurantMenuSelectChange(restaurantId);
-                    alert('✅ Plat ajouté avec succès !');
+                    alert('✅ Produit ajouté avec succès !');
                 } else {
                     errEl.textContent = 'Erreur lors de l\'ajout.';
                     errEl.style.display = 'block';
@@ -1019,7 +1019,7 @@
         }
 
         async function deleteMenuItem(id, name) {
-            if (!confirm(`Supprimer le plat "${name}" ?`)) return;
+            if (!confirm(`Supprimer le produit "${name}" ?`)) return;
             await DataManager.deleteMenuItem(id);
             await onRestaurantMenuSelectChange(currentSelectedMenuRestaurantId);
         }

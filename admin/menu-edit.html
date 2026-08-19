@@ -30,24 +30,24 @@
 
     <div class="admin-nav">
         <a href="menu.html">← Annuler</a>
-        <div style="font-weight: 700; flex:1; text-align: center;">Edition Plat</div>
+        <div style="font-weight: 700; flex:1; text-align: center;">Édition Produit</div>
         <div style="width: 60px;"></div>
     </div>
 
     <div class="container" style="max-width: 600px;">
         <div class="form-card">
-            <h2 class="mb-4" id="page-title">Nouveau Plat</h2>
+            <h2 class="mb-4" id="page-title">Nouveau Produit</h2>
 
             <form id="product-form">
                 <input type="hidden" id="product-id">
 
                 <div class="input-group">
-                    <label>Nom du plat</label>
-                    <input type="text" id="name" required placeholder="Ex: Burger Spécial">
+                    <label>Nom du produit *</label>
+                    <input type="text" id="name" required placeholder="Ex: Burger Spécial, Jus d'Orange, Glace Chocolat">
                 </div>
 
                 <div class="input-group">
-                    <label>Prix (FCFA)</label>
+                    <label>Prix (FCFA) *</label>
                     <input type="number" id="price" required placeholder="Ex: 5000">
                 </div>
 
@@ -61,7 +61,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Photo du plat (Conversion WEBP automatique)</label>
+                    <label>Photo du produit (Conversion WEBP automatique)</label>
                     <input type="file" id="image-file" accept="image/*" style="margin-bottom: 8px;">
                     <input type="hidden" id="image" required>
                     <div id="image-preview"
@@ -71,7 +71,7 @@
 
                 <div class="input-group">
                     <label>Description</label>
-                    <textarea id="description" rows="3" placeholder="Ingrédients, accompagnements..."></textarea>
+                    <textarea id="description" rows="3" placeholder="Ingrédients, accompagnements, saveurs..."></textarea>
                 </div>
 
                 <div class="input-group">
@@ -81,7 +81,7 @@
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-primary" id="btn-save-menu">Enregistrer le plat</button>
+                <button type="submit" class="btn btn-primary" id="btn-save-menu">Enregistrer le produit</button>
             </form>
         </div>
     </div>
@@ -97,7 +97,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (id) {
-                document.getElementById('page-title').textContent = 'Modifier le plat';
+                document.getElementById('page-title').textContent = 'Modifier le produit';
                 const menu = await DataManager.getMenu();
                 const product = menu.find(p => p.id === id);
 
