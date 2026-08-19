@@ -117,16 +117,37 @@ function renderMenu(categoryFilter = 'all') {
 
 function setupCategoryFilters() {
     const products = (window.allProducts || []).filter(p => p.available !== false && p.active !== false);
-    const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
-    const filterContainer = document.getElementById('category-filter');
+    const existingCats = [...new Set(products.map(p => p.category).filter(Boolean))];
+    
+    // Ordre prioritaire des catégories
+    const order = ['Repas', 'Boissons', 'Glaces'];
+    const sortedCats = ['all'];
+    
+    order.forEach(c => {
+        if (existingCats.includes(c) || true) {
+            sortedCats.push(c);
+        }
+    });
+    
+    existingCats.forEach(c => {
+        if (!sortedCats.includes(c)) sortedCats.push(c);
+    });
 
+    const filterContainer = document.getElementById('category-filter');
     if (!filterContainer) return;
     filterContainer.innerHTML = '';
 
-    categories.forEach(cat => {
+    const categoryIcons = {
+        'all': '🍽️ Tous les plats',
+        'Repas': '🍲 Repas',
+        'Boissons': '🥤 Boissons',
+        'Glaces': '🍦 Glaces'
+    };
+
+    sortedCats.forEach(cat => {
         const btn = document.createElement('button');
         btn.className = `category-pill ${cat === 'all' ? 'active' : ''}`;
-        btn.textContent = cat === 'all' ? 'Tous les plats' : cat;
+        btn.textContent = categoryIcons[cat] || cat;
         btn.dataset.category = cat;
 
         btn.addEventListener('click', () => {

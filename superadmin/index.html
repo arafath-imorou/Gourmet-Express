@@ -431,16 +431,11 @@
                 <div class="form-group"><label>Prix (FCFA) *</label><input id="mitem-price" type="number" placeholder="Ex: 3500"></div>
                 <div class="form-group">
                     <label>Catégorie *</label>
-                    <input id="mitem-category" type="text" list="cat-suggestions" placeholder="Ex: Burgers">
-                    <datalist id="cat-suggestions">
-                        <option value="Burgers">
-                        <option value="Pizzas">
-                        <option value="Plats Locaux">
-                        <option value="Salades">
-                        <option value="Grillades">
-                        <option value="Boissons">
-                        <option value="Desserts">
-                    </datalist>
+                    <select id="mitem-category" class="select-custom" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-weight:600;">
+                        <option value="Repas">🍲 Repas</option>
+                        <option value="Boissons">🥤 Boissons</option>
+                        <option value="Glaces">🍦 Glaces</option>
+                    </select>
                 </div>
             </div>
 
@@ -936,7 +931,7 @@
             document.getElementById('mitem-id').value = '';
             document.getElementById('mitem-name').value = '';
             document.getElementById('mitem-price').value = '';
-            document.getElementById('mitem-category').value = '';
+            document.getElementById('mitem-category').value = 'Repas';
             document.getElementById('mitem-desc').value = '';
             document.getElementById('mitem-image').value = '';
             document.getElementById('mitem-image-preview').style.display = 'none';
@@ -959,7 +954,7 @@
             document.getElementById('mitem-restaurant').value = m.restaurant_id || currentSelectedMenuRestaurantId;
             document.getElementById('mitem-name').value = m.name || '';
             document.getElementById('mitem-price').value = m.price || '';
-            document.getElementById('mitem-category').value = m.category || '';
+            document.getElementById('mitem-category').value = m.category || 'Repas';
             document.getElementById('mitem-desc').value = m.description || '';
             document.getElementById('mitem-image').value = m.image || '';
             document.getElementById('mitem-available').checked = m.available !== false;
