@@ -47,16 +47,24 @@
 
     <!-- Desktop Nav -->
     <div class="admin-nav desktop-only">
-        <div style="display:flex; align-items:center; gap:8px; margin-right:16px;">
+        <!-- Left: Restaurant Brand -->
+        <div style="display:flex; align-items:center; gap:8px; min-width:200px;">
             <span id="nav-resto-logo" style="font-size:1.3rem;">🏪</span>
             <span id="nav-restaurant-name" style="font-weight:800; color:var(--primary-color); font-size:1.05rem;">Restaurant</span>
         </div>
-        <a href="index.html" class="nav-btn btn-nav-orders active">📋 Commandes</a>
-        <a href="menu.html" class="nav-btn btn-nav-menu">📦 Menu</a>
-        <a href="clients.html" class="nav-btn btn-nav-clients">👥 Clients</a>
-        <a href="administration.html" class="nav-btn btn-nav-admin">📈 Administration</a>
-        <div style="flex:1"></div>
-        <button onclick="logout()" style="background:#f1f5f9; border:none; color: #475569; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size:0.9rem;">🚪 Déconnexion</button>
+
+        <!-- Center: The 4 Buttons Centered -->
+        <div style="display:flex; align-items:center; justify-content:center; gap:12px; flex:1;">
+            <a href="index.html" class="nav-btn btn-nav-orders active">📋 Commandes</a>
+            <a href="menu.html" class="nav-btn btn-nav-menu">📦 Menu</a>
+            <a href="clients.html" class="nav-btn btn-nav-clients">👥 Clients</a>
+            <a href="administration.html" class="nav-btn btn-nav-admin">📈 Administration</a>
+        </div>
+
+        <!-- Right: Actions -->
+        <div style="display:flex; align-items:center; gap:8px; min-width:200px; justify-content:flex-end;">
+            <button onclick="logout()" style="background:#f1f5f9; border:none; color: #475569; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size:0.9rem;">🚪 Déconnexion</button>
+        </div>
     </div>
 
     <div class="container" style="max-width: 800px; padding: 0 16px 40px 16px;">
