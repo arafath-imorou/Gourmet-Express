@@ -4,134 +4,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Détails Commande - Gourmet Admin</title>
+    <title>Détails Commande - Gourmet Express</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         .admin-nav {
             display: flex;
             gap: 16px;
-            padding: 16px;
+            padding: 14px 20px;
             background: white;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #e2e8f0;
             margin-bottom: 24px;
+            align-items: center;
+        }
+
+        .admin-nav a {
+            font-weight: 600;
+            color: #64748b;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .admin-nav a.active, .admin-nav a:hover {
+            color: var(--primary-color);
+            background: #f8fafc;
         }
 
         .section-box {
             background: white;
             padding: 24px;
-            border-radius: var(--radius-md);
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-sm);
+            border-radius: 14px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            border: 1px solid #e2e8f0;
         }
     </style>
 </head>
 
-<body style="background: #f0f2f5;">
+<body style="background: #f8fafc; font-family: 'Inter', sans-serif;">
 
-    <div class="admin-nav">
-        <a href="index.html" class="nav-back-container">
-            <span style="font-size: 24px;">←</span>
-            <span class="nav-back-text">Retour</span>
-        </a>
-        <div style="font-weight: 700; flex:1; text-align: center;">Détails Commande</div>
-        <div style="flex:0; width: 60px;"></div> <!-- Spacer -->
+    <!-- Desktop Nav -->
+    <div class="admin-nav desktop-only">
+        <div style="display:flex; align-items:center; gap:8px; margin-right:16px;">
+            <span id="nav-resto-logo" style="font-size:1.3rem;">🏪</span>
+            <span id="nav-restaurant-name" style="font-weight:800; color:var(--primary-color); font-size:1.05rem;">Restaurant</span>
+        </div>
+        <a href="index.html" class="active">📋 Commandes</a>
+        <a href="menu.html">📦 Menu</a>
+        <a href="clients.html">👥 Clients</a>
+        <a href="administration.html">📈 Administration</a>
+        <div style="flex:1"></div>
+        <button onclick="logout()" style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 700;">🚪 Déconnexion</button>
     </div>
 
-    <div class="container" style="max-width: 800px;">
-        <!-- Desktop Actions Top -->
-        <div class="section-box desktop-only">
-            <div style="display: flex; gap: 16px; justify-content: flex-end; align-items: center;">
-                <label>Changer le statut :</label>
-                <select id="status-select-desktop" class="input-field"
-                    style="margin-bottom: 0; width: auto; min-width: 200px;">
-                    <option value="ENVOYÉE">ENVOYÉE</option>
-                    <option value="APPROUVÉE">APPROUVÉE</option>
-                    <option value="EN PRÉPARATION">EN PRÉPARATION</option>
-                    <option value="PRÊTE">PRÊTE</option>
-                    <option value="EN LIVRAISON">EN LIVRAISON</option>
-                    <option value="LIVRÉE">LIVRÉE</option>
-                    <option value="ANNULÉE">ANNULÉE</option>
-                </select>
-                <button onclick="updateStatusFromDesktop()" class="btn btn-primary"
-                    style="width: auto;">Appliquer</button>
-                <button onclick="window.print()" class="btn btn-secondary"
-                    style="background-color: transparent; border-color: #6B7280; color: #6B7280; width: auto; margin-right: 8px;">🖨️
-                    Imprimer</button>
-                <div style="width: 20px;"></div>
-                <button onclick="deleteOrder()" class="btn btn-secondary"
-                    style="background-color: transparent; border-color: #DC3545; color: #DC3545; width: auto;">Supprimer</button>
+    <div class="container" style="max-width: 800px; padding: 0 16px 40px 16px;">
+        
+        <div style="margin-bottom: 16px;">
+            <a href="index.html" style="text-decoration: none; color: #64748b; font-weight: 700; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 6px;">
+                ← Retour aux commandes
+            </a>
+        </div>
+
+        <!-- Top Actions -->
+        <div class="section-box">
+            <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <label style="font-weight:700; color:#334155; font-size:0.9rem;">Statut :</label>
+                    <select id="status-select-desktop" style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-weight: 700; font-size: 0.9rem;">
+                        <option value="Nouvelle">🟡 Nouvelle</option>
+                        <option value="En cours">🔵 En cours</option>
+                        <option value="Terminée">🟢 Terminée</option>
+                        <option value="Annulée">🔴 Annulée</option>
+                    </select>
+                    <button onclick="updateStatusFromDesktop()" class="btn btn-primary" style="width: auto; padding: 8px 16px; font-weight: 700; border-radius: 8px;">Enregistrer</button>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="window.print()" class="btn btn-secondary" style="width: auto; padding: 8px 14px; font-weight: 700; border-radius: 8px;">🖨️ Imprimer</button>
+                    <button onclick="deleteOrder()" class="btn btn-secondary" style="width: auto; padding: 8px 14px; color: #ef4444; border-color: #fca5a5; font-weight: 700; border-radius: 8px;">🗑️ Supprimer</button>
+                </div>
             </div>
         </div>
 
+        <!-- Order Information Box -->
         <div class="section-box">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
                 <div>
-                    <h2 id="order-id" style="font-size: 1.5rem;">CMD-...</h2>
-                    <div class="text-sm text-muted" id="order-date">...</div>
+                    <h2 id="order-id" style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">CMD-...</h2>
+                    <div class="text-sm text-muted" id="order-date" style="color:#64748b;">...</div>
                 </div>
                 <div id="order-status-badge"></div>
             </div>
 
-            <h4 class="mb-2">Client</h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+            <h4 style="font-size: 0.95rem; font-weight: 800; color: #334155; margin-bottom: 12px; text-transform: uppercase;">👤 Informations Client</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; background: #f8fafc; padding: 16px; border-radius: 10px;">
                 <div>
-                    <div class="text-sm text-muted">Nom</div>
-                    <div class="font-bold" id="client-name">...</div>
+                    <div style="font-size:0.8rem; color:#64748b; font-weight:600;">Nom du Client</div>
+                    <div style="font-weight:700; color:#0f172a; font-size:1rem;" id="client-name">...</div>
                 </div>
                 <div>
-                    <div class="text-sm text-muted">Téléphone</div>
-                    <div class="font-bold" id="client-phone">...</div>
+                    <div style="font-size:0.8rem; color:#64748b; font-weight:600;">Téléphone (WhatsApp)</div>
+                    <div style="font-weight:700; color:#0f172a; font-size:1rem;" id="client-phone">...</div>
                 </div>
                 <div>
-                    <div class="text-sm text-muted">Mode</div>
-                    <div class="font-bold" id="order-mode">...</div>
+                    <div style="font-size:0.8rem; color:#64748b; font-weight:600;">Mode de Réception</div>
+                    <div style="font-weight:700; color:#0f172a; font-size:1rem;" id="order-mode">...</div>
                 </div>
                 <div>
-                    <div class="text-sm text-muted">Adresse</div>
-                    <div class="font-bold" id="order-address">-</div>
+                    <div style="font-size:0.8rem; color:#64748b; font-weight:600;">Adresse de Livraison</div>
+                    <div style="font-weight:700; color:#0f172a; font-size:1rem;" id="order-address">-</div>
                 </div>
             </div>
 
-            <div id="order-comment-box"
-                style="display: none; background: #FFFBEB; padding: 12px; border-radius: 8px; margin-bottom: 24px;">
-                <div class="text-xs font-bold text-orange" style="color: #F59E0B">Note du client</div>
-                <div id="order-comment"></div>
+            <div id="order-comment-box" style="display: none; background: #fffbeb; border: 1px solid #fef3c7; padding: 14px; border-radius: 10px; margin-bottom: 24px;">
+                <div style="font-size:0.8rem; font-weight:800; color: #b45309; margin-bottom: 4px;">📝 Note / Détails du paiement</div>
+                <div id="order-comment" style="color: #78350f; font-size: 0.92rem; line-height: 1.5;"></div>
             </div>
 
-            <h4 class="mb-2">Articles</h4>
-            <div id="items-list" style="margin-bottom: 24px; border-top: 1px solid #eee;">
+            <h4 style="font-size: 0.95rem; font-weight: 800; color: #334155; margin-bottom: 12px; text-transform: uppercase;">🍽️ Articles Commandés</h4>
+            <div id="items-list" style="margin-bottom: 24px; border-top: 1px solid #f1f5f9;">
                 <!-- Items rendered here -->
             </div>
 
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 700; padding-top: 16px; border-top: 2px solid #eee;">
-                <span>Total</span>
-                <span id="order-total" style="color: var(--primary-color);">0 FCFA</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.3rem; font-weight: 800; padding-top: 16px; border-top: 2px solid #e2e8f0;">
+                <span>Total Payé</span>
+                <span id="order-total" style="color: #e74c3c;">0 F CFA</span>
             </div>
         </div>
-
-        <div class="bottom-spacer mobile-only"></div>
-    </div>
-
-    <!-- Mobile Fixed Bottom Actions -->
-    <div class="fixed-bottom-actions mobile-only" style="border-top: 1px solid #eee;">
-        <div style="flex: 1; display: flex; gap: 8px;">
-            <select id="status-select-mobile" class="input-field" style="margin-bottom: 0; flex: 1;">
-                <option value="ENVOYÉE">ENVOYÉE</option>
-                <option value="APPROUVÉE">APPROUVÉE</option>
-                <option value="EN PRÉPARATION">EN PRÉPARATION</option>
-                <option value="PRÊTE">PRÊTE</option>
-                <option value="EN LIVRAISON">EN LIVRAISON</option>
-                <option value="LIVRÉE">LIVRÉE</option>
-                <option value="ANNULÉE">ANNULÉE</option>
-            </select>
-            <button onclick="updateStatusFromMobile()" class="btn btn-primary" style="width: auto;">OK</button>
-        </div>
-        <button onclick="deleteOrder()" class="btn btn-secondary"
-            style="width: auto; border-color: #DC3545; color: #DC3545;">🗑️</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -143,41 +143,55 @@
         const id = params.get('id');
         let currentOrder = null;
 
-        function renderDetails() {
-            const orders = DataManager.getOrders();
-            currentOrder = orders.find(o => o.id === id);
+        document.addEventListener('DOMContentLoaded', async () => {
+            const staff = DataManager.getCurrentStaff();
+            if (staff) {
+                const nameEl = document.getElementById('nav-restaurant-name');
+                if (nameEl) nameEl.textContent = staff.restaurant_name || 'Restaurant';
+                if (staff.restaurant_logo) {
+                    const logoEl = document.getElementById('nav-resto-logo');
+                    if (logoEl) logoEl.innerHTML = `<img src="${staff.restaurant_logo}" style="width:28px; height:28px; border-radius:6px; object-fit:cover;">`;
+                }
+            }
 
-            if (!currentOrder) {
-                alert('Commande introuvable');
+            if (!id) {
+                alert('ID de commande manquant.');
                 window.location.href = 'index.html';
                 return;
             }
 
+            const orders = await DataManager.getOrders();
+            currentOrder = orders.find(o => o.id === id);
+
+            if (!currentOrder) {
+                alert('Commande introuvable.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            renderOrderDetails();
+        });
+
+        function renderOrderDetails() {
             document.getElementById('order-id').textContent = currentOrder.id;
-            document.getElementById('order-date').textContent = new Date(currentOrder.date).toLocaleString();
+            const d = new Date(currentOrder.date);
+            document.getElementById('order-date').textContent = '📅 ' + d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-            // Status badge
-            const badge = document.getElementById('order-status-badge');
-            let bg = '#9CA3AF'; // Gray default
-            const s = currentOrder.status;
-            if (s === 'ENVOYÉE') bg = '#3B82F6';
-            if (s === 'APPROUVÉE') bg = '#F59E0B';
-            if (s === 'EN PRÉPARATION') bg = '#F59E0B';
-            if (s === 'LIVRÉE') bg = '#10B981';
-            if (s === 'PRÊTE') bg = '#10B981';
+            const statusBadge = document.getElementById('order-status-badge');
+            statusBadge.innerHTML = `<span style="padding:6px 12px; border-radius:8px; font-weight:700; font-size:0.9rem; background:${getStatusBg(currentOrder.status)}; color:${getStatusColor(currentOrder.status)};">${currentOrder.status}</span>`;
 
-            badge.innerHTML = `<span style="background: ${bg}; color: white; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;">${currentOrder.status}</span>`;
+            document.getElementById('status-select-desktop').value = currentOrder.status || 'Nouvelle';
 
-            // Update Selects (Mobile & Desktop)
-            const mobileSelect = document.getElementById('status-select-mobile');
-            if (mobileSelect) mobileSelect.value = currentOrder.status;
-            const desktopSelect = document.getElementById('status-select-desktop');
-            if (desktopSelect) desktopSelect.value = currentOrder.status;
+            document.getElementById('client-name').textContent = currentOrder.client_name || currentOrder.clientName || 'Client';
+            
+            const phone = currentOrder.phone || '';
+            const cleanPhone = phone.replace(/[^0-9]/g, '');
+            const waUrl = cleanPhone ? `https://wa.me/229${cleanPhone.replace(/^229/, '')}` : null;
+            document.getElementById('client-phone').innerHTML = phone ? `${phone} ${waUrl ? `<a href="${waUrl}" target="_blank" style="margin-left:6px; color:#25D366; text-decoration:none; font-weight:700;">💬 WhatsApp</a>` : ''}` : '-';
 
-            document.getElementById('client-name').textContent = currentOrder.clientName;
-            document.getElementById('client-phone').textContent = currentOrder.phone;
-            document.getElementById('order-mode').textContent = currentOrder.type === 'delivery' ? 'Livraison' : (currentOrder.type === 'dinein' ? 'Sur place' : 'À emporter');
-            document.getElementById('order-address').textContent = currentOrder.address || '-';
+            const modeMap = { 'delivery': '🛵 Livraison à domicile', 'takeaway': '🥡 À emporter', 'dinein': '🍽️ Sur place' };
+            document.getElementById('order-mode').textContent = modeMap[currentOrder.type] || currentOrder.type || 'Standard';
+            document.getElementById('order-address').textContent = currentOrder.address || 'Non spécifiée';
 
             if (currentOrder.comment) {
                 document.getElementById('order-comment-box').style.display = 'block';
@@ -187,83 +201,68 @@
             const itemsContainer = document.getElementById('items-list');
             itemsContainer.innerHTML = '';
 
-            // Group items by category
-            const groupedItems = {};
-            currentOrder.items.forEach(item => {
-                const menu = DataManager.getMenu();
-                const liveProduct = menu.find(p => p.id === item.productId);
-                const category = liveProduct ? liveProduct.category : 'Autre';
-
-                if (!groupedItems[category]) {
-                    groupedItems[category] = [];
-                }
-                groupedItems[category].push({ item, liveProduct });
-            });
-
-            // Render groups
-            for (const [category, group] of Object.entries(groupedItems)) {
-                // Category Header
-                const catHeader = document.createElement('div');
-                catHeader.style.background = '#f8f9fa';
-                catHeader.style.padding = '8px';
-                catHeader.style.fontWeight = '700';
-                catHeader.style.fontSize = '0.9rem';
-                catHeader.style.color = '#666';
-                catHeader.style.marginTop = '12px';
-                catHeader.style.textTransform = 'uppercase';
-                catHeader.style.borderBottom = '1px solid #ddd';
-                catHeader.innerHTML = category;
-                itemsContainer.appendChild(catHeader);
-
-                // Items in this category
-                group.forEach(({ item, liveProduct }) => {
-                    const name = item.frozenName || (liveProduct ? liveProduct.name : 'Produit (Supprimé)');
-                    const price = item.frozenPrice || (liveProduct ? liveProduct.price : 0);
-
+            const items = currentOrder.items || [];
+            if (items.length === 0) {
+                itemsContainer.innerHTML = '<div style="padding:14px; color:#888;">Aucun détail sur les articles.</div>';
+            } else {
+                items.forEach(item => {
                     const row = document.createElement('div');
-                    row.style.display = 'flex';
-                    row.style.justifyContent = 'space-between';
-                    row.style.padding = '12px 0';
-                    row.style.borderBottom = '1px solid #eee';
+                    row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;';
+                    const name = item.frozenName || item.name || 'Produit';
+                    const price = item.frozenPrice || item.price || 0;
+                    const qty = item.quantity || 1;
                     row.innerHTML = `
-                        <div>${item.quantity}x ${name}</div>
-                        <div>${formatPrice(price * item.quantity)}</div>
+                        <div>
+                            <div style="font-weight:700; color:#0f172a;">${qty}x ${name}</div>
+                            ${item.note ? `<div style="font-size:0.8rem; color:#64748b;">Note: ${item.note}</div>` : ''}
+                        </div>
+                        <div style="font-weight:700; color:#334155;">${new Intl.NumberFormat('fr-FR').format(price * qty)} F CFA</div>
                     `;
                     itemsContainer.appendChild(row);
                 });
             }
 
-            document.getElementById('order-total').textContent = formatPrice(currentOrder.total);
+            document.getElementById('order-total').textContent = new Intl.NumberFormat('fr-FR').format(currentOrder.total || 0) + ' F CFA';
         }
 
-        window.updateStatusFromMobile = () => {
-            const newStatus = document.getElementById('status-select-mobile').value;
-            DataManager.updateOrderStatus(id, newStatus);
-            renderDetails();
-            alert('Statut mis à jour !');
-        };
-
-        window.updateStatusFromDesktop = () => {
+        async function updateStatusFromDesktop() {
             const newStatus = document.getElementById('status-select-desktop').value;
-            DataManager.updateOrderStatus(id, newStatus);
-            renderDetails();
-            alert('Statut mis à jour !');
-        };
-
-        window.deleteOrder = () => {
-            if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer cette commande définitivement ?')) {
-                let orders = DataManager.getOrders();
-                orders = orders.filter(o => o.id !== id);
-                localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
-                window.location.href = 'index.html';
-            }
-        };
-
-        function formatPrice(price) {
-            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(price);
+            await DataManager.updateOrderStatus(currentOrder.id, newStatus);
+            currentOrder.status = newStatus;
+            renderOrderDetails();
+            alert('✅ Statut mis à jour : ' + newStatus);
         }
 
-        renderDetails();
+        async function deleteOrder() {
+            if (!confirm(`Supprimer définitivement la commande ${currentOrder.id} ?`)) return;
+            await DataManager.deleteOrder(currentOrder.id);
+            window.location.href = 'index.html';
+        }
+
+        function getStatusBg(status) {
+            switch (status) {
+                case 'Nouvelle': return '#fef3c7';
+                case 'En cours': return '#e0f2fe';
+                case 'Terminée': return '#dcfce7';
+                case 'Annulée': return '#fee2e2';
+                default: return '#f1f5f9';
+            }
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'Nouvelle': return '#b45309';
+                case 'En cours': return '#0369a1';
+                case 'Terminée': return '#15803d';
+                case 'Annulée': return '#b91c1c';
+                default: return '#475569';
+            }
+        }
+
+        function logout() {
+            DataManager.logout();
+            window.location.href = '../login.html';
+        }
     </script>
 </body>
 

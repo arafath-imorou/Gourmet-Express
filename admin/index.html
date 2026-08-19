@@ -162,24 +162,30 @@
     <div id="dashboard-content" style="display: none;">
         <!-- Desktop Nav -->
         <div class="admin-nav desktop-only">
-            <span id="nav-restaurant-name" style="font-weight:700;color:var(--primary-color);margin-right:12px;">Restaurant</span>
-            <a href="index.html" class="active">Commandes</a>
-            <a href="menu.html">Menu</a>
-            <a href="agents.html" id="nav-agents" style="display:none;">Agents</a>
-            <a href="clients.html">Clients</a>
+            <div style="display:flex; align-items:center; gap:8px; margin-right:16px;">
+                <span id="nav-resto-logo" style="font-size:1.3rem;">🏪</span>
+                <span id="nav-restaurant-name" style="font-weight:800; color:var(--primary-color); font-size:1.05rem;">Restaurant</span>
+            </div>
+            <a href="index.html" class="active">📋 Commandes</a>
+            <a href="menu.html">📦 Menu</a>
+            <a href="clients.html">👥 Clients</a>
+            <a href="administration.html">📈 Administration</a>
             <div style="flex:1"></div>
-            <a href="../superadmin/index.html" style="background:#f3e8ff; color:#7e22ce; padding:6px 12px; border-radius:8px; font-weight:700; text-decoration:none; margin-right:12px; font-size:0.85rem; border:1px solid #d8b4fe;">🏪 Plateforme Superadmin</a>
+            <a href="../superadmin/index.html" id="nav-superadmin-link" style="display:none; background:#f3e8ff; color:#7e22ce; padding:6px 12px; border-radius:8px; font-weight:700; text-decoration:none; margin-right:12px; font-size:0.85rem; border:1px solid #d8b4fe;">🏪 Plateforme Superadmin</a>
             <button onclick="logout()"
-                style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 600;">Déconnexion</button>
+                style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 700;">🚪 Déconnexion</button>
         </div>
 
         <!-- Mobile Header -->
         <div class="mobile-only"
             style="background: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; margin-bottom: 16px;">
-            <span style="font-weight: 700; font-size: 1.2rem;">Gourmet Admin</span>
-            <div>
-                <a href="menu.html" style="margin-right: 16px; font-size: 1.5rem; text-decoration: none;">🍔</a>
-                <button onclick="logout()" style="background: none; border: none; font-size: 1.5rem;">🚪</button>
+            <span style="font-weight: 700; font-size: 1.1rem;" id="mobile-restaurant-name">Gourmet Admin</span>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <a href="index.html" style="font-size:1.2rem; text-decoration:none;">📋</a>
+                <a href="menu.html" style="font-size:1.2rem; text-decoration:none;">📦</a>
+                <a href="clients.html" style="font-size:1.2rem; text-decoration:none;">👥</a>
+                <a href="administration.html" style="font-size:1.2rem; text-decoration:none;">📈</a>
+                <button onclick="logout()" style="background: none; border: none; font-size: 1.3rem; cursor:pointer;">🚪</button>
             </div>
         </div>
 
@@ -189,19 +195,19 @@
 
             <div class="stats-row">
                 <div class="stat-card">
-                    <div class="text-sm text-muted">Aujourd'hui</div>
+                    <div class="text-sm text-muted">Total Commandes</div>
                     <div class="font-bold" style="font-size: 1.5rem;" id="stat-count">0</div>
-                    <div class="text-xs text-muted">Commandes</div>
+                    <div class="text-xs text-muted">Enregistrées</div>
                 </div>
                 <div class="stat-card">
-                    <div class="text-sm text-muted">Revenu</div>
-                    <div class="font-bold" style="font-size: 1.5rem;" id="stat-revenue">0</div>
-                    <div class="text-xs text-muted">FCFA</div>
+                    <div class="text-sm text-muted">Chiffre d'Affaires</div>
+                    <div class="font-bold" style="font-size: 1.5rem; color:#e74c3c;" id="stat-revenue">0 F</div>
+                    <div class="text-xs text-muted">Ventes validées</div>
                 </div>
-                <!-- Hide Pending on mobile to save space if needed, or keep it. Let's keep it but smaller. -->
                 <div class="stat-card">
-                    <div class="text-sm text-muted">En attente</div>
+                    <div class="text-sm text-muted">En attente / En cours</div>
                     <div class="font-bold" style="font-size: 1.5rem; color: #F59E0B;" id="stat-pending">0</div>
+                    <div class="text-xs text-muted">À traiter</div>
                 </div>
             </div>
 
@@ -313,69 +319,73 @@
     <script src="../assets/js/admin.js"></script>
     <script>
         // Multi-restaurant auth guard
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const staff = DataManager.getCurrentStaff();
             if (staff && staff.role === 'superadmin') {
-                window.location.href = '../superadmin/index.html';
-                return;
+                const superadminLink = document.getElementById('nav-superadmin-link');
+                if (superadminLink) superadminLink.style.display = 'inline-block';
             }
             const loginOverlay = document.getElementById('login-overlay');
             const dashboardContent = document.getElementById('dashboard-content');
-            if (staff && (staff.role === 'admin' || staff.role === 'agent')) {
+            
+            if (staff && (staff.role === 'admin' || staff.role === 'staff' || staff.role === 'agent' || staff.role === 'superadmin')) {
                 if (loginOverlay) loginOverlay.style.display = 'none';
                 if (dashboardContent) dashboardContent.style.display = 'block';
+                
                 const nameEl = document.getElementById('nav-restaurant-name');
-                if (nameEl) nameEl.textContent = staff.restaurant_name || '';
-                if (staff.role === 'admin' || staff.agent_role === 'administrateur') {
-                    const agentsLink = document.getElementById('nav-agents');
-                    if (agentsLink) agentsLink.style.display = 'inline';
+                if (nameEl) nameEl.textContent = staff.restaurant_name || 'Restaurant';
+                const mobNameEl = document.getElementById('mobile-restaurant-name');
+                if (mobNameEl) mobNameEl.textContent = staff.restaurant_name || 'Gourmet Admin';
+                
+                if (staff.restaurant_logo) {
+                    const logoEl = document.getElementById('nav-resto-logo');
+                    if (logoEl) logoEl.innerHTML = `<img src="${staff.restaurant_logo}" style="width:28px; height:28px; border-radius:6px; object-fit:cover;">`;
                 }
-                renderAdminOrders();
-            } else if (loginOverlay && dashboardContent) {
-                loginOverlay.style.display = 'flex';
-                dashboardContent.style.display = 'none';
+
+                await renderAdminOrders();
+            } else {
+                window.location.href = '../login.html';
             }
         });
-        function logout() { DataManager.logout(); window.location.href = '../login.html'; }
+
+        function logout() { 
+            DataManager.logout(); 
+            window.location.href = '../login.html'; 
+        }
+
         function resetFilters() {
             ['filter-search','filter-date-specific'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
             ['filter-date','filter-status','filter-mode'].forEach(id => { const el = document.getElementById(id); if(el) el.value='all'; });
             renderAdminOrders();
         }
 
-        // Override renderAdminOrders for table view
+        // Render Admin Orders for this restaurant
         async function renderAdminOrders() {
             const tableContainer = document.getElementById('orders-list');
             const mobileContainer = document.getElementById('mobile-orders-list');
 
             if (!tableContainer && !mobileContainer) return;
 
-            const orders = await DataManager.getOrders();
-
-            // 1. FILTER ORDERS based on DOM Inputs (Replicate filter logic here or grab from DOM?)
-            // Actually, admin.js handles filtering and calls renderOrderList.
-            // But renderAdminOrders HERE is the one initializing stats?
-            // Let's rely on DataManager.getOrders() and the Filter DOM elements.
+            const staff = DataManager.getCurrentStaff();
+            const restaurantId = staff ? staff.restaurant_id : null;
+            const orders = await DataManager.getOrders(restaurantId);
 
             const filterDate = document.getElementById('filter-date') ? document.getElementById('filter-date').value : 'all';
             const filterDateSpecific = document.getElementById('filter-date-specific') ? document.getElementById('filter-date-specific').value : '';
             const filterStatus = document.getElementById('filter-status') ? document.getElementById('filter-status').value : 'all';
             const filterMode = document.getElementById('filter-mode') ? document.getElementById('filter-mode').value : 'all';
-            const filterSearch = document.getElementById('filter-search') ? document.getElementById('filter-search').value.toLowerCase() : '';
+            const filterSearch = document.getElementById('filter-search') ? document.getElementById('filter-search').value.toLowerCase().trim() : '';
 
             // Apply Filters
             let filteredOrders = orders.filter(order => {
-                // Date
                 const d = new Date(order.date);
                 const now = new Date();
                 let dateMatch = true;
 
                 if (filterDateSpecific) {
-                    // Check specific date match (ignoring time)
                     const specificDate = new Date(filterDateSpecific);
                     dateMatch = d.toDateString() === specificDate.toDateString();
                 } else {
-                    // Fallback to range
                     if (filterDate === 'today') dateMatch = d.toDateString() === now.toDateString();
                     if (filterDate === 'week') {
                         const weekAgo = new Date();
@@ -387,14 +397,10 @@
                     }
                 }
 
-                // Status
                 let statusMatch = (filterStatus === 'all') || (order.status === filterStatus);
-
-                // Mode
                 let modeMatch = (filterMode === 'all') || (order.type === filterMode);
-
-                // Search
                 let searchMatch = true;
+
                 if (filterSearch) {
                     const cn = (order.client_name || order.clientName || '').toLowerCase();
                     searchMatch = cn.includes(filterSearch) ||
@@ -405,126 +411,122 @@
                 return dateMatch && statusMatch && modeMatch && searchMatch;
             });
 
-            // Update Stats based on FILTERED view
-            // Count
+            // Update Stats based on restaurant's valid orders
             const elCount = document.getElementById('stat-count');
             if (elCount) elCount.textContent = filteredOrders.length;
 
-            // Revenue (Sum of 'LIVRÉE' within the filtered set)
             const elRevenue = document.getElementById('stat-revenue');
             if (elRevenue) {
                 const revenue = filteredOrders
-                    .filter(o => o.status === 'LIVRÉE')
-                    .reduce((acc, o) => acc + o.total, 0);
+                    .filter(o => o.status !== 'Annulée')
+                    .reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
                 elRevenue.textContent = formatPrice(revenue);
             }
 
-            // Pending (active within filtered set)
             const elPending = document.getElementById('stat-pending');
-            const activeStatuses = ['ENVOYÉE', 'APPROUVÉE', 'EN PRÉPARATION', 'PRÊTE', 'EN LIVRAISON'];
             if (elPending) {
-                const pending = filteredOrders.filter(o => activeStatuses.includes(o.status)).length;
+                const pending = filteredOrders.filter(o => o.status === 'Nouvelle' || o.status === 'En cours').length;
                 elPending.textContent = pending;
             }
 
-            // Update Labels to indicate context
-            const labelCount = elCount.parentElement.querySelector('.text-sm');
-            if (labelCount) {
-                if (filterDateSpecific) {
-                    labelCount.textContent = 'Date Spécifique';
-                } else {
-                    labelCount.textContent = filterDate === 'all' ? 'Total' : (filterDate === 'today' ? "Aujourd'hui" : 'Période');
-                }
-            }
-
-            const labelRev = elRevenue.parentElement.querySelector('.text-sm');
-            if (labelRev) {
-                if (filterDateSpecific) {
-                    labelRev.textContent = 'CA Date';
-                } else {
-                    labelRev.textContent = filterDate === 'all' ? 'CA Total' : (filterDate === 'today' ? "CA Jour" : 'CA Période');
-                }
-            }
-
-
             const ordersToRender = filteredOrders;
-            // (The rest of formatting uses ordersToRender instead of raw orders)
 
             // Render Desktop Table
             if (tableContainer) {
                 tableContainer.innerHTML = '';
-                // Sort by date desc
-                const sorted = ordersToRender.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                sorted.forEach(order => {
-                    const tr = document.createElement('tr');
-                    const clientName = order.client_name || order.clientName || 'Client';
-                    tr.innerHTML = `
-                        <td class="font-bold">${(order.id || '').split('-').pop()}</td>
-                        <td><div>${clientName}</div><div class="text-xs text-muted">${order.phone || ''}</div></td>
-                        <td>${formatPrice(order.total)}</td>
-                        <td>${order.type === 'delivery' ? '🛵 Livraison' : (order.type === 'dinein' ? '🍽️ Sur place' : '🥡 Emporter')}</td>
-                        <td><span class="badge ${getStatusClass(order.status)}">${order.status}</span></td>
-                        <td>
-                            <select onchange="updateStatus('${order.id}', this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid #eee;font-size:0.8rem;">
-                                <option value="Nouvelle" ${order.status==='Nouvelle'?'selected':''}>Nouvelle</option>
-                                <option value="En cours" ${order.status==='En cours'?'selected':''}>En cours</option>
-                                <option value="Terminée" ${order.status==='Terminée'?'selected':''}>Terminée</option>
-                                <option value="Annulée" ${order.status==='Annulée'?'selected':''}>Annulée</option>
-                            </select>
-                        </td>
-                    `;
-                    tableContainer.appendChild(tr);
-                });
+                if (ordersToRender.length === 0) {
+                    tableContainer.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#888;">Aucune commande trouvée.</td></tr>`;
+                } else {
+                    const sorted = ordersToRender.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    sorted.forEach(order => {
+                        const tr = document.createElement('tr');
+                        const clientName = order.client_name || order.clientName || 'Client';
+                        tr.innerHTML = `
+                            <td class="font-bold">#${(order.id || '').split('-').pop()}</td>
+                            <td>
+                                <div style="font-weight:600;">${clientName}</div>
+                                <div class="text-xs text-muted">📱 ${order.phone || ''}</div>
+                            </td>
+                            <td style="font-weight:700; color:#1a1a2e;">${formatPrice(order.total)}</td>
+                            <td>${order.type === 'delivery' ? '🛵 Livraison' : (order.type === 'dinein' ? '🍽️ Sur place' : '🥡 Emporter')}</td>
+                            <td><span class="badge ${getStatusClass(order.status)}">${order.status}</span></td>
+                            <td style="display:flex; align-items:center; gap:8px;">
+                                <select onchange="updateStatus('${order.id}', this.value)" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.85rem; font-weight:600;">
+                                    <option value="Nouvelle" ${order.status==='Nouvelle'?'selected':''}>🟡 Nouvelle</option>
+                                    <option value="En cours" ${order.status==='En cours'?'selected':''}>🔵 En cours</option>
+                                    <option value="Terminée" ${order.status==='Terminée'?'selected':''}>🟢 Terminée</option>
+                                    <option value="Annulée" ${order.status==='Annulée'?'selected':''}>🔴 Annulée</option>
+                                </select>
+                                <a href="order-detail.html?id=${order.id}" class="btn btn-secondary btn-sm" style="padding:6px 10px; text-decoration:none;">👁️</a>
+                            </td>
+                        `;
+                        tableContainer.appendChild(tr);
+                    });
+                }
             }
 
             // Render Mobile Cards
             if (mobileContainer) {
                 mobileContainer.innerHTML = '';
-                // Sort by date desc
-                const sorted = ordersToRender.sort((a, b) => new Date(b.date) - new Date(a.date));
+                if (ordersToRender.length === 0) {
+                    mobileContainer.innerHTML = `<div style="text-align:center; padding:30px; color:#888;">Aucune commande trouvée.</div>`;
+                } else {
+                    const sorted = ordersToRender.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    sorted.forEach(order => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.style.padding = '16px';
+                        if (order.status === 'Nouvelle') {
+                            card.style.borderLeft = '4px solid #F59E0B';
+                        } else if (order.status === 'En cours') {
+                            card.style.borderLeft = '4px solid #3B82F6';
+                        } else if (order.status === 'Terminée') {
+                            card.style.borderLeft = '4px solid #10B981';
+                        }
 
-                sorted.forEach(order => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.style.padding = '16px';
-                    // Highlight new orders
-                    if (order.status === 'ENVOYÉE') {
-                        card.style.borderLeft = '4px solid #3B82F6';
-                    }
-
-                    card.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                            <div>
-                                <span class="font-bold">#${order.id.split('-')[1]}</span>
-                                <span class="text-muted text-sm"> • ${new Date(order.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        card.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                <div>
+                                    <span class="font-bold">#${(order.id || '').split('-').pop()}</span>
+                                    <span class="text-muted text-sm"> • ${new Date(order.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                                <span class="badge ${getStatusClass(order.status)}">${order.status}</span>
                             </div>
-                            <span class="badge ${getStatusClass(order.status)}">${order.status}</span>
-                        </div>
-                        <div style="margin-bottom: 12px;">
-                            <div class="font-bold">${order.clientName}</div>
-                            <div class="text-sm text-muted">${formatPrice(order.total)} • ${order.type === 'delivery' ? '🛵 Livraison' : (order.type === 'dinein' ? '🍽️ Sur place' : '🥡 Emporter')}</div>
-                        </div>
-                        <a href="order-detail.html?id=${order.id}" class="btn btn-secondary" style="width: 100%; display: block; text-align: center;">Voir la commande</a>
-                    `;
-                    mobileContainer.appendChild(card);
-                });
+                            <div style="margin-bottom: 12px;">
+                                <div class="font-bold">${order.client_name || order.clientName || 'Client'}</div>
+                                <div class="text-sm text-muted">${formatPrice(order.total)} • ${order.type === 'delivery' ? '🛵 Livraison' : (order.type === 'dinein' ? '🍽️ Sur place' : '🥡 Emporter')}</div>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <select onchange="updateStatus('${order.id}', this.value)" style="flex:1; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;">
+                                    <option value="Nouvelle" ${order.status==='Nouvelle'?'selected':''}>🟡 Nouvelle</option>
+                                    <option value="En cours" ${order.status==='En cours'?'selected':''}>🔵 En cours</option>
+                                    <option value="Terminée" ${order.status==='Terminée'?'selected':''}>🟢 Terminée</option>
+                                    <option value="Annulée" ${order.status==='Annulée'?'selected':''}>🔴 Annulée</option>
+                                </select>
+                                <a href="order-detail.html?id=${order.id}" class="btn btn-secondary btn-sm" style="padding:8px 12px; text-decoration: none;">👁️ Détails</a>
+                            </div>
+                        `;
+                        mobileContainer.appendChild(card);
+                    });
+                }
             }
         }
 
+        async function updateStatus(orderId, newStatus) {
+            await DataManager.updateOrderStatus(orderId, newStatus);
+            await renderAdminOrders();
+        }
+
         function formatPrice(price) {
-            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(price);
+            return new Intl.NumberFormat('fr-FR').format(price || 0) + ' F CFA';
         }
 
         function getStatusClass(status) {
             switch (status) {
-                case 'ENVOYÉE': return 'bg-blue';
-                case 'APPROUVÉE': return 'bg-orange';
-                case 'EN PRÉPARATION': return 'bg-orange';
-                case 'PRÊTE': return 'bg-green';
-                case 'EN LIVRAISON': return 'bg-orange';
-                case 'LIVRÉE': return 'bg-green';
-                case 'ANNULÉE': return 'bg-gray';
+                case 'Nouvelle': return 'bg-orange';
+                case 'En cours': return 'bg-blue';
+                case 'Terminée': return 'bg-green';
+                case 'Annulée': return 'bg-gray';
                 default: return 'bg-gray';
             }
         }

@@ -4,83 +4,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Menu - Gourmet Express</title>
+    <title>Gestion du Menu - Gourmet Express</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         .admin-nav {
             display: flex;
             gap: 16px;
-            padding: 16px;
+            padding: 14px 20px;
             background: white;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #e2e8f0;
             margin-bottom: 24px;
+            align-items: center;
         }
 
         .admin-nav a {
-            font-weight: 500;
-            color: var(--text-secondary);
+            font-weight: 600;
+            color: #64748b;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
         }
 
-        .admin-nav a.active {
+        .admin-nav a.active, .admin-nav a:hover {
             color: var(--primary-color);
-            font-weight: 700;
+            background: #f8fafc;
         }
 
-        .menu-item-row {
+        .category-pills {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 18px;
+        }
+
+        .cat-pill {
+            background: white;
+            border: 1.5px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: #475569;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .cat-pill.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-card-cover {
+            height: 140px;
+            background: #f1f5f9;
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            flex-wrap: wrap;
-            /* Enable wrap for mobile */
+            justify-content: center;
+            overflow: hidden;
+            font-size: 2.5rem;
         }
 
-        .menu-actions-container {
+        .menu-card-cover img {
             width: 100%;
-            margin-top: 12px;
-            justify-content: space-between;
+            height: 100%;
+            object-fit: cover;
         }
 
-        @media (min-width: 600px) {
-            .menu-item-row {
-                flex-wrap: nowrap;
-            }
+        .menu-card-body {
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
 
-            .menu-actions-container {
-                width: auto;
-                margin-top: 0;
-                justify-content: flex-end;
-            }
+        .menu-card-cat {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #7e22ce;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .menu-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+
+        .menu-card-desc {
+            font-size: 0.82rem;
+            color: #64748b;
+            flex: 1;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .menu-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
         }
     </style>
 </head>
 
-<body style="background: #f0f2f5;">
+<body style="background: #f8fafc; font-family: 'Inter', sans-serif;">
 
-    <div class="admin-nav">
-        <a href="index.html">Commandes</a>
-        <a href="menu.html" class="active">Menu</a>
-        <a href="clients.html">Clients</a>
+    <!-- Desktop Nav -->
+    <div class="admin-nav desktop-only">
+        <div style="display:flex; align-items:center; gap:8px; margin-right:16px;">
+            <span id="nav-resto-logo" style="font-size:1.3rem;">🏪</span>
+            <span id="nav-restaurant-name" style="font-weight:800; color:var(--primary-color); font-size:1.05rem;">Restaurant</span>
+        </div>
+        <a href="index.html">📋 Commandes</a>
+        <a href="menu.html" class="active">📦 Menu</a>
+        <a href="clients.html">👥 Clients</a>
+        <a href="administration.html">📈 Administration</a>
         <div style="flex:1"></div>
-        <button onclick="logout()"
-            style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 600;">Déconnexion</button>
+        <a href="../superadmin/index.html" id="nav-superadmin-link" style="display:none; background:#f3e8ff; color:#7e22ce; padding:6px 12px; border-radius:8px; font-weight:700; text-decoration:none; margin-right:12px; font-size:0.85rem; border:1px solid #d8b4fe;">🏪 Plateforme Superadmin</a>
+        <button onclick="logout()" style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 700;">🚪 Déconnexion</button>
     </div>
 
-    <div class="container" style="max-width: 800px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <h2 class="mb-0">Gestion du Menu</h2>
-            <a href="menu-edit.html" class="btn btn-primary" style="width: auto;">+ Nouveau Produit</a>
+    <!-- Mobile Header -->
+    <div class="mobile-only" style="background: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; margin-bottom: 16px;">
+        <span style="font-weight: 700; font-size: 1.1rem;" id="mobile-restaurant-name">Menu</span>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <a href="index.html" style="font-size:1.2rem; text-decoration:none;">📋</a>
+            <a href="menu.html" style="font-size:1.2rem; text-decoration:none;">📦</a>
+            <a href="clients.html" style="font-size:1.2rem; text-decoration:none;">👥</a>
+            <a href="administration.html" style="font-size:1.2rem; text-decoration:none;">📈</a>
+            <button onclick="logout()" style="background: none; border: none; font-size: 1.3rem; cursor:pointer;">🚪</button>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1100px; padding: 0 16px 40px 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">📦 Gestion des Produits du Menu</h1>
+                <p style="color: #64748b; font-size: 0.95rem; margin: 0;">Ajoutez, modifiez vos produits et gérez leur disponibilité en temps réel.</p>
+            </div>
+            <a href="menu-edit.html" class="btn btn-primary" style="width: auto; padding: 10px 18px; font-weight: 700; border-radius: 10px; text-decoration: none;">+ Ajouter un produit</a>
         </div>
 
-        <div id="admin-menu-list">
-            <!-- Rendered by JS -->
+        <!-- Filter & Search Bar -->
+        <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+            <input type="text" id="search-product" placeholder="🔍 Rechercher un produit..." style="flex:1; min-width:220px; padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:0.95rem;" oninput="filterMenu()">
+        </div>
+
+        <!-- Category Pills -->
+        <div class="category-pills">
+            <button class="cat-pill active" onclick="setCategoryFilter('all', this)">🍽️ Tous les produits</button>
+            <button class="cat-pill" onclick="setCategoryFilter('Repas', this)">🍲 Repas</button>
+            <button class="cat-pill" onclick="setCategoryFilter('Boissons', this)">🥤 Boissons</button>
+            <button class="cat-pill" onclick="setCategoryFilter('Glaces', this)">🍦 Glaces</button>
+        </div>
+
+        <!-- Menu Grid -->
+        <div id="admin-menu-list" class="menu-grid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #888;">Chargement des produits...</div>
         </div>
     </div>
 
@@ -89,48 +197,119 @@
     <script src="../assets/js/data.js"></script>
     <script src="../assets/js/admin.js"></script>
     <script>
-        function renderAdminMenu() {
-            const container = document.getElementById('admin-menu-list');
-            const menu = DataManager.getMenu();
-            container.innerHTML = '';
+        let allProducts = [];
+        let currentCategory = 'all';
 
-            menu.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'menu-item-row';
-                // Adjust for mobile: Stack on very small screens, row on larger.
-                div.style.flexWrap = 'wrap';
+        document.addEventListener('DOMContentLoaded', async () => {
+            const staff = DataManager.getCurrentStaff();
+            if (staff && staff.role === 'superadmin') {
+                const superadminLink = document.getElementById('nav-superadmin-link');
+                if (superadminLink) superadminLink.style.display = 'inline-block';
+            }
 
-                div.innerHTML = `
-                    <div style="display: flex; gap: 16px; flex: 1; min-width: 250px;">
-                        <div style="width: 60px; height: 60px; border-radius: 8px; background-image: url('${item.image}'); background-size: cover; background-position: center; flex-shrink: 0;"></div>
-                        <div>
-                            <div class="font-bold" style="font-size: 1.1rem;">${item.name}</div>
-                            <div class="text-sm text-muted">${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(item.price)} • ${item.category}</div>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 8px; width: 100%; margin-top: 12px; justify-content: flex-end;" class="menu-actions-container">
-                        <!-- Desktop/Tablet styles handled by CSS mostly, but inline fallback -->
-                         <button class="btn btn-secondary btn-sm" style="flex: 1; white-space: nowrap;" onclick="toggleMenuItem('${item.id}')">
-                            ${item.active ? '✅ Actif' : '❌ Inactif'}
-                        </button>
-                        <a href="menu-edit.html?id=${item.id}" class="btn btn-secondary btn-sm" style="flex: 1; text-align: center;">
-                            ✏️ Modi.
-                        </a>
-                        <button class="btn btn-secondary btn-sm" style="flex: 0; min-width: 50px; color: #DC3545; border-color: #DC3545;" onclick="deleteMenuItem('${item.id}')">
-                            🗑️
-                        </button>
-                    </div>
-                `;
+            if (staff && (staff.role === 'admin' || staff.role === 'staff' || staff.role === 'agent' || staff.role === 'superadmin')) {
+                const nameEl = document.getElementById('nav-restaurant-name');
+                if (nameEl) nameEl.textContent = staff.restaurant_name || 'Restaurant';
+                const mobNameEl = document.getElementById('mobile-restaurant-name');
+                if (mobNameEl) mobNameEl.textContent = staff.restaurant_name || 'Menu';
 
-                // Add media query inline style for desktop to prevent wrapping if ample space? 
-                // Better handled by style tag below
-                container.appendChild(div);
-            });
+                if (staff.restaurant_logo) {
+                    const logoEl = document.getElementById('nav-resto-logo');
+                    if (logoEl) logoEl.innerHTML = `<img src="${staff.restaurant_logo}" style="width:28px; height:28px; border-radius:6px; object-fit:cover;">`;
+                }
+
+                await loadRestaurantMenu();
+            } else {
+                window.location.href = '../login.html';
+            }
+        });
+
+        async function loadRestaurantMenu() {
+            const staff = DataManager.getCurrentStaff();
+            const restaurantId = staff ? staff.restaurant_id : null;
+            if (!restaurantId) return;
+
+            allProducts = await DataManager.getMenu(restaurantId);
+            renderMenuGrid();
         }
 
-        // Initial render
-        renderAdminMenu();
+        function setCategoryFilter(category, btn) {
+            currentCategory = category;
+            document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderMenuGrid();
+        }
+
+        function filterMenu() {
+            renderMenuGrid();
+        }
+
+        function renderMenuGrid() {
+            const container = document.getElementById('admin-menu-list');
+            if (!container) return;
+
+            const query = (document.getElementById('search-product')?.value || '').toLowerCase().trim();
+
+            const filtered = allProducts.filter(item => {
+                const catMatch = (currentCategory === 'all') || (item.category === currentCategory);
+                const queryMatch = !query || (item.name && item.name.toLowerCase().includes(query)) || (item.description && item.description.toLowerCase().includes(query));
+                return catMatch && queryMatch;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; background: white; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                        <p style="color:#64748b; font-size:1.05rem; margin-bottom:12px;">Aucun produit ne correspond à ces critères.</p>
+                        <a href="menu-edit.html" class="btn btn-primary" style="width:auto; display:inline-block; text-decoration:none;">+ Ajouter un produit</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => `
+                <div class="menu-card">
+                    <div class="menu-card-cover">
+                        ${item.image ? `<img src="${item.image}" alt="${item.name}">` : '🍽️'}
+                    </div>
+                    <div class="menu-card-body">
+                        <div class="menu-card-cat">${item.category || 'Repas'}</div>
+                        <div class="menu-card-title">${item.name}</div>
+                        <div class="menu-card-desc">${item.description || 'Aucune description'}</div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-size:0.8rem; font-weight:700; padding:4px 8px; border-radius:6px; background:${item.available !== false && item.active !== false ? '#dcfce7' : '#fee2e2'}; color:${item.available !== false && item.active !== false ? '#15803d' : '#b91c1c'};">
+                                ${item.available !== false && item.active !== false ? '✅ Disponible' : '❌ Épuisé / Inactif'}
+                            </span>
+                        </div>
+
+                        <div class="menu-card-footer">
+                            <span style="font-size:1.15rem; font-weight:800; color:#0f172a;">${new Intl.NumberFormat('fr-FR').format(item.price)} F</span>
+                            <div style="display:flex; gap:6px;">
+                                <a href="menu-edit.html?id=${item.id}" class="btn btn-secondary btn-sm" style="padding:6px 10px; text-decoration:none;" title="Modifier">✏️</a>
+                                <button onclick="toggleProduct('${item.id}', ${item.available !== false && item.active !== false})" class="btn btn-secondary btn-sm" style="padding:6px 10px;" title="Activer / Désactiver">🔄</button>
+                                <button onclick="deleteProduct('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="btn btn-secondary btn-sm" style="padding:6px 10px; color:#ef4444;" title="Supprimer">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function toggleProduct(id, currentAvailable) {
+            await DataManager.updateMenuItem(id, { available: !currentAvailable, active: !currentAvailable });
+            await loadRestaurantMenu();
+        }
+
+        async function deleteProduct(id, name) {
+            if (!confirm(`Supprimer définitivement le produit "${name}" du menu ?`)) return;
+            await DataManager.deleteMenuItem(id);
+            await loadRestaurantMenu();
+        }
+
+        function logout() {
+            DataManager.logout();
+            window.location.href = '../login.html';
+        }
     </script>
 </body>
 

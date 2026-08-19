@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration & Finances - Gourmet Express</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .admin-nav {
+            display: flex;
+            gap: 16px;
+            padding: 14px 20px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 24px;
+            align-items: center;
+        }
+
+        .admin-nav a {
+            font-weight: 600;
+            color: #64748b;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .admin-nav a.active, .admin-nav a:hover {
+            color: var(--primary-color);
+            background: #f8fafc;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+        }
+
+        .stat-box .title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-box .value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .stat-box .subtitle {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-custom th, .table-custom td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table-custom th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body style="background: #f8fafc; font-family: 'Inter', sans-serif;">
+
+    <!-- Desktop Nav -->
+    <div class="admin-nav desktop-only">
+        <div style="display:flex; align-items:center; gap:8px; margin-right:16px;">
+            <span id="nav-resto-logo" style="font-size:1.3rem;">🏪</span>
+            <span id="nav-restaurant-name" style="font-weight:800; color:var(--primary-color); font-size:1.05rem;">Restaurant</span>
+        </div>
+        <a href="index.html">📋 Commandes</a>
+        <a href="menu.html">📦 Menu</a>
+        <a href="clients.html">👥 Clients</a>
+        <a href="administration.html" class="active">📈 Administration</a>
+        <div style="flex:1"></div>
+        <a href="../superadmin/index.html" id="nav-superadmin-link" style="display:none; background:#f3e8ff; color:#7e22ce; padding:6px 12px; border-radius:8px; font-weight:700; text-decoration:none; margin-right:12px; font-size:0.85rem; border:1px solid #d8b4fe;">🏪 Plateforme Superadmin</a>
+        <button onclick="logout()" style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 700;">🚪 Déconnexion</button>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="mobile-only" style="background: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; margin-bottom: 16px;">
+        <span style="font-weight: 700; font-size: 1.1rem;" id="mobile-restaurant-name">Administration</span>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <a href="index.html" style="font-size:1.2rem; text-decoration:none;">📋</a>
+            <a href="menu.html" style="font-size:1.2rem; text-decoration:none;">📦</a>
+            <a href="clients.html" style="font-size:1.2rem; text-decoration:none;">👥</a>
+            <a href="administration.html" style="font-size:1.2rem; text-decoration:none;">📈</a>
+            <button onclick="logout()" style="background: none; border: none; font-size: 1.3rem; cursor:pointer;">🚪</button>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1100px; padding: 0 16px 40px 16px;">
+        
+        <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">📈 Administration & Suivi Financier</h1>
+                <p style="color: #64748b; font-size: 0.95rem; margin: 0;">Suivez votre chiffre d'affaires, la commission de la plateforme et vos reversements.</p>
+            </div>
+            <button onclick="loadFinancialData()" class="btn btn-secondary" style="padding: 8px 16px; font-weight: 700; border-radius: 8px;">🔄 Actualiser les chiffres</button>
+        </div>
+
+        <!-- KPI Financial Cards -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="title">Chiffre d'Affaires Brut</div>
+                <div class="value" id="kpi-gross-revenue" style="color: #0f172a;">0 F CFA</div>
+                <div class="subtitle">Total des commandes payées (100%)</div>
+            </div>
+
+            <div class="stat-box" style="border-left: 4px solid #7e22ce;">
+                <div class="title" style="color: #7e22ce;">Commission ITA (5%)</div>
+                <div class="value" id="kpi-commission" style="color: #7e22ce;">0 F CFA</div>
+                <div class="subtitle">Frais de service plateforme</div>
+            </div>
+
+            <div class="stat-box" style="border-left: 4px solid #10b981;">
+                <div class="title" style="color: #10b981;">Part Nette Restaurateur (95%)</div>
+                <div class="value" id="kpi-net-share" style="color: #10b981;">0 F CFA</div>
+                <div class="subtitle">Votre revenu net garanti</div>
+            </div>
+
+            <div class="stat-box" style="border-left: 4px solid #3b82f6;">
+                <div class="title" style="color: #3b82f6;">Total Déjà Reversé</div>
+                <div class="value" id="kpi-total-paid" style="color: #3b82f6;">0 F CFA</div>
+                <div class="subtitle">Paiements reçus de ITA</div>
+            </div>
+
+            <div class="stat-box" style="border-left: 4px solid #f59e0b; background: #fffbeb;">
+                <div class="title" style="color: #b45309;">Solde Restant Dû</div>
+                <div class="value" id="kpi-balance-due" style="color: #b45309;">0 F CFA</div>
+                <div class="subtitle">Montant à recevoir de la plateforme</div>
+            </div>
+        </div>
+
+        <!-- Explanation card -->
+        <div class="card mb-4" style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 1px solid #e2e8f0; padding: 20px; border-radius: 14px;">
+            <div style="display: flex; gap: 14px; align-items: flex-start;">
+                <span style="font-size: 1.6rem;">💡</span>
+                <div style="font-size: 0.9rem; color: #334155; line-height: 1.6;">
+                    <strong>Comment fonctionne votre compte ?</strong><br>
+                    Sur chaque commande client payée, <strong>ITA INNOVATE</strong> prélève <strong>5% de commission</strong> pour la maintenance, la passerelle Mobile Money et le support de la plateforme. Les <strong>95% restants</strong> vous sont intégralement reversés par Mobile Money ou Virement selon votre solde disponible.
+                </div>
+            </div>
+        </div>
+
+        <!-- Payout History Table -->
+        <div class="card" style="padding: 24px; border-radius: 14px;">
+            <h2 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 16px;">📜 Historique des Règlements & Reversements Reçus</h2>
+            <div style="overflow-x: auto;">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Date & Heure</th>
+                            <th>Référence</th>
+                            <th>Montant Reçu</th>
+                            <th>Moyen de Versement</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payouts-table-body">
+                        <tr><td colspan="5" style="text-align:center; padding:24px; color:#888;">Chargement des reversements...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase.js"></script>
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const staff = DataManager.getCurrentStaff();
+            if (staff && staff.role === 'superadmin') {
+                const superadminLink = document.getElementById('nav-superadmin-link');
+                if (superadminLink) superadminLink.style.display = 'inline-block';
+            }
+
+            if (staff && (staff.role === 'admin' || staff.role === 'staff' || staff.role === 'agent' || staff.role === 'superadmin')) {
+                const nameEl = document.getElementById('nav-restaurant-name');
+                if (nameEl) nameEl.textContent = staff.restaurant_name || 'Restaurant';
+                const mobNameEl = document.getElementById('mobile-restaurant-name');
+                if (mobNameEl) mobNameEl.textContent = staff.restaurant_name || 'Administration';
+
+                if (staff.restaurant_logo) {
+                    const logoEl = document.getElementById('nav-resto-logo');
+                    if (logoEl) logoEl.innerHTML = `<img src="${staff.restaurant_logo}" style="width:28px; height:28px; border-radius:6px; object-fit:cover;">`;
+                }
+
+                await loadFinancialData();
+            } else {
+                window.location.href = '../login.html';
+            }
+        });
+
+        async function loadFinancialData() {
+            const staff = DataManager.getCurrentStaff();
+            const restaurantId = staff ? staff.restaurant_id : null;
+            if (!restaurantId) return;
+
+            // 1. Fetch Orders for this restaurant
+            const orders = await DataManager.getOrders(restaurantId);
+            const validOrders = orders.filter(o => o.status !== 'Annulée');
+
+            const grossRevenue = validOrders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+            const itaCommission = Math.round(grossRevenue * 0.05);
+            const netShare = grossRevenue - itaCommission;
+
+            // 2. Fetch Payouts for this restaurant
+            const payouts = await DataManager.getPayouts(restaurantId);
+            const totalPaidOut = payouts.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+            const remainingBalance = Math.max(0, netShare - totalPaidOut);
+
+            // 3. Render KPIs
+            document.getElementById('kpi-gross-revenue').textContent = formatPrice(grossRevenue);
+            document.getElementById('kpi-commission').textContent = formatPrice(itaCommission);
+            document.getElementById('kpi-net-share').textContent = formatPrice(netShare);
+            document.getElementById('kpi-total-paid').textContent = formatPrice(totalPaidOut);
+            document.getElementById('kpi-balance-due').textContent = formatPrice(remainingBalance);
+
+            // 4. Render Table
+            const tbody = document.getElementById('payouts-table-body');
+            if (!tbody) return;
+
+            if (payouts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:#888;">Aucun reversement enregistré pour le moment.</td></tr>`;
+            } else {
+                tbody.innerHTML = payouts.map(p => {
+                    const d = new Date(p.date || p.created_at || Date.now());
+                    const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <tr>
+                            <td style="font-weight:600; color:#334155;">📅 ${dateStr}</td>
+                            <td style="font-family:monospace; font-weight:700; color:#64748b;">${p.reference || p.id || 'REV-001'}</td>
+                            <td style="font-weight:800; color:#10b981; font-size:1.05rem;">+ ${formatPrice(p.amount)}</td>
+                            <td><span style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:6px; font-weight:700; font-size:0.85rem;">💳 ${p.method || 'Mobile Money'}</span></td>
+                            <td><span style="background:#dcfce7; color:#15803d; padding:4px 8px; border-radius:6px; font-weight:700; font-size:0.85rem;">✅ Reçu & Validé</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function formatPrice(amount) {
+            return new Intl.NumberFormat('fr-FR').format(amount || 0) + ' F CFA';
+        }
+
+        function logout() {
+            DataManager.logout();
+            window.location.href = '../login.html';
+        }
+    </script>
+</body>
+
+</html>

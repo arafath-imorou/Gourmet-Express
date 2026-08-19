@@ -4,91 +4,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion Clients - Gourmet Admin</title>
+    <title>Suivi Clients - Gourmet Express</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         .admin-nav {
             display: flex;
             gap: 16px;
-            padding: 16px;
+            padding: 14px 20px;
             background: white;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #e2e8f0;
             margin-bottom: 24px;
+            align-items: center;
         }
 
         .admin-nav a {
-            font-weight: 500;
-            color: var(--text-secondary);
+            font-weight: 600;
+            color: #64748b;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
         }
 
-        .admin-nav a.active {
+        .admin-nav a.active, .admin-nav a:hover {
             color: var(--primary-color);
-            font-weight: 700;
+            background: #f8fafc;
         }
 
-        .client-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
+        .client-card {
             background: white;
-            border-bottom: 1px solid #eee;
+            border-radius: 12px;
+            padding: 18px 20px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        .client-row:first-child {
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
         }
 
-        .client-row:last-child {
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
-            border-bottom: none;
+        .table-custom th, .table-custom td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
         }
 
-        .status-active {
-            color: #10B981;
-            background: #D1FAE5;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-        }
-
-        .status-blocked {
-            color: #DC3545;
-            background: #F8D7DA;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+        .table-custom th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.85rem;
         }
     </style>
 </head>
 
-<body style="background: #f0f2f5;">
+<body style="background: #f8fafc; font-family: 'Inter', sans-serif;">
 
-    <div class="admin-nav">
-        <a href="index.html">Commandes</a>
-        <a href="menu.html">Menu</a>
-        <a href="clients.html" class="active">Clients</a>
+    <!-- Desktop Nav -->
+    <div class="admin-nav desktop-only">
+        <div style="display:flex; align-items:center; gap:8px; margin-right:16px;">
+            <span id="nav-resto-logo" style="font-size:1.3rem;">🏪</span>
+            <span id="nav-restaurant-name" style="font-weight:800; color:var(--primary-color); font-size:1.05rem;">Restaurant</span>
+        </div>
+        <a href="index.html">📋 Commandes</a>
+        <a href="menu.html">📦 Menu</a>
+        <a href="clients.html" class="active">👥 Clients</a>
+        <a href="administration.html">📈 Administration</a>
         <div style="flex:1"></div>
-        <button onclick="logout()"
-            style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 600;">Déconnexion</button>
+        <a href="../superadmin/index.html" id="nav-superadmin-link" style="display:none; background:#f3e8ff; color:#7e22ce; padding:6px 12px; border-radius:8px; font-weight:700; text-decoration:none; margin-right:12px; font-size:0.85rem; border:1px solid #d8b4fe;">🏪 Plateforme Superadmin</a>
+        <button onclick="logout()" style="background:none; border:none; color: var(--primary-color); cursor: pointer; font-weight: 700;">🚪 Déconnexion</button>
     </div>
 
-    <div class="container" style="max-width: 1000px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <h2 style="margin: 0;">Clients Fidèles</h2>
-            <button onclick="recalculatePoints()" class="btn btn-secondary" style="width: auto;">🔄 Recalculer les
-                points</button>
+    <!-- Mobile Header -->
+    <div class="mobile-only" style="background: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; margin-bottom: 16px;">
+        <span style="font-weight: 700; font-size: 1.1rem;" id="mobile-restaurant-name">Clients</span>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <a href="index.html" style="font-size:1.2rem; text-decoration:none;">📋</a>
+            <a href="menu.html" style="font-size:1.2rem; text-decoration:none;">📦</a>
+            <a href="clients.html" style="font-size:1.2rem; text-decoration:none;">👥</a>
+            <a href="administration.html" style="font-size:1.2rem; text-decoration:none;">📈</a>
+            <button onclick="logout()" style="background: none; border: none; font-size: 1.3rem; cursor:pointer;">🚪</button>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1100px; padding: 0 16px 40px 16px;">
+        
+        <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">👥 Suivi de votre Clientèle</h1>
+                <p style="color: #64748b; font-size: 0.95rem; margin: 0;">Retrouvez l'historique et les contacts des clients ayant commandé dans votre établissement.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="search-client" placeholder="🔍 Rechercher un client (Nom, Tel)..." style="padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:0.95rem; min-width:240px;" oninput="filterClients()">
+            </div>
         </div>
 
-        <div class="card" style="padding: 0; overflow: hidden;">
-            <div id="clients-list">
-                <!-- Rendered by JS -->
-                <div style="padding: 32px; text-align: center; color: #888;">Chargement...</div>
+        <div class="card" style="padding: 0; overflow: hidden; border-radius: 14px;">
+            <div style="overflow-x: auto;">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Client</th>
+                            <th>Contact WhatsApp / Tél</th>
+                            <th>Commandes chez vous</th>
+                            <th>Total Dépensé</th>
+                            <th>Dernière Commande</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clients-table-body">
+                        <tr><td colspan="6" style="text-align:center; padding:30px; color:#888;">Chargement de votre clientèle...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -98,93 +136,128 @@
     <script src="../assets/js/data.js"></script>
     <script src="../assets/js/admin.js"></script>
     <script>
-        // Override checkAuth or similar if needed, or rely on admin.js to handle basics? 
-        // admin.js handles checkAuth on load. 
-        // We need checkAuth to ensure we are logged in as ADMIN.
-        // admin.js checkAuth logic:
-        /*
-        const token = sessionStorage.getItem('admin_token');
-        if (!token && !document.getElementById('login-overlay')) {
-             window.location.href = 'index.html';
+        let restaurantClients = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const staff = DataManager.getCurrentStaff();
+            if (staff && staff.role === 'superadmin') {
+                const superadminLink = document.getElementById('nav-superadmin-link');
+                if (superadminLink) superadminLink.style.display = 'inline-block';
+            }
+
+            if (staff && (staff.role === 'admin' || staff.role === 'staff' || staff.role === 'agent' || staff.role === 'superadmin')) {
+                const nameEl = document.getElementById('nav-restaurant-name');
+                if (nameEl) nameEl.textContent = staff.restaurant_name || 'Restaurant';
+                const mobNameEl = document.getElementById('mobile-restaurant-name');
+                if (mobNameEl) mobNameEl.textContent = staff.restaurant_name || 'Clients';
+
+                if (staff.restaurant_logo) {
+                    const logoEl = document.getElementById('nav-resto-logo');
+                    if (logoEl) logoEl.innerHTML = `<img src="${staff.restaurant_logo}" style="width:28px; height:28px; border-radius:6px; object-fit:cover;">`;
+                }
+
+                await loadRestaurantClients();
+            } else {
+                window.location.href = '../login.html';
+            }
+        });
+
+        async function loadRestaurantClients() {
+            const staff = DataManager.getCurrentStaff();
+            const restaurantId = staff ? staff.restaurant_id : null;
+            if (!restaurantId) return;
+
+            // Fetch Orders for this restaurant
+            const orders = await DataManager.getOrders(restaurantId);
+            
+            // Group by client
+            const clientMap = {};
+            orders.forEach(o => {
+                const name = o.client_name || o.clientName || 'Client Inconnu';
+                const phone = (o.phone || '').trim();
+                const key = phone || name;
+
+                if (!clientMap[key]) {
+                    clientMap[key] = {
+                        name: name,
+                        phone: phone,
+                        ordersCount: 0,
+                        totalSpent: 0,
+                        lastOrderDate: o.date
+                    };
+                }
+
+                clientMap[key].ordersCount += 1;
+                if (o.status !== 'Annulée') {
+                    clientMap[key].totalSpent += (parseFloat(o.total) || 0);
+                }
+
+                if (new Date(o.date) > new Date(clientMap[key].lastOrderDate)) {
+                    clientMap[key].lastOrderDate = o.date;
+                }
+            });
+
+            restaurantClients = Object.values(clientMap).sort((a, b) => b.totalSpent - a.totalSpent);
+            renderClientsList();
         }
-        */
-        // So it should be fine.
 
-        function renderClients() {
-            const container = document.getElementById('clients-list');
-            const clients = DataManager.getClients();
+        function filterClients() {
+            renderClientsList();
+        }
 
-            if (clients.length === 0) {
-                container.innerHTML = '<div style="padding: 32px; text-align: center; color: #888;">Aucun client inscrit pour le moment.</div>';
+        function renderClientsList() {
+            const tbody = document.getElementById('clients-table-body');
+            if (!tbody) return;
+
+            const q = (document.getElementById('search-client')?.value || '').toLowerCase().trim();
+            const filtered = restaurantClients.filter(c => 
+                c.name.toLowerCase().includes(q) || (c.phone && c.phone.includes(q))
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#888;">Aucun client trouvé.</td></tr>`;
                 return;
             }
 
-            container.innerHTML = '';
-            clients.forEach(client => {
-                const div = document.createElement('div');
-                div.className = 'client-row';
-                div.innerHTML = `
-                    <div style="flex: 2;">
-                        <div class="font-bold">${client.firstname} ${client.lastname}</div>
-                        <div class="text-sm text-muted">${client.phone} • ${client.email}</div>
-                    </div>
-                    <div style="flex: 1; text-align: center;">
-                        <div class="font-bold" style="color: var(--primary-color); font-size: 1.1rem;">${client.points || 0} pts</div>
-                        <div class="text-xs text-muted">Fidélité</div>
-                        ${(client.vouchers && client.vouchers > 0) ?
-                        `<div style="margin-top: 4px; color: #F59E0B; font-weight: 700; font-size: 0.9rem;">🎁 ${client.vouchers} Bon(s)</div>`
-                        : ''}
-                    </div>
-                    <div style="flex: 1; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                        <div>
-                            <span class="status-${client.status}">${client.status === 'active' ? 'Actif' : 'Bloqué'}</span>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            ${(client.vouchers && client.vouchers > 0) ?
-                        `<button onclick="redeemVoucher('${client.id}')" class="btn btn-primary btn-sm" style="background-color: #F59E0B; border-color: #F59E0B; padding: 4px 8px;">🎁 Utiliser</button>`
-                        : ''}
-                            <button onclick="toggleClientStatus('${client.id}')" class="btn btn-secondary btn-sm" style="width: auto; padding: 4px 8px;">
-                                ${client.status === 'active' ? '🚫' : '✅'}
-                            </button>
-                        </div>
-                    </div>
+            tbody.innerHTML = filtered.map(c => {
+                const cleanPhone = (c.phone || '').replace(/[^0-9]/g, '');
+                const waUrl = cleanPhone ? `https://wa.me/229${cleanPhone.replace(/^229/, '')}` : null;
+                const d = new Date(c.lastOrderDate);
+                const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight:700; color:#0f172a; font-size:0.95rem;">👤 ${c.name}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight:600; color:#334155;">📱 ${c.phone || 'Non renseigné'}</div>
+                        </td>
+                        <td>
+                            <span style="background:#f1f5f9; color:#475569; padding:4px 10px; border-radius:6px; font-weight:700; font-size:0.85rem;">${c.ordersCount} commande(s)</span>
+                        </td>
+                        <td style="font-weight:800; color:#10b981; font-size:1rem;">
+                            ${new Intl.NumberFormat('fr-FR').format(c.totalSpent)} F CFA
+                        </td>
+                        <td style="color:#64748b; font-size:0.85rem;">
+                            📅 ${dateStr}
+                        </td>
+                        <td>
+                            ${waUrl ? `
+                                <a href="${waUrl}" target="_blank" class="btn btn-secondary btn-sm" style="background:#25D366; color:white; border:none; padding:6px 12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:4px; border-radius:8px;">
+                                    💬 WhatsApp
+                                </a>
+                            ` : '-'}
+                        </td>
+                    </tr>
                 `;
-                container.appendChild(div);
-            });
+            }).join('');
         }
 
-        window.toggleClientStatus = (id) => {
-            const clients = DataManager.getClients();
-            const index = clients.findIndex(c => c.id === id);
-            if (index !== -1) {
-                clients[index].status = clients[index].status === 'active' ? 'blocked' : 'active';
-                DataManager.saveClients(clients);
-                renderClients();
-            }
-        };
-
-        window.redeemVoucher = (id) => {
-            const gift = prompt("Quel cadeau offrez-vous pour ce bon ? (Ex: Pizza offerte)");
-            if (gift) {
-                const result = DataManager.redeemVoucher(id, gift);
-                if (result.success) {
-                    alert(`Bon validé ! Cadeau : ${gift}`);
-                    renderClients();
-                } else {
-                    alert(result.message);
-                }
-            }
-        };
-
-        window.recalculatePoints = () => {
-            if (confirm("Voulez-vous recalculer tous les points de fidélité en fonction de l'historique des commandes livrées ?")) {
-                const result = DataManager.recalculateLoyaltyPoints();
-                alert(result.message);
-                renderClients();
-            }
-        };
-
-        renderClients();
+        function logout() {
+            DataManager.logout();
+            window.location.href = '../login.html';
+        }
     </script>
 </body>
 
