@@ -72,14 +72,25 @@ const FedaPayManager = {
                     },
                     onComplete: function (response) {
                         console.log('FedaPay onComplete response:', response);
-                        if (response && (response.status === 'approved' || response.status === 'transferred' || response.reason === 'CHECKOUT_COMPLETE' || response.transaction)) {
-                            const txId = (response.transaction && response.transaction.id) || 'FED-' + Date.now().toString().slice(-6);
+                        
+                        // Analyse approfondie de la réponse FedaPay
+                        const tx = (response && response.transaction) ? response.transaction : response;
+                        const status = (tx && tx.status) ? tx.status.toString().toLowerCase() : '';
+                        
+                        // Strictement vérifier que le statut est 'approved' ou 'transferred'
+                        const isApproved = (status === 'approved' || status === 'transferred');
+
+                        if (isApproved) {
+                            const txId = (tx && tx.id) || (response && response.id) || 'FED-' + Date.now().toString().slice(-6);
                             if (onSuccess) onSuccess({ transactionId: txId, raw: response });
                         } else {
-                            if (onError) onError('Le paiement n\'a pas pu être validé.');
+                            console.warn('FedaPay non approuvé:', status, response);
+                            const msg = status ? `Statut de la transaction: "${status}".` : 'La transaction n\'a pas été complétée.';
+                            if (onError) onError(`Paiement non validé (${msg}). Votre compte n'a pas été débité et la commande n'a pas été enregistrée.`);
                         }
                     },
                     onDismiss: function () {
+                        console.log('FedaPay checkout fermé par l\'utilisateur.');
                         if (onCancel) onCancel();
                     }
                 });
@@ -88,11 +99,13 @@ const FedaPayManager = {
                 return;
             } catch (err) {
                 console.error('Erreur lancement widget FedaPay:', err);
+                if (onError) onError('Impossible d\'ouvrir la passerelle FedaPay. Veuillez vérifier votre connexion.');
+                return;
             }
         }
 
-        // Modal de simulation/fallback sécurisé si FedaPay script est bloqué (ex: adblockers) ou en environnement local
-        FedaPayManager.showFallbackPaymentModal({ amount: cleanAmount, customer, onSuccess, onCancel });
+        // Si le script FedaPay n'est pas chargé
+        if (onError) onError('La passerelle de paiement FedaPay n\'est pas accessible actuellement. Veuillez réessayer.');
     },
 
     /**
