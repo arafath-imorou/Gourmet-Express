@@ -375,8 +375,13 @@ const DataManager = {
             // 1. Vérifier si c'est un compte Restaurant (ou Staff) dans la table 'staff'
             let staffQuery = window.supabaseClient
                 .from('staff')
-                .select('*, restaurants(id, name, logo, phone, address, commission_rate)')
-                .or(`email.eq.${normEmail},email.eq.${rawId}`);
+                .select('*, restaurants(id, name, logo, phone, address)');
+
+            if (normEmail && rawId && normEmail !== rawId) {
+                staffQuery = staffQuery.or(`email.eq.${normEmail},email.eq.${rawId}`);
+            } else {
+                staffQuery = staffQuery.eq('email', normEmail || rawId);
+            }
 
             const { data: staffList, error: staffErr } = await staffQuery;
             if (!staffErr && staffList && staffList.length > 0) {
@@ -413,10 +418,12 @@ const DataManager = {
             }
 
             // 2. Vérifier si c'est un compte Client dans la table 'restau_clients'
-            let clientQuery = window.supabaseClient
-                .from('restau_clients')
-                .select('*')
-                .or(`email.eq.${normEmail},email.eq.${rawId},phone.eq.${normPhone},phone.eq.${rawId}`);
+            let clientQuery = window.supabaseClient.from('restau_clients').select('*');
+            if (rawId.includes('@')) {
+                clientQuery = clientQuery.eq('email', normEmail || rawId);
+            } else {
+                clientQuery = clientQuery.or(`phone.eq.${normPhone},phone.eq.${rawId},email.eq.${rawId}`);
+            }
 
             const { data: clientList, error: clientErr } = await clientQuery;
             if (!clientErr && clientList && clientList.length > 0) {
@@ -631,7 +638,7 @@ const DataManager = {
         try {
             let query = window.supabaseClient
                 .from('restau_orders')
-                .select('*, restaurants(id, name, logo, phone, whatsapp_phone)')
+                .select('*, restaurants(id, name, logo, phone, address)')
                 .order('date', { ascending: false });
             
             if (clientId && phone) {
