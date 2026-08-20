@@ -216,33 +216,8 @@
 
 <body style="background: #f8fafc; font-family: 'Aptos', 'Segoe UI Variable', 'Segoe UI', 'Inter', system-ui, sans-serif;">
 
-    <!-- LOGIN LAYER -->
-    <div id="login-overlay" style="display: none;">
-        <div class="login-card">
-            <h2 class="mb-4" style="color: var(--primary-color);">Gourmet Admin 🔐</h2>
-
-            <div id="error-box" class="error-msg">Identifiants incorrects</div>
-
-            <form id="login-form">
-                <div class="input-group" style="text-align: left;">
-                    <label for="username">Identifiant</label>
-                    <input type="text" id="username" name="username" required placeholder="admin">
-                </div>
-
-                <div class="input-group" style="text-align: left;">
-                    <label for="password">Mot de passe</label>
-                    <input type="password" id="password" name="password" required placeholder="admin">
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="margin-top: 16px;">Se connecter</button>
-                <a href="../index.html" class="btn btn-secondary"
-                    style="margin-top: 12px; display: block; text-decoration: none;">← Retour au site</a>
-            </form>
-        </div>
-    </div>
-
-    <!-- DASHBOARD LAYER -->
-    <div id="dashboard-content" style="display: none;">
+    <!-- DASHBOARD CONTENT -->
+    <div id="dashboard-content">
         <!-- Desktop Nav -->
         <div class="admin-nav desktop-only">
             <!-- Left: Restaurant Brand -->
@@ -418,12 +393,7 @@
                 const superadminLink = document.getElementById('nav-superadmin-link');
                 if (superadminLink) superadminLink.style.display = 'inline-block';
             }
-            const loginOverlay = document.getElementById('login-overlay');
-            const dashboardContent = document.getElementById('dashboard-content');
-            
             if (staff && (staff.role === 'admin' || staff.role === 'staff' || staff.role === 'agent' || staff.role === 'superadmin')) {
-                if (loginOverlay) loginOverlay.style.display = 'none';
-                if (dashboardContent) dashboardContent.style.display = 'block';
                 
                 const nameEl = document.getElementById('nav-restaurant-name');
                 if (nameEl) nameEl.textContent = staff.restaurant_name || 'Restaurant';
