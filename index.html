@@ -458,13 +458,14 @@
                     e.preventDefault();
                     openRestaurantModal(r);
                 };
+                const initial = r.name ? r.name.charAt(0).toUpperCase() : 'R';
                 a.innerHTML = `
                     <div class="cover">
-                        ${r.logo ? `<img src="${r.logo}" alt="${r.name}">` : '🍽️'}
+                        ${r.logo ? `<img src="${r.logo}" alt="${r.name}" loading="lazy" decoding="async">` : `<span style="font-weight:800; color:white;">${initial}</span>`}
                     </div>
                     <div class="info">
                         <div class="name">${r.name}</div>
-                        <div class="address">📍 ${r.address || (r.city ? r.city : 'En savoir plus...')}</div>
+                        <div class="address">${r.address || (r.city ? r.city : 'En savoir plus...')}</div>
                     </div>`;
                 grid.appendChild(a);
             });

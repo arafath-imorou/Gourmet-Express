@@ -6,7 +6,7 @@
 let allRestaurantsList = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Load active restaurants list
+    // 1. Load active restaurants list (from high-speed cache)
     allRestaurantsList = await DataManager.getRestaurants(true);
 
     let restaurantId = DataManager.getCurrentRestaurantId();
@@ -35,7 +35,7 @@ function populateRestaurantSwitcher(currentId) {
 
     select.innerHTML = allRestaurantsList.map(r => `
         <option value="${r.id}" ${r.id === currentId ? 'selected' : ''}>
-            🍽️ ${r.name}
+            ${r.name}
         </option>
     `).join('');
 
@@ -51,12 +51,13 @@ function updateSwitcherBadge(restaurantId) {
     if (currentResto) {
         if (nameEl) nameEl.textContent = currentResto.name;
         if (avatarEl) {
+            const initial = currentResto.name ? currentResto.name.charAt(0).toUpperCase() : 'R';
             avatarEl.innerHTML = currentResto.logo 
-                ? `<img src="${currentResto.logo}" alt="${currentResto.name}">`
-                : '🍽️';
+                ? `<img src="${currentResto.logo}" alt="${currentResto.name}" loading="lazy">`
+                : `<span>${initial}</span>`;
         }
         if (headerTitle) {
-            headerTitle.innerHTML = `Notre Carte<div style="font-size:0.75rem; color:#e74c3c; font-weight:600;">${currentResto.name}</div>`;
+            headerTitle.innerHTML = `Notre Carte<div style="font-size:0.75rem; color:#e63946; font-weight:700;">${currentResto.name}</div>`;
         }
     }
 }
@@ -77,7 +78,7 @@ async function switchRestaurantFromMenu(newRestaurantId) {
 async function loadMenuForRestaurant(restaurantId) {
     const menuContainer = document.getElementById('menu-container');
     if (menuContainer) {
-        menuContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 40px;">Chargement de la carte...</div>';
+        menuContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 40px; font-weight:600;">Chargement de la carte...</div>';
     }
 
     window.allProducts = await DataManager.getMenu(restaurantId);
@@ -96,7 +97,7 @@ function renderMenu(categoryFilter = 'all') {
         : products.filter(p => p.category === categoryFilter);
 
     if (filteredProducts.length === 0) {
-        menuContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 40px; font-weight:500;">Aucun plat disponible pour cet établissement dans cette catégorie.</div>';
+        menuContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 40px; font-weight:600;">Aucun plat disponible pour cet établissement dans cette catégorie.</div>';
         return;
     }
 
@@ -144,17 +145,17 @@ function setupCategoryFilters() {
     if (!filterContainer) return;
     filterContainer.innerHTML = '';
 
-    const categoryIcons = {
-        'all': '🍽️ Tous les plats',
-        'Repas': '🍲 Repas',
-        'Boissons': '🥤 Boissons',
-        'Glaces': '🍦 Glaces'
+    const categoryNames = {
+        'all': 'Tous les plats',
+        'Repas': 'Repas',
+        'Boissons': 'Boissons',
+        'Glaces': 'Glaces'
     };
 
     sortedCats.forEach(cat => {
         const btn = document.createElement('button');
         btn.className = `category-pill ${cat === 'all' ? 'active' : ''}`;
-        btn.textContent = categoryIcons[cat] || cat;
+        btn.textContent = categoryNames[cat] || cat;
         btn.dataset.category = cat;
 
         btn.addEventListener('click', () => {

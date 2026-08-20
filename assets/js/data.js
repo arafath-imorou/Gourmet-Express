@@ -12,7 +12,18 @@ const STORAGE_KEYS = {
     PAYOUTS: 'restaurant_payouts_local'
 };
 
+const _DATA_CACHE = {
+    restaurants: { data: null, expires: 0 },
+    menus: {}
+};
+
 const DataManager = {
+
+    // Cache control
+    invalidateCache: () => {
+        _DATA_CACHE.restaurants.data = null;
+        _DATA_CACHE.menus = {};
+    },
 
     // ==================== HELPERS ====================
     normalize: (str) => str ? str.toString().trim().toLowerCase() : '',
@@ -104,19 +115,35 @@ const DataManager = {
     logoutStaff: () => localStorage.removeItem(STORAGE_KEYS.STAFF_SESSION),
 
     // ==================== RESTAURANTS ====================
-    getRestaurants: async (activeOnly = false) => {
+    getRestaurants: async (activeOnly = false, forceRefresh = false) => {
         try {
+            if (!forceRefresh && _DATA_CACHE.restaurants.data && Date.now() < _DATA_CACHE.restaurants.expires) {
+                if (activeOnly) {
+                    return _DATA_CACHE.restaurants.data.filter(r => r.status !== 'inactive');
+                }
+                return _DATA_CACHE.restaurants.data;
+            }
+
             if (!window.supabaseClient) return [];
             let q = window.supabaseClient.from('restaurants').select('*');
             if (activeOnly) {
                 q = q.neq('status', 'inactive');
             }
             const { data, error } = await q.order('name');
-            if (!error && data && data.length > 0) return data;
+            let results = [];
+            if (!error && data && data.length > 0) {
+                results = data;
+            } else {
+                // Fallback: fetch all without filter
+                const { data: allData, error: allErr } = await window.supabaseClient.from('restaurants').select('*');
+                if (!allErr && allData) results = allData;
+            }
 
-            // Fallback: fetch all without filter
-            const { data: allData, error: allErr } = await window.supabaseClient.from('restaurants').select('*');
-            if (!allErr && allData) return allData;
+            if (results && results.length > 0) {
+                _DATA_CACHE.restaurants.data = results;
+                _DATA_CACHE.restaurants.expires = Date.now() + 30000; // 30s TTL
+            }
+            return results;
         } catch (e) {
             console.error('Erreur getRestaurants:', e);
         }
@@ -536,13 +563,23 @@ const DataManager = {
     },
 
     // ==================== MENU ====================
-    getMenu: async (restaurantId) => {
+    getMenu: async (restaurantId, forceRefresh = false) => {
         const rid = restaurantId || DataManager.getCurrentRestaurantId();
         if (!rid) return [];
+
+        if (!forceRefresh && _DATA_CACHE.menus[rid] && Date.now() < _DATA_CACHE.menus[rid].expires) {
+            return _DATA_CACHE.menus[rid].data;
+        }
+
         const { data, error } = await window.supabaseClient
             .from('restau_menu').select('*').eq('restaurant_id', rid).order('category');
         if (error) return [];
-        return data || [];
+        const menuItems = data || [];
+        _DATA_CACHE.menus[rid] = {
+            data: menuItems,
+            expires: Date.now() + 30000 // 30s TTL
+        };
+        return menuItems;
     },
     addMenuItem: async (item) => {
         const itemToInsert = {
@@ -557,6 +594,7 @@ const DataManager = {
                 console.error('Erreur Supabase addMenuItem:', error);
                 return null;
             }
+            if (item.restaurant_id) delete _DATA_CACHE.menus[item.restaurant_id];
             return data && data.length > 0 ? data[0] : itemToInsert;
         } catch (err) {
             console.error('Exception addMenuItem:', err);
@@ -567,6 +605,7 @@ const DataManager = {
         try {
             const { error } = await window.supabaseClient.from('restau_menu').update(updates).eq('id', id);
             if (error) console.error('Erreur updateMenuItem:', error);
+            _DATA_CACHE.menus = {}; // Invalidate menu cache
             return !error;
         } catch (err) {
             console.error('Exception updateMenuItem:', err);
@@ -577,6 +616,7 @@ const DataManager = {
         try {
             const { error } = await window.supabaseClient.from('restau_menu').delete().eq('id', id);
             if (error) console.error('Erreur deleteMenuItem:', error);
+            _DATA_CACHE.menus = {}; // Invalidate menu cache
             return !error;
         } catch (err) {
             console.error('Exception deleteMenuItem:', err);

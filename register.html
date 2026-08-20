@@ -9,34 +9,34 @@
     <style>
         .auth-card {
             background: white;
-            padding: 32px;
+            padding: clamp(20px, 5vw, 32px);
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-md);
             max-width: 500px;
-            margin: 40px auto;
+            margin: 24px auto;
         }
     </style>
 </head>
 <body style="background: #f0f2f5;">
 
     <div class="container">
-        <div style="text-align: center; margin-top: 40px;">
+        <div style="text-align: center; margin-top: 24px;">
             <a href="index.html" class="nav-back-container" style="flex-direction: row; gap: 8px;">
-                <span style="font-size: 24px;">←</span>
+                <span style="font-size: 20px;">←</span>
                 <span>Retour à l'accueil</span>
             </a>
-            <div style="display:flex; flex-direction:column; align-items:center; margin-top:16px;">
-                <img src="assets/images/logogourmet.png" alt="Logo Gourmet Express" style="height: 100px; object-fit: contain; margin-bottom: 10px;">
-                <div style="font-size:1.6rem; font-weight:700; color:var(--primary-color);">Gourmet Express</div>
-                <div style="font-size:0.8rem; font-weight:700; letter-spacing:2px; color:#888; margin-top:2px; text-transform:uppercase; font-family:'Inter', sans-serif;">by ITA INNOVATE</div>
+            <div style="display:flex; flex-direction:column; align-items:center; margin-top:14px;">
+                <img src="assets/images/logogourmet.png" alt="Logo Gourmet Express" style="height: 90px; object-fit: contain; margin-bottom: 8px;">
+                <div style="font-size:1.5rem; font-weight:700; color:var(--primary-color);">Gourmet Express</div>
+                <div style="font-size:0.75rem; font-weight:700; letter-spacing:2px; color:#888; margin-top:2px; text-transform:uppercase; font-family:'Inter', sans-serif;">by ITA INNOVATE</div>
             </div>
         </div>
 
         <div class="auth-card">
-            <h2 class="text-center mb-4">Créer un compte</h2>
+            <h2 class="text-center mb-4" style="font-size:1.35rem;">Créer un compte</h2>
 
             <form id="register-form">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px;">
                     <div class="input-group">
                         <label>Prénom</label>
                         <input type="text" name="firstname" required>
