@@ -37,10 +37,10 @@
 
     <div class="client-header">
         <div style="display:flex; align-items:center; gap:12px;">
-            <a href="index.html" style="text-decoration: none; font-size: 1.1rem; color:#64748b; font-weight:700;">← Retour</a>
+            <a href="index.html" style="text-decoration: none; font-size: 0.95rem; color:#64748b; font-weight:700;">Retour</a>
             <div style="font-weight: 800; color:#0f172a; font-size:1.1rem;">Mon Profil</div>
         </div>
-        <a href="orders.html" style="text-decoration:none; font-weight:700; color:#e63946; font-size:0.9rem;">📜 Mes Commandes</a>
+        <a href="orders.html" style="text-decoration:none; font-weight:700; color:#e63946; font-size:0.9rem;">Mes Commandes</a>
     </div>
 
     <div class="container" style="max-width: 600px; padding: 24px 16px 40px 16px;">
@@ -48,7 +48,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <h3 style="font-size: 1.3rem; font-weight: 800; margin: 0; color: #0f172a;">Informations personnelles</h3>
                 <button id="btn-edit" class="btn btn-secondary" style="width: auto; padding: 8px 16px; font-weight: 700; border-radius: 10px;"
-                    onclick="enableEdit()">✏️ Modifier</button>
+                    onclick="enableEdit()">Modifier</button>
             </div>
 
             <form id="profile-form">
@@ -142,7 +142,7 @@
                 Object.assign(client, updates);
                 localStorage.setItem('restaurant_client_session', JSON.stringify(client));
                 cancelEdit();
-                alert('✅ Profil mis à jour avec succès !');
+                alert('Profil mis à jour avec succès !');
             }
         });
     </script>

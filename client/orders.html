@@ -76,19 +76,19 @@
     <!-- Client Header -->
     <div class="client-nav">
         <div style="display:flex; align-items:center; gap:12px;">
-            <a href="index.html" style="text-decoration:none; font-size:1.1rem; color:#64748b; font-weight:700;">← Retour</a>
+            <a href="index.html" style="text-decoration:none; font-size:0.95rem; color:#64748b; font-weight:700;">Retour</a>
             <span style="font-weight:800; color:#0f172a; font-size:1.1rem;">Mes Commandes</span>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
-            <a href="../menu.html" class="btn btn-primary btn-sm" style="width:auto; padding:8px 16px; font-weight:700; border-radius:10px; text-decoration:none;">🍽️ Commander</a>
-            <button onclick="logout()" style="background:#f1f5f9; border:none; color:#475569; padding:8px 14px; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.88rem;">🚪 Déconnexion</button>
+            <a href="../menu.html" class="btn btn-primary btn-sm" style="width:auto; padding:8px 16px; font-weight:700; border-radius:10px; text-decoration:none;">Commander</a>
+            <button onclick="logout()" style="background:#f1f5f9; border:none; color:#475569; padding:8px 14px; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.88rem;">Déconnexion</button>
         </div>
     </div>
 
     <div class="container" style="max-width: 800px; padding: 24px 16px 40px 16px;">
         
         <div style="margin-bottom: 20px;">
-            <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">📜 Historique de vos Commandes</h1>
+            <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Historique de vos Commandes</h1>
             <p style="color: #64748b; font-size: 0.95rem; margin: 0;">Suivez le statut de vos commandes en temps réel et contactez les restaurants.</p>
         </div>
 
@@ -161,7 +161,6 @@
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div style="background:white; border-radius:14px; border:1.5px solid #e2e8f0; padding:40px 20px; text-align:center;">
-                        <div style="font-size: 3rem; margin-bottom: 12px;">🍽️</div>
                         <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Aucune commande trouvée</h4>
                         <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 18px;">Vous n'avez pas de commande dans cette catégorie.</p>
                         <a href="../menu.html" class="btn btn-primary" style="width: auto; display: inline-block; padding: 10px 24px; font-weight: 700; border-radius: 10px; text-decoration: none;">Voir la carte</a>
@@ -177,7 +176,7 @@
                 const statusClass = getStatusClass(order.status);
                 
                 // Restaurant WhatsApp contact
-                const restoWa = order.restaurants?.whatsapp_phone || order.restaurants?.phone || '';
+                const restoWa = order.restaurants?.phone || '';
                 const cleanWa = restoWa.replace(/[^0-9]/g, '');
                 const waUrl = cleanWa ? `https://wa.me/229${cleanWa.replace(/^229/, '')}?text=${encodeURIComponent(`Bonjour ${restoName}, je vous contacte au sujet de ma commande N° ${order.id}`)}` : null;
 
@@ -194,13 +193,13 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
                             <div>
                                 <span style="font-weight: 800; color: #0f172a; font-size: 1.1rem;">#${order.id}</span>
-                                <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;">📅 ${dateStr}</span>
+                                <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;">${dateStr}</span>
                             </div>
                             <span class="badge-status ${statusClass}">${order.status}</span>
                         </div>
 
                         <div style="margin-bottom: 12px; font-size: 0.95rem; color: #0f172a; font-weight:700;">
-                            🏪 ${restoName}
+                            ${restoName}
                         </div>
 
                         <div style="background:#f8fafc; border-radius:10px; padding:12px; margin-bottom:14px; border:1px solid #f1f5f9;">
@@ -217,8 +216,8 @@
                             </div>
                             <div style="display:flex; gap:8px;">
                                 ${waUrl ? `
-                                    <a href="${waUrl}" target="_blank" class="btn btn-secondary btn-sm" style="width:auto; padding:8px 14px; background:#25D366; color:white; border:none; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
-                                        💬 Contacter le Restaurant
+                                    <a href="${waUrl}" target="_blank" class="btn btn-secondary btn-sm" style="width:auto; padding:8px 14px; background:#25D366; color:white; border:none; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.88rem; display:inline-flex; align-items:center;">
+                                        Contacter le Restaurant
                                     </a>
                                 ` : ''}
                             </div>
