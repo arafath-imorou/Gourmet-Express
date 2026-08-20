@@ -83,6 +83,7 @@
                     <select id="status-select-desktop" style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-weight: 700; font-size: 0.9rem;">
                         <option value="Nouvelle">🟡 Nouvelle</option>
                         <option value="En cours">🔵 En cours</option>
+                        <option value="Livrée">🟢 Livrée</option>
                         <option value="Terminée">🟢 Terminée</option>
                         <option value="Annulée">🔴 Annulée</option>
                     </select>
@@ -251,6 +252,7 @@
             switch (status) {
                 case 'Nouvelle': return '#fef3c7';
                 case 'En cours': return '#e0f2fe';
+                case 'Livrée': return '#dcfce7';
                 case 'Terminée': return '#dcfce7';
                 case 'Annulée': return '#fee2e2';
                 default: return '#f1f5f9';
@@ -261,6 +263,7 @@
             switch (status) {
                 case 'Nouvelle': return '#b45309';
                 case 'En cours': return '#0369a1';
+                case 'Livrée': return '#15803d';
                 case 'Terminée': return '#15803d';
                 case 'Annulée': return '#b91c1c';
                 default: return '#475569';

@@ -239,7 +239,44 @@
             const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMsg)}`;
             const waBtn = document.getElementById('wa-btn');
             waBtn.href = waLink;
-            waBtn.innerHTML = `<span>💬 Envoyer le récapitulatif sur le WhatsApp de ${restoName}</span>`;
+            waBtn.innerHTML = `<span>Envoyer le récapitulatif sur le WhatsApp de ${restoName}</span>`;
+
+            // Function to check status and disable button if 'En cours', 'Livrée', or 'Terminée'
+            function applyStatusCheck(status) {
+                if (status === 'En cours' || status === 'Livrée' || status === 'Terminée') {
+                    waBtn.removeAttribute('href');
+                    waBtn.style.background = '#94a3b8';
+                    waBtn.style.boxShadow = 'none';
+                    waBtn.style.animation = 'none';
+                    waBtn.style.cursor = 'not-allowed';
+                    waBtn.style.pointerEvents = 'none';
+                    waBtn.style.opacity = '0.75';
+                    if (status === 'Livrée') {
+                        waBtn.innerHTML = `<span>Commande Livrée</span>`;
+                    } else if (status === 'Terminée') {
+                        waBtn.innerHTML = `<span>Commande Terminée</span>`;
+                    } else {
+                        waBtn.innerHTML = `<span>Commande en cours de préparation</span>`;
+                    }
+                }
+            }
+
+            // Initial check
+            applyStatusCheck(order.status);
+
+            // Live poll every 3 seconds to detect when restaurant clicks "En cours" or "Livrée"
+            setInterval(async () => {
+                try {
+                    const { data: liveOrder } = await window.supabaseClient
+                        .from('restau_orders')
+                        .select('status')
+                        .eq('id', orderId)
+                        .single();
+                    if (liveOrder) {
+                        applyStatusCheck(liveOrder.status);
+                    }
+                } catch (e) {}
+            }, 3000);
         });
     </script>
 </body>

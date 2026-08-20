@@ -318,13 +318,11 @@
                         <select id="filter-status" class="input-field" style="margin:0; padding: 10px;"
                             onchange="renderAdminOrders()">
                             <option value="all">Tous les statuts</option>
-                            <option value="ENVOYÉE">ENVOYÉE</option>
-                            <option value="APPROUVÉE">APPROUVÉE</option>
-                            <option value="EN PRÉPARATION">En prépa.</option>
-                            <option value="PRÊTE">Prête</option>
-                            <option value="EN LIVRAISON">En livraison</option>
-                            <option value="LIVRÉE">Livrée</option>
-                            <option value="ANNULÉE">Annulée</option>
+                            <option value="Nouvelle">🟡 Nouvelle</option>
+                            <option value="En cours">🔵 En cours</option>
+                            <option value="Livrée">🟢 Livrée</option>
+                            <option value="Terminée">🟢 Terminée</option>
+                            <option value="Annulée">🔴 Annulée</option>
                         </select>
                     </div>
 
@@ -517,6 +515,7 @@
                                 <select onchange="updateStatus('${order.id}', this.value)" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.85rem; font-weight:600;">
                                     <option value="Nouvelle" ${order.status==='Nouvelle'?'selected':''}>🟡 Nouvelle</option>
                                     <option value="En cours" ${order.status==='En cours'?'selected':''}>🔵 En cours</option>
+                                    <option value="Livrée" ${order.status==='Livrée'?'selected':''}>🟢 Livrée</option>
                                     <option value="Terminée" ${order.status==='Terminée'?'selected':''}>🟢 Terminée</option>
                                     <option value="Annulée" ${order.status==='Annulée'?'selected':''}>🔴 Annulée</option>
                                 </select>
@@ -543,7 +542,7 @@
                             card.style.borderLeft = '4px solid #F59E0B';
                         } else if (order.status === 'En cours') {
                             card.style.borderLeft = '4px solid #3B82F6';
-                        } else if (order.status === 'Terminée') {
+                        } else if (order.status === 'Livrée' || order.status === 'Terminée') {
                             card.style.borderLeft = '4px solid #10B981';
                         }
 
@@ -563,6 +562,7 @@
                                 <select onchange="updateStatus('${order.id}', this.value)" style="flex:1; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;">
                                     <option value="Nouvelle" ${order.status==='Nouvelle'?'selected':''}>🟡 Nouvelle</option>
                                     <option value="En cours" ${order.status==='En cours'?'selected':''}>🔵 En cours</option>
+                                    <option value="Livrée" ${order.status==='Livrée'?'selected':''}>🟢 Livrée</option>
                                     <option value="Terminée" ${order.status==='Terminée'?'selected':''}>🟢 Terminée</option>
                                     <option value="Annulée" ${order.status==='Annulée'?'selected':''}>🔴 Annulée</option>
                                 </select>
@@ -588,6 +588,7 @@
             switch (status) {
                 case 'Nouvelle': return 'bg-orange';
                 case 'En cours': return 'bg-blue';
+                case 'Livrée': return 'bg-green';
                 case 'Terminée': return 'bg-green';
                 case 'Annulée': return 'bg-gray';
                 default: return 'bg-gray';

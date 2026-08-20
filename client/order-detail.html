@@ -6,48 +6,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Détails Commande - Gourmet Express</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
         .section-box {
             background: white;
-            padding: 24px;
+            padding: 22px;
             border-radius: var(--radius-md);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            border: 1.5px solid #e2e8f0;
             box-shadow: var(--shadow-sm);
         }
     </style>
 </head>
 
-<body style="background: #f0f2f5;">
+<body style="background: #f8fafc;">
 
-    <div class="client-header"
-        style="background: white; padding: 16px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 16px;">
-        <a href="orders.html" style="text-decoration: none; font-size: 1.2rem;">←</a>
-        <div style="font-weight: 700;">Détails Commande</div>
+    <div class="client-header" style="background: white; padding: 14px 18px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 14px;">
+        <a href="orders.html" style="text-decoration: none; font-size: 1.2rem; font-weight: 700; color:#334155;">←</a>
+        <div style="font-weight: 700; font-size: 1.05rem; color:#0f172a;">Détails de la Commande</div>
     </div>
 
-    <div class="container" style="max-width: 600px; padding-top: 24px;">
+    <div class="container" style="max-width: 600px; padding-top: 20px; padding-bottom: 40px;">
         <div class="section-box">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
                 <div>
-                    <h2 id="order-id" style="font-size: 1.5rem; margin-bottom: 4px;">...</h2>
+                    <h2 id="order-id" style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">...</h2>
                     <div class="text-sm text-muted" id="order-date">...</div>
                 </div>
                 <div id="order-status-badge"></div>
             </div>
 
-            <h4 class="mb-2">Articles</h4>
-            <div id="items-list" style="margin-bottom: 24px; border-top: 1px solid #eee;">
-                <!-- Rendered -->
+            <div id="status-message-banner" style="margin-bottom: 20px; padding: 12px 14px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; text-align: center;"></div>
+
+            <div style="margin-bottom: 18px;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Établissement</div>
+                <div id="resto-name" style="font-weight: 700; font-size: 1.05rem; color: #0f172a;">...</div>
             </div>
 
-            <div
-                style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.2rem; border-top: 2px solid #eee; padding-top: 16px;">
-                <span>Total</span>
-                <span id="order-total" style="color: var(--primary-color);">...</span>
+            <div style="margin-bottom: 18px;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Articles commandés</div>
+                <div id="items-list" style="background: #f8fafc; border-radius: 10px; padding: 12px; border: 1px solid #f1f5f9;">
+                    <!-- Rendered -->
+                </div>
             </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.25rem; border-top: 2px dashed #e2e8f0; padding-top: 14px; margin-bottom: 16px;">
+                <span style="color:#0f172a;">Total Réglé</span>
+                <span id="order-total" style="color: #e63946;">...</span>
+            </div>
+
+            <div id="order-contact-actions" style="margin-top: 14px;"></div>
         </div>
     </div>
 
@@ -55,88 +63,105 @@
     <script src="../assets/js/supabase.js"></script>
     <script src="../assets/js/data.js"></script>
     <script>
-        const client = DataManager.getCurrentClient();
-        const isAdmin = sessionStorage.getItem('admin_token') === 'valid';
-
-        // Redirect if NOT client AND NOT admin
-        if (!client && !isAdmin) {
-            window.location.href = '../login.html';
-        }
-
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
-
-        const orders = DataManager.getOrders();
-        const order = orders.find(o => o.id === id);
-
-        // Check if order exists AND (belongs to client OR user is admin)
-        if (!order || (!isAdmin && (!client || order.clientId !== client.id))) {
-            alert('Commande introuvable ou accès refusé.');
-            // Redirect based on role
-            if (isAdmin) {
-                window.location.href = '../admin/index.html';
-            } else {
-                window.location.href = 'orders.html';
+        document.addEventListener('DOMContentLoaded', async () => {
+            const client = DataManager.getCurrentClient();
+            if (!client) {
+                window.location.href = '../login.html';
+                return;
             }
-        } else {
-            document.getElementById('order-id').textContent = order.id;
-            document.getElementById('order-date').textContent = new Date(order.date).toLocaleString();
+
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            if (!id) {
+                window.location.href = 'orders.html';
+                return;
+            }
+
+            const { data: order, error } = await window.supabaseClient
+                .from('restau_orders')
+                .select('*, restaurants(name, phone, address, logo)')
+                .eq('id', id)
+                .single();
+
+            if (error || !order) {
+                alert('Commande introuvable.');
+                window.location.href = 'orders.html';
+                return;
+            }
+
+            document.getElementById('order-id').textContent = '#' + order.id;
+            const d = new Date(order.date);
+            document.getElementById('order-date').textContent = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+            const resto = order.restaurants || {};
+            const restoName = resto.name || 'Restaurant';
+            document.getElementById('resto-name').textContent = restoName;
 
             // Status Config & Message
             function getStatusInfo(status) {
                 switch (status) {
-                    case 'ENVOYÉE': return { bg: '#3B82F6', msg: 'Votre commande a bien été envoyée' };
-                    case 'APPROUVÉE': return { bg: '#F59E0B', msg: 'Votre commande a été approuvée par le restaurant' };
-                    case 'EN PRÉPARATION': return { bg: '#F59E0B', msg: 'Votre commande est en cours de préparation' };
-                    case 'PRÊTE': return { bg: '#10B981', msg: 'Votre commande est prête' };
-                    case 'EN LIVRAISON': return { bg: '#F59E0B', msg: 'Votre commande est en cours de livraison' };
-                    case 'LIVRÉE': return { bg: '#10B981', msg: 'Votre commande a été livrée' };
-                    case 'ANNULÉE': return { bg: '#9CA3AF', msg: 'Votre commande a été annulée' };
-                    default: return { bg: '#9CA3AF', msg: '' };
+                    case 'Nouvelle': return { bg: '#fef3c7', color: '#b45309', msg: 'Votre commande a été transmise et est en attente de validation.' };
+                    case 'En cours': return { bg: '#e0f2fe', color: '#0369a1', msg: 'Votre commande a été prise en charge et est en cours de préparation.' };
+                    case 'Livrée': return { bg: '#dcfce7', color: '#15803d', msg: 'Votre commande a été remise et livrée avec succès ! Bon appétit !' };
+                    case 'Terminée': return { bg: '#dcfce7', color: '#15803d', msg: 'Votre commande est terminée. Merci pour votre fidélité !' };
+                    case 'Annulée': return { bg: '#fee2e2', color: '#b91c1c', msg: 'Cette commande a été annulée.' };
+                    default: return { bg: '#f1f5f9', color: '#475569', msg: `Statut : ${status}` };
                 }
             }
 
             const info = getStatusInfo(order.status);
 
-            // Badge
             const badge = document.getElementById('order-status-badge');
-            badge.innerHTML = `<span style="background: ${info.bg}; color: white; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;">${order.status}</span>`;
+            badge.innerHTML = `<span style="background: ${info.bg}; color: ${info.color}; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.88rem;">${order.status}</span>`;
 
-            // Message Banner
-            const messageBox = document.createElement('div');
-            messageBox.style.background = info.bg + '20'; // 20% opacity
-            messageBox.style.color = info.bg;
-            messageBox.style.padding = '16px';
-            messageBox.style.borderRadius = '8px';
-            messageBox.style.marginBottom = '24px';
-            messageBox.style.fontWeight = '600';
-            messageBox.style.textAlign = 'center';
+            const messageBox = document.getElementById('status-message-banner');
+            messageBox.style.background = info.bg;
+            messageBox.style.color = info.color;
             messageBox.textContent = info.msg;
-
-            // Insert after header line
-            badge.parentElement.insertAdjacentElement('afterend', messageBox);
 
             // Items
             const list = document.getElementById('items-list');
-            order.items.forEach(item => {
+            list.innerHTML = '';
+            const items = order.items || [];
+            items.forEach(item => {
                 const row = document.createElement('div');
-                row.style.display = 'flex';
-                row.style.justifyContent = 'space-between';
-                row.style.padding = '12px 0';
-                row.style.borderBottom = '1px solid #eee';
-
-                // Read snapshot name
-                const name = item.frozenName || 'Produit';
+                row.style.cssText = 'display: flex; justify-content: space-between; align-items:center; padding: 6px 0; font-size:0.92rem; color:#334155;';
+                const name = item.frozenName || item.name || 'Produit';
+                const price = item.frozenPrice || item.price || 0;
+                const qty = item.quantity || 1;
 
                 row.innerHTML = `
-                    <div>${item.quantity}x ${name}</div>
-                    <div>${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format((item.frozenPrice || 0) * item.quantity)}</div>
+                    <div><strong>${qty}x</strong> ${name}</div>
+                    <div style="font-weight:700;">${new Intl.NumberFormat('fr-FR').format(price * qty)} F CFA</div>
                 `;
                 list.appendChild(row);
             });
 
-            document.getElementById('order-total').textContent = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(order.total);
-        }
+            document.getElementById('order-total').textContent = new Intl.NumberFormat('fr-FR').format(order.total || 0) + ' F CFA';
+
+            // WhatsApp Contact button
+            const cleanWa = (resto.phone || '').replace(/[^0-9]/g, '');
+            const waUrl = cleanWa ? `https://wa.me/229${cleanWa.replace(/^229/, '')}?text=${encodeURIComponent(`Bonjour ${restoName}, je vous contacte concernant ma commande N° ${order.id}`)}` : null;
+            const contactBox = document.getElementById('order-contact-actions');
+            const isTakenCare = order.status === 'En cours' || order.status === 'Livrée' || order.status === 'Terminée';
+
+            if (waUrl) {
+                if (isTakenCare) {
+                    contactBox.innerHTML = `
+                        <div style="background:#f1f5f9; border:1px solid #cbd5e1; color:#64748b; padding:12px; border-radius:10px; text-align:center; font-weight:700; font-size:0.9rem;">
+                            Commande prise en charge (${order.status})
+                        </div>
+                    `;
+                } else {
+                    contactBox.innerHTML = `
+                        <a href="${waUrl}" target="_blank" class="btn btn-primary" style="background:#25D366; border:none; text-decoration:none; font-weight:700;">
+                            Contacter le restaurant sur WhatsApp
+                        </a>
+                    `;
+                }
+            }
+        });
     </script>
 </body>
 

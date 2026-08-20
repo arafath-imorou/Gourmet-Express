@@ -153,7 +153,7 @@
             if (currentFilter === 'active') {
                 filtered = allClientOrders.filter(o => o.status === 'Nouvelle' || o.status === 'En cours');
             } else if (currentFilter === 'completed') {
-                filtered = allClientOrders.filter(o => o.status === 'Terminée');
+                filtered = allClientOrders.filter(o => o.status === 'Livrée' || o.status === 'Terminée');
             } else if (currentFilter === 'cancelled') {
                 filtered = allClientOrders.filter(o => o.status === 'Annulée');
             }
@@ -179,6 +179,7 @@
                 const restoWa = order.restaurants?.phone || '';
                 const cleanWa = restoWa.replace(/[^0-9]/g, '');
                 const waUrl = cleanWa ? `https://wa.me/229${cleanWa.replace(/^229/, '')}?text=${encodeURIComponent(`Bonjour ${restoName}, je vous contacte au sujet de ma commande N° ${order.id}`)}` : null;
+                const isTakenCare = order.status === 'En cours' || order.status === 'Livrée' || order.status === 'Terminée';
 
                 // Items list
                 const itemsHtml = (order.items && Array.isArray(order.items)) ? order.items.map(it => `
@@ -215,11 +216,13 @@
                                 </div>
                             </div>
                             <div style="display:flex; gap:8px;">
-                                ${waUrl ? `
-                                    <a href="${waUrl}" target="_blank" class="btn btn-secondary btn-sm" style="width:auto; padding:8px 14px; background:#25D366; color:white; border:none; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.88rem; display:inline-flex; align-items:center;">
+                                ${waUrl ? (
+                                    isTakenCare 
+                                    ? `<span style="padding:8px 14px; background:#e2e8f0; color:#64748b; font-weight:700; border-radius:8px; font-size:0.88rem; cursor:not-allowed; border:1px solid #cbd5e1;">Commande en cours</span>`
+                                    : `<a href="${waUrl}" target="_blank" class="btn btn-secondary btn-sm" style="width:auto; padding:8px 14px; background:#25D366; color:white; border:none; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.88rem; display:inline-flex; align-items:center;">
                                         Contacter le Restaurant
-                                    </a>
-                                ` : ''}
+                                    </a>`
+                                ) : ''}
                             </div>
                         </div>
                     </div>
@@ -230,6 +233,7 @@
         function getStatusClass(status) {
             if (status === 'Nouvelle') return 'badge-Nouvelle';
             if (status === 'En cours') return 'badge-EnCours';
+            if (status === 'Livrée') return 'badge-Terminée';
             if (status === 'Terminée') return 'badge-Terminée';
             if (status === 'Annulée') return 'badge-Annulée';
             return 'badge-Nouvelle';

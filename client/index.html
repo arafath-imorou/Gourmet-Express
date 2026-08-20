@@ -218,6 +218,7 @@
                 const restoWa = order.restaurants?.phone || '';
                 const cleanWa = restoWa.replace(/[^0-9]/g, '');
                 const waUrl = cleanWa ? `https://wa.me/229${cleanWa.replace(/^229/, '')}?text=${encodeURIComponent(`Bonjour ${restoName}, je vous contacte concernant ma commande N° ${order.id}`)}` : null;
+                const isTakenCare = order.status === 'En cours' || order.status === 'Livrée' || order.status === 'Terminée';
 
                 return `
                     <div class="order-card">
@@ -239,11 +240,13 @@
                                 ${new Intl.NumberFormat('fr-FR').format(order.total || 0)} F CFA
                             </div>
                             <div style="display:flex; gap:8px;">
-                                ${waUrl ? `
-                                    <a href="${waUrl}" target="_blank" class="btn btn-secondary btn-sm" style="width:auto; padding:6px 12px; background:#25D366; color:white; border:none; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.82rem;">
+                                ${waUrl ? (
+                                    isTakenCare
+                                    ? `<span style="padding:6px 12px; background:#e2e8f0; color:#64748b; font-weight:700; border-radius:8px; font-size:0.82rem; cursor:not-allowed; border:1px solid #cbd5e1;">En cours</span>`
+                                    : `<a href="${waUrl}" target="_blank" class="btn btn-secondary btn-sm" style="width:auto; padding:6px 12px; background:#25D366; color:white; border:none; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.82rem;">
                                         WhatsApp Resto
-                                    </a>
-                                ` : ''}
+                                    </a>`
+                                ) : ''}
                                 <a href="order-detail.html?id=${order.id}" class="btn btn-secondary btn-sm" style="width:auto; padding:6px 12px; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.82rem;">
                                     Détails
                                 </a>
@@ -257,6 +260,7 @@
         function getStatusClass(status) {
             if (status === 'Nouvelle') return 'badge-Nouvelle';
             if (status === 'En cours') return 'badge-EnCours';
+            if (status === 'Livrée') return 'badge-Terminée';
             if (status === 'Terminée') return 'badge-Terminée';
             if (status === 'Annulée') return 'badge-Annulée';
             return 'badge-Nouvelle';
