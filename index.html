@@ -318,32 +318,26 @@
                 <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:22px;">
                     <!-- Spécialités -->
                     <div style="background:#f8fafc; border-radius:12px; padding:12px 14px; border:1px solid #f1f5f9;">
-                        <div style="font-size:0.75rem; font-weight:700; color:#e63946; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">🍲 Spécialités & Informations</div>
+                        <div style="font-size:0.75rem; font-weight:700; color:#e63946; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Spécialités & Informations</div>
                         <div id="resto-modal-specialties" style="font-size:0.9rem; color:#334155; line-height:1.45;">Cuisine africaine & européenne, Grillades, Boissons, Desserts...</div>
                     </div>
 
                     <!-- Localisation -->
                     <div style="background:#f8fafc; border-radius:12px; padding:12px 14px; border:1px solid #f1f5f9;">
-                        <div style="font-size:0.75rem; font-weight:700; color:#2563eb; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">📍 Localisation & Adresse</div>
+                        <div style="font-size:0.75rem; font-weight:700; color:#2563eb; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Localisation & Adresse</div>
                         <div id="resto-modal-address" style="font-size:0.9rem; color:#334155; line-height:1.45;">Adresse non renseignée</div>
                     </div>
 
                     <!-- Contact -->
-                    <div style="background:#f8fafc; border-radius:12px; padding:12px 14px; border:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-size:0.75rem; font-weight:700; color:#059669; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">📱 Contact Restaurant</div>
-                            <div id="resto-modal-phone" style="font-size:0.9rem; font-weight:700; color:#0f172a;">Non renseigné</div>
-                        </div>
-                        <a id="resto-modal-wa-btn" href="#" target="_blank" style="display:none; background:#25D366; color:white; padding:7px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; text-decoration:none; align-items:center; gap:4px;">
-                            💬 WhatsApp
-                        </a>
+                    <div style="background:#f8fafc; border-radius:12px; padding:12px 14px; border:1px solid #f1f5f9;">
+                        <div style="font-size:0.75rem; font-weight:700; color:#059669; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">Contact Restaurant</div>
+                        <div id="resto-modal-phone" style="font-size:0.9rem; font-weight:700; color:#0f172a;">Non renseigné</div>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div style="display:flex; gap:10px;">
-                    <button onclick="closeRestaurantModal()" class="btn btn-secondary" style="flex:1; border-radius:12px; padding:11px; font-weight:700;">Fermer</button>
-                    <button id="resto-modal-menu-btn" onclick="goToSelectedRestaurantMenu()" class="btn btn-primary" style="flex:1.4; border-radius:12px; padding:11px; font-weight:700;">Voir le Menu 🍽️</button>
+                <!-- Action Button -->
+                <div>
+                    <button onclick="closeRestaurantModal()" class="btn btn-secondary" style="width:100%; border-radius:12px; padding:12px; font-weight:700; background:#f1f5f9; color:#334155; border:none; cursor:pointer; font-size:0.95rem;">Fermer</button>
                 </div>
             </div>
         </div>
@@ -372,7 +366,7 @@
             selectedRestaurantForModal = resto;
             
             document.getElementById('resto-modal-name').textContent = resto.name || 'Restaurant';
-            document.getElementById('resto-modal-city').textContent = resto.city ? `📍 ${resto.city}` : 'Bénin';
+            document.getElementById('resto-modal-city').textContent = resto.city ? resto.city : 'Bénin';
             
             // Logo
             const logoEl = document.getElementById('resto-modal-logo-img');
@@ -382,7 +376,7 @@
                 logoEl.style.display = 'block';
             } else {
                 logoEl.style.display = 'none';
-                avatarContainer.innerHTML = '<span style="font-size:2rem;">🍽️</span>';
+                avatarContainer.innerHTML = '<span style="font-size:1.8rem; font-weight:800; color:#e63946;">' + (resto.name ? resto.name.charAt(0) : 'R') + '</span>';
             }
 
             // Spécialités / Description
@@ -393,18 +387,9 @@
             const address = resto.address || (resto.city ? `Ville de ${resto.city}` : 'Adresse disponible auprès du restaurant.');
             document.getElementById('resto-modal-address').textContent = address;
 
-            // Contact & WhatsApp
+            // Contact
             const phone = resto.phone || resto.whatsapp_phone || 'Non renseigné';
             document.getElementById('resto-modal-phone').textContent = phone;
-
-            const waBtn = document.getElementById('resto-modal-wa-btn');
-            const cleanWa = (resto.whatsapp_phone || resto.phone || '').replace(/[^0-9]/g, '');
-            if (cleanWa) {
-                waBtn.href = `https://wa.me/229${cleanWa.replace(/^229/, '')}?text=${encodeURIComponent(`Bonjour ${resto.name}, je vous contacte depuis la plateforme Gourmet Express.`)}`;
-                waBtn.style.display = 'inline-flex';
-            } else {
-                waBtn.style.display = 'none';
-            }
 
             const modal = document.getElementById('restaurant-modal');
             modal.style.display = 'flex';
@@ -413,13 +398,6 @@
         function closeRestaurantModal() {
             const modal = document.getElementById('restaurant-modal');
             if (modal) modal.style.display = 'none';
-        }
-
-        function goToSelectedRestaurantMenu() {
-            if (selectedRestaurantForModal) {
-                DataManager.setCurrentRestaurant(selectedRestaurantForModal.id, selectedRestaurantForModal.name);
-                window.location.href = 'menu.html';
-            }
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
