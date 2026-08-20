@@ -280,10 +280,10 @@
             <p>Découvrez nos restaurants partenaires et commandez vos plats préférés, livrés chez vous ou à emporter.</p>
             
             <div class="hero-btns" id="hero-btns-container">
-                <a href="#restaurants-grid" class="btn-hero btn-hero-order" id="btn-hero-order">🍽️ Commander maintenant</a>
-                <a href="login.html" class="btn-hero btn-hero-login" id="btn-hero-login">🔑 Se connecter</a>
-                <a href="register.html" class="btn-hero btn-hero-register" id="btn-hero-register">📝 Créer un compte</a>
-                <a href="client/index.html" class="btn-hero btn-hero-login" id="btn-hero-account" style="display:none;">👤 Voir mon compte</a>
+                <a href="#restaurants-grid" class="btn-hero btn-hero-order" id="btn-hero-order">Commander maintenant</a>
+                <a href="login.html" class="btn-hero btn-hero-login" id="btn-hero-login">Se connecter</a>
+                <a href="register.html" class="btn-hero btn-hero-register" id="btn-hero-register">Créer un compte</a>
+                <a href="client/index.html" class="btn-hero btn-hero-login" id="btn-hero-account" style="display:none;">Voir mon compte</a>
             </div>
         </div>
     </div>
@@ -335,10 +335,10 @@
                     btnAccount.style.display = 'inline-flex';
                     if (staff) {
                         btnAccount.href = staff.role === 'superadmin' ? 'superadmin/index.html' : 'admin/index.html';
-                        btnAccount.innerHTML = '🛡️ Administration';
+                        btnAccount.textContent = 'Administration';
                     } else if (client) {
                         btnAccount.href = 'client/index.html';
-                        btnAccount.innerHTML = '👤 Voir mon compte';
+                        btnAccount.textContent = 'Voir mon compte';
                     }
                 }
 
@@ -347,10 +347,10 @@
                     header.style.display = 'flex';
                     if (staff) {
                         const name = staff.firstname ? `${staff.firstname} ${staff.lastname || ''}` : (staff.name || 'Admin');
-                        username.textContent = `👋 Bienvenue, ${name}`;
+                        username.textContent = `Bienvenue, ${name}`;
                     } else if (client) {
                         const fullName = `${client.firstname || ''} ${client.lastname || ''}`.trim();
-                        username.textContent = `👋 Bienvenue, ${fullName || 'Client'}`;
+                        username.textContent = `Bienvenue, ${fullName || 'Client'}`;
                     }
                 }
             }
