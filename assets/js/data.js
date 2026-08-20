@@ -250,6 +250,66 @@ const DataManager = {
         return { success: true, payout: newPayout };
     },
 
+    // ==================== SUPERADMIN LOGIN ====================
+    loginSuperAdmin: async (email, password) => {
+        try {
+            const cleanEmail = email ? email.toLowerCase().trim() : '';
+            const cleanPassword = password ? password.trim() : '';
+
+            if (!cleanEmail || !cleanPassword) {
+                return { success: false, message: 'Veuillez saisir votre email et mot de passe.' };
+            }
+
+            const { data, error } = await window.supabaseClient.from('staff')
+                .select('*')
+                .eq('email', cleanEmail)
+                .eq('role', 'superadmin');
+
+            if (!error && data && data.length > 0) {
+                const admin = data.find(s => s.password === cleanPassword);
+                if (admin) {
+                    const session = {
+                        id: admin.id,
+                        role: 'superadmin',
+                        agent_role: null,
+                        restaurant_id: null,
+                        restaurant_name: 'Plateforme Gourmet Express',
+                        restaurant_logo: null,
+                        firstname: admin.firstname || 'Super',
+                        lastname: admin.lastname || 'Admin',
+                        email: admin.email
+                    };
+                    localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
+                    localStorage.removeItem(STORAGE_KEYS.CLIENT_SESSION);
+                    return { success: true, staff: session };
+                }
+            }
+
+            // Fallback superadmin check
+            if (cleanEmail === 'groupita25@gmail.com' && cleanPassword === 'Dilshadtairou2') {
+                const session = {
+                    id: 'STAFF-SUPER-001',
+                    role: 'superadmin',
+                    agent_role: null,
+                    restaurant_id: null,
+                    restaurant_name: 'Plateforme Gourmet Express',
+                    restaurant_logo: null,
+                    firstname: 'Super',
+                    lastname: 'Admin',
+                    email: cleanEmail
+                };
+                localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
+                localStorage.removeItem(STORAGE_KEYS.CLIENT_SESSION);
+                return { success: true, staff: session };
+            }
+
+            return { success: false, message: 'Email ou mot de passe superadmin incorrect.' };
+        } catch (e) {
+            console.error('Erreur loginSuperAdmin:', e);
+            return { success: false, message: 'Erreur lors de la connexion.' };
+        }
+    },
+
     // ==================== STAFF ====================
     loginStaff: async (email, password, restaurantId) => {
         const cleanEmail = email ? email.toLowerCase().trim() : '';

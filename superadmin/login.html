@@ -174,12 +174,19 @@
             btn.disabled = true;
             btn.textContent = 'Connexion en cours...';
 
-            const result = await DataManager.loginSuperAdmin(email, password);
+            try {
+                const result = await DataManager.loginSuperAdmin(email, password);
 
-            if (result.success) {
-                window.location.href = 'index.html';
-            } else {
-                showError(result.message || 'Email ou mot de passe superadmin incorrect.');
+                if (result && result.success) {
+                    window.location.href = 'index.html';
+                } else {
+                    showError((result && result.message) ? result.message : 'Email ou mot de passe superadmin incorrect.');
+                    btn.disabled = false;
+                    btn.textContent = 'Accéder à la Plateforme';
+                }
+            } catch (err) {
+                console.error(err);
+                showError('Erreur inattendue. Veuillez réessayer.');
                 btn.disabled = false;
                 btn.textContent = 'Accéder à la Plateforme';
             }
