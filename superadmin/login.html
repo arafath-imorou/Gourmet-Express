@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - Gourmet Express</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <title>Administration Plateforme - Gourmet Express</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31104b 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -25,8 +25,22 @@
             background: white;
             border-radius: 20px;
             padding: 34px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
             border: 1.5px solid #e2e8f0;
+        }
+        
+        .admin-badge {
+            background: #f5f3ff;
+            color: #7c3aed;
+            border: 1px solid #ddd6fe;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .form-group { margin-bottom: 18px; }
@@ -44,15 +58,15 @@
         }
         .form-group input:focus {
             outline: none;
-            border-color: #2563eb;
+            border-color: #7c3aed;
             background: white;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
         }
         
         .btn-login {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
             color: white;
             border: none;
             border-radius: 12px;
@@ -61,12 +75,12 @@
             cursor: pointer;
             transition: all 0.2s;
             margin-top: 8px;
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
         }
         .btn-login:hover {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            background: linear-gradient(135deg, #6d28d9, #5b21b6);
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.55);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.55);
         }
         .btn-login:disabled { opacity: 0.7; transform: none; cursor: not-allowed; }
         
@@ -83,10 +97,6 @@
             font-weight: 600;
         }
         
-        .link-row { text-align: center; margin-top: 22px; font-size: 0.9rem; color: #64748b; }
-        .link-row a { color: #2563eb; font-weight: 700; text-decoration: none; }
-        .link-row a:hover { text-decoration: underline; }
-        
         .back-link { text-align: center; margin-bottom: 20px; }
         .back-link a { color: rgba(255,255,255,0.75); text-decoration: none; font-size: 0.9rem; font-weight: 600; }
         .back-link a:hover { color: white; }
@@ -94,35 +104,35 @@
 </head>
 <body>
     <div class="login-wrapper">
-        <div class="back-link"><a href="index.html">← Retour à l'accueil</a></div>
+        <div class="back-link"><a href="../index.html">← Retour à l'accueil</a></div>
 
         <div class="login-logo" style="display:flex; flex-direction:column; align-items:center;">
-            <img src="assets/images/logogourmet.png" alt="Logo Gourmet Express" style="height: 105px; object-fit: contain; margin-bottom: 12px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));">
+            <img src="../assets/images/logogourmet.png" alt="Logo Gourmet Express" style="height: 105px; object-fit: contain; margin-bottom: 12px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));">
             <div class="brand">Gourmet Express</div>
             <div style="font-size:0.85rem; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,0.5); margin-top:4px; text-transform:uppercase;">by ITA INNOVATE</div>
-            <div class="tagline" style="margin-top:6px;">Espace de Connexion</div>
+            <div class="tagline" style="margin-top:6px;">Administration Plateforme</div>
         </div>
 
         <div class="login-card">
+            <div class="admin-badge">
+                🛡️ Espace Réservé Super Administrateur
+            </div>
+
             <div id="error-box" class="error-box"></div>
 
-            <form id="unified-login-form" onsubmit="handleUnifiedLogin(event)">
+            <form id="admin-login-form" onsubmit="handleSuperAdminLogin(event)">
                 <div class="form-group">
-                    <label for="login-identifier">Identifiant</label>
-                    <input type="text" id="login-identifier" placeholder="Email ou Numéro de téléphone" required autocomplete="username">
+                    <label for="admin-email">Email Superadmin</label>
+                    <input type="email" id="admin-email" value="groupita25@gmail.com" placeholder="admin@itainnovate.com" required autocomplete="username">
                 </div>
                 
                 <div class="form-group">
-                    <label for="login-password">Mot de passe</label>
-                    <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+                    <label for="admin-password">Mot de passe</label>
+                    <input type="password" id="admin-password" placeholder="••••••••" required autocomplete="current-password">
                 </div>
 
-                <button type="submit" class="btn-login" id="btn-submit">Se connecter</button>
+                <button type="submit" class="btn-login" id="btn-submit">Accéder à la Plateforme</button>
             </form>
-
-            <div class="link-row">
-                Pas encore de compte ? <a href="register.html">Créer un compte</a>
-            </div>
         </div>
 
         <div style="text-align:center; margin-top:24px; font-size:0.75rem; letter-spacing:1px; font-weight:700;">
@@ -131,22 +141,13 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="assets/js/supabase.js"></script>
-    <script src="assets/js/data.js"></script>
+    <script src="../assets/js/supabase.js"></script>
+    <script src="../assets/js/data.js"></script>
     <script>
         window.addEventListener('DOMContentLoaded', () => {
-            // Auto redirect if already logged in
-            const client = DataManager.getCurrentClient();
             const staff = DataManager.getCurrentStaff();
-
-            if (staff) {
-                if (staff.role === 'superadmin') {
-                    window.location.href = 'superadmin/index.html';
-                } else {
-                    window.location.href = 'admin/index.html';
-                }
-            } else if (client) {
-                window.location.href = 'client/index.html';
+            if (staff && staff.role === 'superadmin') {
+                window.location.href = 'index.html';
             }
         });
 
@@ -162,30 +163,25 @@
             el.textContent = '';
         }
 
-        async function handleUnifiedLogin(e) {
+        async function handleSuperAdminLogin(e) {
             e.preventDefault();
             clearError();
 
-            const identifier = document.getElementById('login-identifier').value.trim();
-            const password = document.getElementById('login-password').value;
-
-            if (!identifier || !password) {
-                showError('Veuillez renseigner votre identifiant et mot de passe.');
-                return;
-            }
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
 
             const btn = document.getElementById('btn-submit');
             btn.disabled = true;
             btn.textContent = 'Connexion en cours...';
 
-            const result = await DataManager.loginUnified(identifier, password);
+            const result = await DataManager.loginSuperAdmin(email, password);
 
             if (result.success) {
-                window.location.href = result.redirectUrl || 'index.html';
+                window.location.href = 'index.html';
             } else {
-                showError(result.message || 'Identifiant ou mot de passe incorrect.');
+                showError(result.message || 'Email ou mot de passe superadmin incorrect.');
                 btn.disabled = false;
-                btn.textContent = 'Se connecter';
+                btn.textContent = 'Accéder à la Plateforme';
             }
         }
     </script>

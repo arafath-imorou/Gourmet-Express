@@ -265,7 +265,98 @@ const DataManager = {
             return { success: true, staff: session };
         }
 
-        // 2. Check regular restaurant staff
+        return { success: false, message: 'Identifiants superadmin incorrects.' };
+    },
+
+    // ==================== UNIFIED AUTOMATIC LOGIN ====================
+    loginUnified: async (identifier, password) => {
+        try {
+            const rawId = (identifier || '').trim();
+            const normEmail = DataManager.normalize(rawId);
+            const normPhone = DataManager.normalizePhone(rawId);
+            const cleanPassword = (password || '').trim();
+
+            if (!rawId || !cleanPassword) {
+                return { success: false, message: 'Veuillez saisir votre identifiant et votre mot de passe.' };
+            }
+
+            // 1. Vérifier si c'est un compte Restaurant (ou Staff) dans la table 'staff'
+            let staffQuery = window.supabaseClient
+                .from('staff')
+                .select('*, restaurants(id, name, logo, phone, address, commission_rate)')
+                .or(`email.eq.${normEmail},email.eq.${rawId}`);
+
+            const { data: staffList, error: staffErr } = await staffQuery;
+            if (!staffErr && staffList && staffList.length > 0) {
+                const member = staffList.find(s => s.password === cleanPassword);
+                if (member) {
+                    if (member.status === 'inactive' || member.status === 'blocked') {
+                        return { success: false, message: 'Ce compte restaurant est actuellement désactivé.' };
+                    }
+                    const session = {
+                        id: member.id,
+                        role: member.role || 'admin',
+                        agent_role: member.agent_role,
+                        restaurant_id: member.restaurant_id,
+                        restaurant_name: member.restaurants ? member.restaurants.name : 'Plateforme Gourmet Express',
+                        restaurant_logo: member.restaurants ? member.restaurants.logo : null,
+                        firstname: member.firstname,
+                        lastname: member.lastname,
+                        name: `${member.firstname || ''} ${member.lastname || ''}`.trim() || member.email,
+                        email: member.email
+                    };
+                    localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
+                    localStorage.removeItem(STORAGE_KEYS.CLIENT_SESSION);
+
+                    if (member.restaurant_id) {
+                        DataManager.setCurrentRestaurant(member.restaurant_id, session.restaurant_name);
+                    }
+
+                    if (member.role === 'superadmin') {
+                        return { success: true, type: 'superadmin', redirectUrl: 'superadmin/index.html' };
+                    } else {
+                        return { success: true, type: 'staff', redirectUrl: 'admin/index.html' };
+                    }
+                }
+            }
+
+            // 2. Vérifier si c'est un compte Client dans la table 'restau_clients'
+            let clientQuery = window.supabaseClient
+                .from('restau_clients')
+                .select('*')
+                .or(`email.eq.${normEmail},email.eq.${rawId},phone.eq.${normPhone},phone.eq.${rawId}`);
+
+            const { data: clientList, error: clientErr } = await clientQuery;
+            if (!clientErr && clientList && clientList.length > 0) {
+                const client = clientList.find(c => c.password === cleanPassword);
+                if (client) {
+                    if (client.status === 'blocked' || client.status === 'inactive') {
+                        return { success: false, message: 'Votre compte client est temporairement désactivé.' };
+                    }
+                    const session = {
+                        id: client.id,
+                        firstname: client.firstname,
+                        lastname: client.lastname,
+                        email: client.email,
+                        phone: client.phone,
+                        points: client.points || 0,
+                        type: 'client'
+                    };
+                    localStorage.setItem(STORAGE_KEYS.CLIENT_SESSION, JSON.stringify(session));
+                    localStorage.removeItem(STORAGE_KEYS.STAFF_SESSION);
+
+                    return { success: true, type: 'client', redirectUrl: 'client/index.html' };
+                }
+            }
+
+            return { success: false, message: 'Identifiant (Email / Téléphone) ou mot de passe incorrect.' };
+        } catch (e) {
+            console.error('Erreur loginUnified:', e);
+            return { success: false, message: 'Erreur lors de la connexion. Veuillez vérifier votre connexion internet.' };
+        }
+    },
+
+    // 2. Check regular restaurant staff
         let q = window.supabaseClient.from('staff')
             .select('*, restaurants(id, name, logo, slug)')
             .eq('email', cleanEmail)
