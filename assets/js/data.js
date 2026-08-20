@@ -104,12 +104,23 @@ const DataManager = {
     logoutStaff: () => localStorage.removeItem(STORAGE_KEYS.STAFF_SESSION),
 
     // ==================== RESTAURANTS ====================
-    getRestaurants: async (activeOnly = true) => {
-        let q = window.supabaseClient.from('restaurants').select('*');
-        if (activeOnly) q = q.eq('status', 'active');
-        const { data, error } = await q.order('name');
-        if (error) { console.error(error); return []; }
-        return data || [];
+    getRestaurants: async (activeOnly = false) => {
+        try {
+            if (!window.supabaseClient) return [];
+            let q = window.supabaseClient.from('restaurants').select('*');
+            if (activeOnly) {
+                q = q.neq('status', 'inactive');
+            }
+            const { data, error } = await q.order('name');
+            if (!error && data && data.length > 0) return data;
+
+            // Fallback: fetch all without filter
+            const { data: allData, error: allErr } = await window.supabaseClient.from('restaurants').select('*');
+            if (!allErr && allData) return allData;
+        } catch (e) {
+            console.error('Erreur getRestaurants:', e);
+        }
+        return [];
     },
     getRestaurantById: async (id) => {
         const { data, error } = await window.supabaseClient
