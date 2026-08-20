@@ -280,9 +280,9 @@
             <p>Découvrez nos restaurants partenaires et commandez vos plats préférés, livrés chez vous ou à emporter.</p>
             
             <div class="hero-btns" id="hero-btns-container">
-                <a href="#restaurants-grid" class="btn-hero btn-hero-order" id="btn-hero-order">Commander maintenant</a>
                 <a href="login.html" class="btn-hero btn-hero-login" id="btn-hero-login">Se connecter</a>
                 <a href="register.html" class="btn-hero btn-hero-register" id="btn-hero-register">Créer un compte</a>
+                <a href="#restaurants-grid" class="btn-hero btn-hero-order" id="btn-hero-order" style="display:none;">Commander maintenant</a>
                 <a href="client/index.html" class="btn-hero btn-hero-login" id="btn-hero-account" style="display:none;">Voir mon compte</a>
             </div>
         </div>
@@ -432,13 +432,15 @@
                 const username = document.getElementById('session-username');
                 const btnLogin = document.getElementById('btn-hero-login');
                 const btnRegister = document.getElementById('btn-hero-register');
+                const btnOrder = document.getElementById('btn-hero-order');
                 const btnAccount = document.getElementById('btn-hero-account');
 
                 // 1. Masquer les boutons "Se connecter" et "Créer un compte"
                 if (btnLogin) btnLogin.style.display = 'none';
                 if (btnRegister) btnRegister.style.display = 'none';
 
-                // 2. Afficher "Voir mon compte"
+                // 2. Afficher "Commander maintenant" et "Voir mon compte"
+                if (btnOrder) btnOrder.style.display = 'inline-flex';
                 if (btnAccount) {
                     btnAccount.style.display = 'inline-flex';
                     if (staff) {
