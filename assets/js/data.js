@@ -331,7 +331,7 @@ const DataManager = {
         }
     },
 
-    // ==================== STAFF ====================
+    // ==================== STAFF LOGIN ====================
     loginStaff: async (email, password, restaurantId) => {
         const cleanEmail = email ? email.toLowerCase().trim() : '';
         const cleanPassword = password ? password.trim() : '';
@@ -357,7 +357,30 @@ const DataManager = {
             return { success: true, staff: session };
         }
 
-        return { success: false, message: 'Identifiants superadmin incorrects.' };
+        // 2. Check regular restaurant staff
+        let q = window.supabaseClient.from('staff')
+            .select('*, restaurants(id, name, logo, slug)')
+            .eq('email', cleanEmail)
+            .eq('password', cleanPassword)
+            .eq('status', 'active');
+
+        if (restaurantId) {
+            q = q.eq('restaurant_id', restaurantId);
+        }
+
+        const { data, error } = await q;
+        if (error || !data || data.length === 0) return { success: false, message: 'Identifiants incorrects ou restaurant non correspondant.' };
+
+        const m = data[0];
+        const session = {
+            id: m.id, role: m.role, agent_role: m.agent_role,
+            restaurant_id: m.restaurant_id,
+            restaurant_name: m.restaurants ? m.restaurants.name : 'Restaurant',
+            restaurant_logo: m.restaurants ? m.restaurants.logo : null,
+            firstname: m.firstname, lastname: m.lastname, email: m.email
+        };
+        localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
+        return { success: true, staff: session };
     },
 
     // ==================== UNIFIED AUTOMATIC LOGIN ====================
@@ -453,32 +476,6 @@ const DataManager = {
             console.error('Erreur loginUnified:', e);
             return { success: false, message: 'Erreur lors de la connexion. Veuillez vérifier votre connexion internet.' };
         }
-    },
-
-    // 2. Check regular restaurant staff
-        let q = window.supabaseClient.from('staff')
-            .select('*, restaurants(id, name, logo, slug)')
-            .eq('email', cleanEmail)
-            .eq('password', cleanPassword)
-            .eq('status', 'active');
-
-        if (restaurantId) {
-            q = q.eq('restaurant_id', restaurantId);
-        }
-
-        const { data, error } = await q;
-        if (error || !data || data.length === 0) return { success: false, message: 'Identifiants incorrects ou restaurant non correspondant.' };
-
-        const m = data[0];
-        const session = {
-            id: m.id, role: m.role, agent_role: m.agent_role,
-            restaurant_id: m.restaurant_id,
-            restaurant_name: m.restaurants ? m.restaurants.name : 'Restaurant',
-            restaurant_logo: m.restaurants ? m.restaurants.logo : null,
-            firstname: m.firstname, lastname: m.lastname, email: m.email
-        };
-        localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
-        return { success: true, staff: session };
     },
     getStaff: async (restaurantId) => {
         const { data, error } = await window.supabaseClient
