@@ -227,16 +227,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .restaurant-card .badge { 
-            display: inline-block;
-            background: #d1fae5;
-            color: #059669;
-            font-size: 0.68rem;
-            padding: 1px 7px;
-            border-radius: 12px;
-            margin-top: 3px;
-            font-weight: 600;
-        }
         .loading-card {
             background: #e8eaed;
             border-radius: 14px;
@@ -388,7 +378,6 @@
                     <div class="info">
                         <div class="name">${r.name}</div>
                         <div class="address">📍 ${r.address || 'Adresse non renseignée'}</div>
-                        <span class="badge">✅ Voir le menu</span>
                     </div>`;
                 grid.appendChild(a);
             });
