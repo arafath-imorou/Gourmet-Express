@@ -145,12 +145,15 @@
             const waUrl = cleanWa ? `https://wa.me/229${cleanWa.replace(/^229/, '')}?text=${encodeURIComponent(`Bonjour ${restoName}, je vous contacte concernant ma commande N° ${order.id}`)}` : null;
             const contactBox = document.getElementById('order-contact-actions');
             const isTakenCare = order.status === 'En cours' || order.status === 'Livrée' || order.status === 'Terminée';
+            const statusBtnLabel = order.status === 'Livrée' 
+                ? 'Commande livrée' 
+                : (order.status === 'Terminée' ? 'Commande terminée' : 'Commande en cours');
 
             if (waUrl) {
                 if (isTakenCare) {
                     contactBox.innerHTML = `
                         <div style="background:#f1f5f9; border:1px solid #cbd5e1; color:#64748b; padding:12px; border-radius:10px; text-align:center; font-weight:700; font-size:0.9rem;">
-                            Commande prise en charge (${order.status})
+                            ${statusBtnLabel}
                         </div>
                     `;
                 } else {
