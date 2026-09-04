@@ -1,5 +1,5 @@
 /**
- * FedaPay Integration Module - Gourmet Express
+ * FedaPay Integration Module - ITAMYA
  * Handles Mobile Money (MTN, Moov, Celtiis) and Bank Card payments before order validation.
  */
 
@@ -55,7 +55,7 @@ const FedaPayManager = {
                     environment: FedaPayConfig.ENVIRONMENT,
                     transaction: {
                         amount: cleanAmount,
-                        description: description || 'Commande Gourmet Express',
+                        description: description || 'Commande ITAMYA',
                         custom_metadata: {
                             restaurant_id: DataManager.getCurrentRestaurantId(),
                             client_name: customer.name || 'Client'

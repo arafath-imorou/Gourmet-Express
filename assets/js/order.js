@@ -132,7 +132,7 @@ function setupForm() {
         // Lancement du paiement FedaPay
         FedaPayManager.pay({
             amount: orderTotal,
-            description: `Commande ${DataManager.getCurrentRestaurantName() || 'Gourmet Express'} (${paymentNetwork})`,
+            description: `Commande ${DataManager.getCurrentRestaurantName() || 'ITAMYA'} (${paymentNetwork})`,
             customer: {
                 name: clientName,
                 firstname: firstname,

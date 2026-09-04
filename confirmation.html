@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commande Confirmée - Gourmet Express</title>
+    <title>Commande Confirmée - ITAMYA</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -92,7 +92,7 @@
                 </div>
                 <div style="text-align: right;">
                     <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">ÉTABLISSEMENT</div>
-                    <div style="font-size: 1.05rem; font-weight: 700; color: #e74c3c;" id="resto-name-label">Gourmet Express</div>
+                    <div style="font-size: 1.05rem; font-weight: 700; color: #e74c3c;" id="resto-name-label">ITAMYA</div>
                 </div>
             </div>
 
@@ -167,7 +167,7 @@
             document.getElementById('order-id-label').textContent = order.id;
             
             const resto = order.restaurants || {};
-            const restoName = resto.name || DataManager.getCurrentRestaurantName() || 'Gourmet Express';
+            const restoName = resto.name || DataManager.getCurrentRestaurantName() || 'ITAMYA';
             const restoPhone = resto.phone || '00 229 01 96 79 14 70';
 
             document.getElementById('resto-name-label').textContent = restoName;
@@ -220,7 +220,7 @@
 
             // Construct WhatsApp Message
             let waMsg = `*Bonjour ${restoName}* 👋,\n\n`;
-            waMsg += `Je viens de valider et payer ma commande sur Gourmet Express :\n\n`;
+            waMsg += `Je viens de valider et payer ma commande sur ITAMYA :\n\n`;
             waMsg += `📄 *N° Commande :* ${order.id}\n`;
             waMsg += `💳 *Paiement :* ✅ PAYÉ VIA FEDAPAY\n`;
             waMsg += `👤 *Client :* ${order.client_name}\n`;
