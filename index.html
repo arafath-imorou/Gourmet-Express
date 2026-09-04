@@ -237,6 +237,55 @@
             border-radius: 20px;
             color: rgba(255,255,255,0.75);
         }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 600px) {
+            .hero {
+                padding: 20px 14px 18px;
+                border-bottom-left-radius: 20px;
+                border-bottom-right-radius: 20px;
+            }
+            .hero-logo-img {
+                height: clamp(130px, 34vw, 190px);
+            }
+            .hero p {
+                font-size: 0.88rem;
+                margin: 4px auto 12px;
+                line-height: 1.45;
+            }
+            .hero-btns {
+                width: 100%;
+                gap: 8px;
+            }
+            .btn-hero {
+                flex: 1 1 calc(50% - 8px);
+                min-width: 130px;
+                padding: 10px 14px;
+                font-size: 0.85rem;
+                justify-content: center;
+            }
+            .section {
+                padding: 18px 14px 12px;
+            }
+            .restaurants-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .restaurant-card {
+                padding: 12px 14px;
+            }
+            #session-header {
+                top: 10px !important;
+                right: 10px !important;
+                padding: 4px 10px !important;
+                font-size: 0.78rem !important;
+            }
+        }
+
+        @keyframes modalPop {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body>
