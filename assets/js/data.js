@@ -28,6 +28,25 @@ const DataManager = {
     // ==================== HELPERS ====================
     normalize: (str) => str ? str.toString().trim().toLowerCase() : '',
     normalizePhone: (str) => str ? str.toString().replace(/[\s\-\.]/g, '') : '',
+    cleanPhoneDigits: (str) => {
+        if (!str) return '';
+        return str.toString().replace(/\D/g, '');
+    },
+    matchPhones: (p1, p2) => {
+        if (!p1 || !p2) return false;
+        const d1 = p1.toString().replace(/\D/g, '');
+        const d2 = p2.toString().replace(/\D/g, '');
+        if (!d1 || !d2) return false;
+        if (d1 === d2) return true;
+        // Compare last 8 or 10 digits (Benin formats: 8 digits or 10 digits with '01')
+        if (d1.length >= 8 && d2.length >= 8 && d1.slice(-8) === d2.slice(-8)) return true;
+        if (d1.length >= 10 && d2.length >= 10 && d1.slice(-10) === d2.slice(-10)) return true;
+        return false;
+    },
+    stripAccents: (str) => {
+        if (!str) return '';
+        return str.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    },
 
     // ==================== IMAGE WEBP COMPRESSION ====================
     convertToWebP: (file, maxDimension = 800, quality = 0.82) => {
@@ -359,13 +378,14 @@ const DataManager = {
     },
 
     // ==================== STAFF LOGIN ====================
-    loginStaff: async (email, password, restaurantId) => {
-        const cleanEmail = email ? email.toLowerCase().trim() : '';
+    loginStaff: async (identifier, password, restaurantId) => {
+        const rawId = (identifier || '').trim();
+        const cleanEmail = rawId.toLowerCase();
         const cleanPassword = password ? password.trim() : '';
 
         // 1. Check if superadmin
         const { data: superadmins } = await window.supabaseClient.from('staff')
-            .select('*, restaurants(id, name, logo, slug)')
+            .select('*, restaurants(id, name, logo, slug, phone)')
             .eq('email', cleanEmail)
             .eq('password', cleanPassword)
             .eq('role', 'superadmin')
@@ -384,27 +404,45 @@ const DataManager = {
             return { success: true, staff: session };
         }
 
-        // 2. Check regular restaurant staff
+        // 2. Check regular restaurant staff (by email or restaurant phone)
+        let candidateStaff = [];
+
         let q = window.supabaseClient.from('staff')
-            .select('*, restaurants(id, name, logo, slug)')
+            .select('*, restaurants(id, name, logo, slug, phone)')
             .eq('email', cleanEmail)
             .eq('password', cleanPassword)
             .eq('status', 'active');
 
-        if (restaurantId) {
-            q = q.eq('restaurant_id', restaurantId);
+        if (restaurantId) q = q.eq('restaurant_id', restaurantId);
+        const { data: byEmail } = await q;
+        if (byEmail && byEmail.length > 0) candidateStaff.push(...byEmail);
+
+        if (candidateStaff.length === 0) {
+            const { data: restos } = await window.supabaseClient.from('restaurants').select('id, name, phone');
+            const matchingRestos = (restos || []).filter(r => DataManager.matchPhones(r.phone, rawId));
+            if (matchingRestos.length > 0) {
+                let pq = window.supabaseClient.from('staff')
+                    .select('*, restaurants(id, name, logo, slug, phone)')
+                    .in('restaurant_id', matchingRestos.map(r => r.id))
+                    .eq('password', cleanPassword)
+                    .eq('status', 'active');
+                if (restaurantId) pq = pq.eq('restaurant_id', restaurantId);
+                const { data: byPhone } = await pq;
+                if (byPhone && byPhone.length > 0) candidateStaff.push(...byPhone);
+            }
         }
 
-        const { data, error } = await q;
-        if (error || !data || data.length === 0) return { success: false, message: 'Identifiants incorrects ou restaurant non correspondant.' };
+        if (candidateStaff.length === 0) return { success: false, message: 'Identifiants incorrects ou restaurant non correspondant.' };
 
-        const m = data[0];
+        const m = candidateStaff[0];
         const session = {
             id: m.id, role: m.role, agent_role: m.agent_role,
             restaurant_id: m.restaurant_id,
             restaurant_name: m.restaurants ? m.restaurants.name : 'Restaurant',
             restaurant_logo: m.restaurants ? m.restaurants.logo : null,
-            firstname: m.firstname, lastname: m.lastname, email: m.email
+            restaurant_phone: m.restaurants ? m.restaurants.phone : null,
+            firstname: m.firstname, lastname: m.lastname, email: m.email,
+            phone: m.restaurants ? m.restaurants.phone : null
         };
         localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
         return { success: true, staff: session };
@@ -423,9 +461,13 @@ const DataManager = {
             }
 
             // 1. Vérifier si c'est un compte Restaurant (ou Staff) dans la table 'staff'
+            // Connexion possible par Email OU par Numéro de téléphone du restaurant
+            const candidateStaffList = [];
+
+            // 1.A. Recherche directe par email dans la table 'staff'
             let staffQuery = window.supabaseClient
                 .from('staff')
-                .select('*, restaurants(id, name, logo, phone, address)');
+                .select('*, restaurants(id, name, logo, phone, address, status)');
 
             if (normEmail && rawId && normEmail !== rawId) {
                 staffQuery = staffQuery.or(`email.eq.${normEmail},email.eq.${rawId}`);
@@ -433,12 +475,64 @@ const DataManager = {
                 staffQuery = staffQuery.eq('email', normEmail || rawId);
             }
 
-            const { data: staffList, error: staffErr } = await staffQuery;
-            if (!staffErr && staffList && staffList.length > 0) {
-                const member = staffList.find(s => s.password === cleanPassword);
+            const { data: emailStaffList, error: staffErr } = await staffQuery;
+            if (!staffErr && emailStaffList && emailStaffList.length > 0) {
+                candidateStaffList.push(...emailStaffList);
+            }
+
+            // 1.B. Recherche par Numéro de téléphone du Restaurant
+            const isPotentialPhone = /\d{6,}/.test(rawId.replace(/\D/g, ''));
+            if (isPotentialPhone || candidateStaffList.length === 0) {
+                const { data: allRestos } = await window.supabaseClient
+                    .from('restaurants')
+                    .select('id, name, logo, phone, address, status');
+
+                const matchingRestos = (allRestos || []).filter(r => DataManager.matchPhones(r.phone, rawId));
+
+                if (matchingRestos && matchingRestos.length > 0) {
+                    const restoIds = matchingRestos.map(r => r.id);
+                    const { data: phoneStaffList } = await window.supabaseClient
+                        .from('staff')
+                        .select('*, restaurants(id, name, logo, phone, address, status)')
+                        .in('restaurant_id', restoIds);
+
+                    if (phoneStaffList && phoneStaffList.length > 0) {
+                        candidateStaffList.push(...phoneStaffList);
+                    }
+                }
+            }
+
+            // 1.C. Recherche de tolérance sans accents si email saisi (ex: ginacodelices vs ginacodélices)
+            if (candidateStaffList.length === 0 && rawId.includes('@')) {
+                const strippedInput = DataManager.stripAccents(rawId);
+                const { data: allStaff } = await window.supabaseClient
+                    .from('staff')
+                    .select('*, restaurants(id, name, logo, phone, address, status)');
+
+                const accentMatched = (allStaff || []).filter(s => DataManager.stripAccents(s.email) === strippedInput);
+                if (accentMatched && accentMatched.length > 0) {
+                    candidateStaffList.push(...accentMatched);
+                }
+            }
+
+            // Dédoublonnage des membres staff candidats
+            const uniqueStaff = [];
+            const seenIds = new Set();
+            for (const s of candidateStaffList) {
+                if (s && s.id && !seenIds.has(s.id)) {
+                    seenIds.add(s.id);
+                    uniqueStaff.push(s);
+                }
+            }
+
+            if (uniqueStaff.length > 0) {
+                const member = uniqueStaff.find(s => s.password === cleanPassword);
                 if (member) {
                     if (member.status === 'inactive' || member.status === 'blocked') {
                         return { success: false, message: 'Ce compte restaurant est actuellement désactivé.' };
+                    }
+                    if (member.restaurants && member.restaurants.status === 'inactive') {
+                        return { success: false, message: 'Cet établissement est actuellement désactivé.' };
                     }
                     const session = {
                         id: member.id,
@@ -447,10 +541,12 @@ const DataManager = {
                         restaurant_id: member.restaurant_id,
                         restaurant_name: member.restaurants ? member.restaurants.name : 'Plateforme ITAMYA',
                         restaurant_logo: member.restaurants ? member.restaurants.logo : null,
+                        restaurant_phone: member.restaurants ? member.restaurants.phone : null,
                         firstname: member.firstname,
                         lastname: member.lastname,
                         name: `${member.firstname || ''} ${member.lastname || ''}`.trim() || member.email,
-                        email: member.email
+                        email: member.email,
+                        phone: member.restaurants ? member.restaurants.phone : null
                     };
                     localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
                     localStorage.removeItem(STORAGE_KEYS.CLIENT_SESSION);
@@ -476,8 +572,16 @@ const DataManager = {
             }
 
             const { data: clientList, error: clientErr } = await clientQuery;
-            if (!clientErr && clientList && clientList.length > 0) {
-                const client = clientList.find(c => c.password === cleanPassword);
+            let matchedClients = clientList || [];
+
+            // Recherche par téléphone souple pour les clients si nécessaire
+            if ((!matchedClients || matchedClients.length === 0) && isPotentialPhone) {
+                const { data: allClients } = await window.supabaseClient.from('restau_clients').select('*');
+                matchedClients = (allClients || []).filter(c => DataManager.matchPhones(c.phone, rawId));
+            }
+
+            if (matchedClients && matchedClients.length > 0) {
+                const client = matchedClients.find(c => c.password === cleanPassword);
                 if (client) {
                     if (client.status === 'blocked' || client.status === 'inactive') {
                         return { success: false, message: 'Votre compte client est temporairement désactivé.' };

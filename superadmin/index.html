@@ -466,7 +466,7 @@
                         </div>
                     </div>
                     <small style="color:#64748b; font-size:0.75rem; display:block; margin-top:5px;">
-                        💡 Vous pouvez consulter ou modifier directement le mot de passe ici.
+                        💡 Le restaurant peut se connecter soit avec son <b>Email</b>, soit avec son <b>Numéro de téléphone</b>.
                     </small>
                 </div>
             </div>
@@ -948,13 +948,14 @@
             const email = document.getElementById('er-staff-email').value.trim();
             const password = document.getElementById('er-staff-password').value.trim();
             const restoName = document.getElementById('er-name').value.trim();
+            const phone = document.getElementById('er-phone').value.trim();
 
-            if (!email && !password) {
+            if (!email && !password && !phone) {
                 alert('Aucun identifiant à copier.');
                 return;
             }
 
-            const text = `Identifiants d'accès (${restoName}) :\nIdentifiant / Email : ${email}\nMot de passe : ${password}`;
+            const text = `Identifiants d'accès (${restoName}) :\nEmail : ${email || 'Non renseigné'}\nTéléphone : ${phone || 'Non renseigné'}\nMot de passe : ${password}\n\n(Connexion possible avec l'Email OU le Numéro de téléphone)`;
             navigator.clipboard.writeText(text).then(() => {
                 alert('✅ Identifiants copiés dans le presse-papier !');
             }).catch(() => {
