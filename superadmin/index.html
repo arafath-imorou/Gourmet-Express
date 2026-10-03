@@ -391,8 +391,13 @@
     <!-- Modal 2: Edit Restaurant -->
     <div class="modal-overlay" id="modal-edit-restaurant">
         <div class="modal">
-            <h3>✏️ Modifier le restaurant</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h3 style="margin-bottom:0;">✏️ Modifier le restaurant</h3>
+                <button onclick="closeModal('modal-edit-restaurant')" style="border:none; background:none; font-size:1.6rem; cursor:pointer; color:#888;">&times;</button>
+            </div>
             <input type="hidden" id="er-id">
+            
+            <div class="modal-section" style="margin-top:0;">Informations de l'Établissement</div>
             <div class="form-group"><label>Nom du restaurant *</label><input id="er-name" type="text"></div>
             <div class="form-group"><label>Contact WhatsApp des commandes *</label><input id="er-phone" type="tel" required placeholder="Ex: +229 01 96 79 14 70 (Reçoit les récapitulatifs clients)"></div>
             <div class="form-group"><label>Adresse</label><input id="er-address" type="text"></div>
@@ -407,10 +412,69 @@
             </div>
             <div class="form-group"><label>Description</label><textarea id="er-desc" rows="2"></textarea></div>
 
+            <div class="modal-section" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>🔐 Identifiants d'accès du restaurant</span>
+                <span id="er-staff-count-badge" class="badge" style="background:#e0f2fe; color:#0369a1; font-size:0.75rem; display:none;"></span>
+            </div>
+
+            <!-- Indicateur de chargement des accès -->
+            <div id="er-staff-loading" style="padding:14px; text-align:center; color:#64748b; font-size:0.85rem; background:#f8fafc; border-radius:10px; margin-bottom:12px; border:1px dashed #cbd5e1;">
+                ⏳ Chargement des identifiants et mot de passe...
+            </div>
+
+            <!-- Conteneur des accès -->
+            <div id="er-staff-container" style="display:none; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:16px;">
+                <div id="er-staff-selector-group" class="form-group" style="display:none;">
+                    <label>Compte à modifier</label>
+                    <select id="er-staff-selector" class="select-custom" style="width:100%;" onchange="onEditStaffSelectChange(this.value)"></select>
+                </div>
+
+                <input type="hidden" id="er-staff-id">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Prénom de l'admin</label>
+                        <input id="er-staff-firstname" type="text" placeholder="Prénom">
+                    </div>
+                    <div class="form-group">
+                        <label>Nom de l'admin</label>
+                        <input id="er-staff-lastname" type="text" placeholder="Nom">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email de connexion (Identifiant) *</label>
+                    <input id="er-staff-email" type="email" placeholder="admin@restaurant.com">
+                </div>
+
+                <div class="form-group" style="margin-bottom:4px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="margin-bottom:0;">Mot de passe de connexion *</label>
+                        <button type="button" onclick="generateRandomPassword()" style="background:none; border:none; color:#2563eb; font-size:0.78rem; font-weight:600; cursor:pointer; text-decoration:underline;">
+                            🎲 Générer un mot de passe
+                        </button>
+                    </div>
+                    <div style="position:relative; display:flex; align-items:center;">
+                        <input id="er-staff-password" type="text" placeholder="Mot de passe" style="padding-right:85px; font-family: 'Consolas', 'Courier New', monospace; font-size:0.95rem; font-weight:600;">
+                        <div style="position:absolute; right:6px; display:flex; gap:4px;">
+                            <button type="button" id="er-toggle-pwd-btn" onclick="togglePasswordVisibility('er-staff-password', this)" style="background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.85rem;" title="Afficher/Masquer">
+                                👁️
+                            </button>
+                            <button type="button" onclick="copyStaffCredentials()" style="background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.85rem;" title="Copier les identifiants">
+                                📋
+                            </button>
+                        </div>
+                    </div>
+                    <small style="color:#64748b; font-size:0.75rem; display:block; margin-top:5px;">
+                        💡 Vous pouvez consulter ou modifier directement le mot de passe ici.
+                    </small>
+                </div>
+            </div>
+
             <div id="er-error" style="color:#e74c3c; font-size:0.85rem; margin-top:8px; display:none; font-weight:600;"></div>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeModal('modal-edit-restaurant')">Annuler</button>
-                <button class="btn-primary btn-resto-add" onclick="submitEditRestaurant()">Enregistrer les modifications</button>
+                <button class="btn-primary btn-resto-add" id="btn-submit-edit-restaurant" onclick="submitEditRestaurant()">Enregistrer les modifications</button>
             </div>
         </div>
     </div>
@@ -764,7 +828,9 @@
             }
         }
 
-        function openEditRestaurantModal(id) {
+        let currentEditRestaurantStaffList = [];
+
+        async function openEditRestaurantModal(id) {
             const r = allRestaurants.find(x => x.id === id);
             if (!r) return;
             document.getElementById('er-id').value = r.id;
@@ -782,7 +848,118 @@
                 preview.style.display = 'none';
             }
             document.getElementById('er-error').style.display = 'none';
+
+            // Reset staff section UI
+            const staffLoading = document.getElementById('er-staff-loading');
+            const staffContainer = document.getElementById('er-staff-container');
+            const countBadge = document.getElementById('er-staff-count-badge');
+            const selectorGroup = document.getElementById('er-staff-selector-group');
+            const staffSelector = document.getElementById('er-staff-selector');
+
+            staffLoading.style.display = 'block';
+            staffContainer.style.display = 'none';
+            countBadge.style.display = 'none';
+            currentEditRestaurantStaffList = [];
+
             openModal('modal-edit-restaurant');
+
+            try {
+                const staffList = await DataManager.getStaff(r.id);
+                currentEditRestaurantStaffList = staffList || [];
+                staffLoading.style.display = 'none';
+                staffContainer.style.display = 'block';
+
+                if (currentEditRestaurantStaffList.length === 0) {
+                    countBadge.textContent = 'Création accès';
+                    countBadge.style.display = 'inline-block';
+                    selectorGroup.style.display = 'none';
+                    document.getElementById('er-staff-id').value = '';
+                    document.getElementById('er-staff-firstname').value = 'Admin';
+                    document.getElementById('er-staff-lastname').value = r.name || '';
+                    document.getElementById('er-staff-email').value = '';
+                    document.getElementById('er-staff-password').value = '';
+                } else if (currentEditRestaurantStaffList.length === 1) {
+                    countBadge.textContent = '1 compte admin';
+                    countBadge.style.display = 'inline-block';
+                    selectorGroup.style.display = 'none';
+                    populateStaffFields(currentEditRestaurantStaffList[0]);
+                } else {
+                    countBadge.textContent = `${currentEditRestaurantStaffList.length} comptes`;
+                    countBadge.style.display = 'inline-block';
+                    selectorGroup.style.display = 'block';
+                    staffSelector.innerHTML = currentEditRestaurantStaffList.map(s => `
+                        <option value="${s.id}">
+                            ${s.firstname || ''} ${s.lastname || ''} (${s.role === 'admin' ? 'Administrateur' : (s.agent_role || s.role || 'Agent')}) - ${s.email}
+                        </option>
+                    `).join('');
+
+                    const defaultAdmin = currentEditRestaurantStaffList.find(s => s.role === 'admin') || currentEditRestaurantStaffList[0];
+                    staffSelector.value = defaultAdmin.id;
+                    populateStaffFields(defaultAdmin);
+                }
+            } catch (err) {
+                console.error('Erreur chargement staff restaurant:', err);
+                staffLoading.innerHTML = '<span style="color:#e74c3c;">⚠️ Erreur lors du chargement des accès staff.</span>';
+            }
+        }
+
+        function populateStaffFields(member) {
+            if (!member) return;
+            document.getElementById('er-staff-id').value = member.id || '';
+            document.getElementById('er-staff-firstname').value = member.firstname || '';
+            document.getElementById('er-staff-lastname').value = member.lastname || '';
+            document.getElementById('er-staff-email').value = member.email || '';
+            document.getElementById('er-staff-password').value = member.password || '';
+        }
+
+        function onEditStaffSelectChange(staffId) {
+            const member = currentEditRestaurantStaffList.find(s => s.id === staffId);
+            if (member) populateStaffFields(member);
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (btn) btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                if (btn) btn.textContent = '👁️';
+            }
+        }
+
+        function generateRandomPassword() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+            let pass = '';
+            for (let i = 0; i < 8; i++) {
+                pass += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const pwdInput = document.getElementById('er-staff-password');
+            if (pwdInput) {
+                pwdInput.value = pass;
+                pwdInput.type = 'text';
+                const toggleBtn = document.getElementById('er-toggle-pwd-btn');
+                if (toggleBtn) toggleBtn.textContent = '🙈';
+            }
+        }
+
+        function copyStaffCredentials() {
+            const email = document.getElementById('er-staff-email').value.trim();
+            const password = document.getElementById('er-staff-password').value.trim();
+            const restoName = document.getElementById('er-name').value.trim();
+
+            if (!email && !password) {
+                alert('Aucun identifiant à copier.');
+                return;
+            }
+
+            const text = `Identifiants d'accès (${restoName}) :\nIdentifiant / Email : ${email}\nMot de passe : ${password}`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Identifiants copiés dans le presse-papier !');
+            }).catch(() => {
+                prompt('Copiez les identifiants ci-dessous :', text);
+            });
         }
 
         async function submitEditRestaurant() {
@@ -793,21 +970,81 @@
             const logo = document.getElementById('er-logo').value;
             const description = document.getElementById('er-desc').value.trim();
 
+            const staffId = document.getElementById('er-staff-id').value;
+            const staffFirstname = document.getElementById('er-staff-firstname').value.trim();
+            const staffLastname = document.getElementById('er-staff-lastname').value.trim();
+            const staffEmail = document.getElementById('er-staff-email').value.trim();
+            const staffPassword = document.getElementById('er-staff-password').value.trim();
+
             const errEl = document.getElementById('er-error');
+            const submitBtn = document.getElementById('btn-submit-edit-restaurant');
+
             if (!name) {
                 errEl.textContent = 'Le nom du restaurant est obligatoire.';
                 errEl.style.display = 'block';
                 return;
             }
 
-            const success = await DataManager.updateRestaurant(id, { name, address, phone, logo, description });
-            if (success) {
+            if (!phone) {
+                errEl.textContent = 'Le contact WhatsApp des commandes est obligatoire.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if (staffId && (!staffEmail || !staffPassword)) {
+                errEl.textContent = 'L\'email et le mot de passe de connexion ne peuvent pas être vides.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enregistrement en cours...';
+
+            try {
+                // 1. Mettre à jour les informations du restaurant
+                const successResto = await DataManager.updateRestaurant(id, { name, address, phone, logo, description });
+                if (!successResto) {
+                    throw new Error('Erreur lors de la mise à jour des données du restaurant.');
+                }
+
+                // 2. Mettre à jour ou créer les identifiants du compte staff / admin
+                if (staffId) {
+                    const staffUpdates = {
+                        firstname: staffFirstname,
+                        lastname: staffLastname,
+                        email: staffEmail,
+                        password: staffPassword
+                    };
+                    const successStaff = await DataManager.updateStaff(staffId, staffUpdates);
+                    if (!successStaff) {
+                        throw new Error('Les informations du restaurant ont été mises à jour, mais une erreur est survenue lors de la modification du mot de passe / identifiants.');
+                    }
+                } else if (staffEmail && staffPassword) {
+                    const resStaff = await DataManager.createStaff({
+                        restaurant_id: id,
+                        firstname: staffFirstname || 'Admin',
+                        lastname: staffLastname || name,
+                        email: staffEmail,
+                        password: staffPassword,
+                        role: 'admin',
+                        agent_role: 'administrateur',
+                        status: 'active'
+                    });
+                    if (!resStaff.success) {
+                        throw new Error('Erreur lors de la création du compte administrateur : ' + resStaff.message);
+                    }
+                }
+
                 closeModal('modal-edit-restaurant');
                 await initPlatformData();
-                alert('✅ Restaurant mis à jour avec succès !');
-            } else {
-                errEl.textContent = 'Erreur lors de la mise à jour.';
+                alert('✅ Restaurant et mot de passe / identifiants mis à jour avec succès !');
+            } catch (err) {
+                console.error(err);
+                errEl.textContent = err.message || 'Erreur lors de la mise à jour.';
                 errEl.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enregistrer les modifications';
             }
         }
 
