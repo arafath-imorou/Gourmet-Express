@@ -287,345 +287,354 @@
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* --- Sections Plateforme (Qui sommes-nous, Comment ça marche, Charte, Confiance) --- */
+        /* --- Sections Plateforme Premium (Qui sommes-nous, Comment ça marche, Charte, Confiance) --- */
         .info-section {
-            padding: 32px 20px;
-            max-width: 900px;
+            padding: 48px 20px;
+            max-width: 920px;
             margin: 0 auto;
             width: 100%;
         }
         .info-section.alt-bg {
             background: #ffffff;
             border-radius: 24px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 25px rgba(0,0,0,0.03);
             border: 1px solid #eef2f6;
-            margin-top: 14px;
-            margin-bottom: 14px;
+            margin-top: 24px;
+            margin-bottom: 24px;
+            padding: 52px 32px;
         }
         
         .section-header {
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 36px;
         }
         .section-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            display: inline-block;
             padding: 5px 14px;
             border-radius: 50px;
-            font-size: 0.74rem;
+            font-size: 0.72rem;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 8px;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #475569;
         }
-        .badge-red { background: #fee2e2; color: #dc2626; }
-        .badge-blue { background: #dbeafe; color: #1d4ed8; }
-        .badge-green { background: #d1fae5; color: #047857; }
-        .badge-amber { background: #fef3c7; color: #b45309; }
+        .section-badge.badge-accent {
+            background: rgba(230,57,70,0.08);
+            border-color: rgba(230,57,70,0.2);
+            color: #c42b37;
+        }
         
         .section-main-title {
             font-family: 'Poppins', sans-serif;
-            font-size: clamp(1.25rem, 3vw, 1.55rem);
+            font-size: clamp(1.35rem, 3.2vw, 1.75rem);
             font-weight: 800;
             color: #0f172a;
-            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+            line-height: 1.3;
         }
         .section-subtitle {
             color: #64748b;
-            font-size: 0.9rem;
-            max-width: 580px;
+            font-size: 0.94rem;
+            max-width: 600px;
             margin: 0 auto;
-            line-height: 1.5;
+            line-height: 1.7;
+            font-weight: 400;
         }
 
         /* 1. Qui sommes-nous ? */
         .about-card {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border-radius: 20px;
-            padding: clamp(22px, 4vw, 32px);
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 24px;
+            padding: clamp(28px, 5vw, 44px);
             color: white;
-            box-shadow: 0 10px 30px rgba(15,23,42,0.15);
+            box-shadow: 0 16px 40px rgba(15,23,42,0.12);
+            border: 1px solid rgba(255,255,255,0.08);
             position: relative;
-            overflow: hidden;
         }
-        .about-card::before {
-            content: '';
-            position: absolute;
-            top: -40px;
-            right: -40px;
-            width: 140px;
-            height: 140px;
-            background: radial-gradient(circle, rgba(230,57,70,0.3) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-        .about-text {
-            font-size: clamp(0.92rem, 1.8vw, 1.02rem);
-            line-height: 1.65;
+        .about-lead {
+            font-size: clamp(0.96rem, 2vw, 1.08rem);
+            line-height: 1.8;
             color: rgba(255,255,255,0.92);
-            margin-bottom: 22px;
+            margin-bottom: 18px;
+            font-weight: 400;
+        }
+        .about-subtext {
+            font-size: 0.92rem;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.76);
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .about-subtext a {
+            color: #f39c12;
+            text-decoration: underline;
+            font-weight: 700;
         }
         .about-pillars {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
         }
         .about-pillar-item {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px;
-            padding: 16px;
-            transition: all 0.25s;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 24px 20px;
+            transition: all 0.25s ease;
         }
         .about-pillar-item:hover {
-            background: rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.18);
             transform: translateY(-2px);
         }
-        .about-pillar-icon {
-            font-size: 1.6rem;
-            margin-bottom: 8px;
+        .about-pillar-num {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #e63946;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
             display: block;
         }
         .about-pillar-title {
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: white;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
+            line-height: 1.4;
         }
         .about-pillar-desc {
-            font-size: 0.82rem;
-            color: rgba(255,255,255,0.75);
-            line-height: 1.45;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.72);
+            line-height: 1.65;
         }
 
         /* 2. Comment ça marche ? */
         .steps-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 18px;
         }
         .step-card {
-            background: white;
-            border-radius: 18px;
-            padding: 22px 16px;
-            border: 1.5px solid #e2e8f0;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 28px 22px;
+            border: 1.5px solid #edf2f7;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.02);
             position: relative;
             transition: all 0.25s ease;
-            text-align: center;
+            text-align: left;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
         .step-card:hover {
             transform: translateY(-4px);
-            border-color: #3b82f6;
-            box-shadow: 0 8px 24px rgba(59,130,246,0.12);
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 28px rgba(15,23,42,0.06);
         }
         .step-number {
-            position: absolute;
-            top: 12px;
-            right: 14px;
-            font-size: 0.76rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.15rem;
             font-weight: 800;
-            color: #94a3b8;
+            color: #0f172a;
+            margin-bottom: 16px;
+            display: inline-block;
             background: #f1f5f9;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .step-icon-wrap {
-            width: 54px;
-            height: 54px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            margin-bottom: 12px;
-            transition: transform 0.2s;
-        }
-        .step-card:hover .step-icon-wrap {
-            transform: scale(1.1);
+            width: 38px;
+            height: 38px;
+            line-height: 38px;
+            text-align: center;
+            border-radius: 12px;
         }
         .step-title {
             font-weight: 700;
-            font-size: 0.94rem;
+            font-size: 0.98rem;
             color: #0f172a;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            line-height: 1.35;
         }
         .step-desc {
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             color: #64748b;
-            line-height: 1.45;
+            line-height: 1.65;
         }
 
         /* 3. Notre charte qualité */
         .quality-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
         }
         .quality-card {
-            background: white;
-            border-radius: 16px;
-            padding: 18px;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 26px 24px;
             border: 1.5px solid #e2e8f0;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.02);
             display: flex;
-            gap: 14px;
-            align-items: flex-start;
-            transition: all 0.25s;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.25s ease;
+            position: relative;
+            border-left: 4px solid #0f172a;
         }
         .quality-card:hover {
             transform: translateY(-3px);
-            border-color: #10b981;
-            box-shadow: 0 8px 22px rgba(16,185,129,0.1);
+            border-color: #94a3b8;
+            border-left-color: #e63946;
+            box-shadow: 0 10px 26px rgba(15,23,42,0.06);
         }
-        .quality-icon {
-            width: 44px;
-            height: 44px;
-            min-width: 44px;
-            border-radius: 12px;
-            background: #ecfdf5;
-            color: #059669;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.35rem;
+        .quality-badge {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            text-transform: uppercase;
         }
         .quality-title {
             font-weight: 700;
-            font-size: 0.92rem;
+            font-size: 1rem;
             color: #0f172a;
-            margin-bottom: 4px;
+            line-height: 1.4;
         }
         .quality-desc {
-            font-size: 0.82rem;
+            font-size: 0.86rem;
             color: #64748b;
-            line-height: 1.45;
+            line-height: 1.7;
         }
 
         /* 4. Ils nous font déjà confiance */
         .trust-stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 12px;
-            margin-bottom: 22px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
         }
         .trust-stat-box {
             background: #f8fafc;
             border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 14px 10px;
+            border-radius: 16px;
+            padding: 20px 14px;
             text-align: center;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
         .trust-stat-box:hover {
-            border-color: #e63946;
-            background: white;
+            border-color: #0f172a;
+            background: #ffffff;
             transform: translateY(-2px);
         }
         .trust-stat-val {
             font-family: 'Poppins', sans-serif;
-            font-size: 1.4rem;
+            font-size: 1.55rem;
             font-weight: 800;
-            color: #e63946;
+            color: #0f172a;
             line-height: 1.2;
+            letter-spacing: -0.5px;
         }
         .trust-stat-lbl {
-            font-size: 0.74rem;
+            font-size: 0.76rem;
             font-weight: 600;
             color: #64748b;
-            margin-top: 4px;
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
         .testimonials-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
         }
         .testimonial-card {
-            background: white;
-            border-radius: 16px;
-            padding: 18px;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 26px 22px;
             border: 1.5px solid #e2e8f0;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.02);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
         }
         .testimonial-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.07);
+            border-color: #cbd5e1;
+            box-shadow: 0 8px 24px rgba(15,23,42,0.05);
         }
         .testimonial-quote {
-            font-size: 0.86rem;
+            font-size: 0.9rem;
             color: #334155;
-            line-height: 1.5;
-            font-style: italic;
-            margin-bottom: 14px;
+            line-height: 1.75;
+            font-style: normal;
+            margin-bottom: 20px;
         }
         .testimonial-author {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            padding-top: 14px;
+            border-top: 1px solid #f1f5f9;
         }
         .author-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #e63946, #f4a261);
-            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: #0f172a;
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 0.82rem;
             flex-shrink: 0;
+            letter-spacing: 0.5px;
         }
         .author-info .name {
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             font-weight: 700;
             color: #0f172a;
+            line-height: 1.3;
         }
         .author-info .role {
-            font-size: 0.72rem;
+            font-size: 0.74rem;
             color: #94a3b8;
+            margin-top: 2px;
         }
 
         @media (max-width: 600px) {
             .info-section {
-                padding: 24px 14px;
+                padding: 32px 16px;
             }
             .info-section.alt-bg {
-                border-radius: 18px;
-                margin-top: 10px;
-                margin-bottom: 10px;
+                border-radius: 20px;
+                margin-top: 16px;
+                margin-bottom: 16px;
+                padding: 32px 16px;
             }
             .about-pillars {
                 grid-template-columns: 1fr;
+                gap: 14px;
             }
             .steps-grid {
                 grid-template-columns: 1fr;
-                gap: 10px;
+                gap: 12px;
             }
             .quality-grid {
                 grid-template-columns: 1fr;
-                gap: 10px;
+                gap: 14px;
             }
             .trust-stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
+                gap: 10px;
             }
             .testimonials-grid {
                 grid-template-columns: 1fr;
-                gap: 10px;
+                gap: 14px;
             }
         }
     </style>
@@ -666,29 +675,34 @@
     <!-- ==================== 1. QUI SOMMES-NOUS ? ==================== -->
     <div class="info-section" id="qui-sommes-nous">
         <div class="about-card">
-            <div class="section-badge badge-red" style="background:rgba(230,57,70,0.25); color:#ff8585;">
-                ✨ À Propos d'ITAMYA
-            </div>
-            <h2 class="section-main-title" style="color:white; margin-bottom:12px;">Qui sommes-nous ?</h2>
-            <p class="about-text">
-                <strong>ITAMYA</strong> est la plateforme digitale de référence qui réunit les passionnés de bonne cuisine et les meilleurs restaurants, maquis et traiteurs du Bénin. Conçue pour valoriser la richesse gastronomique locale, notre plateforme vous permet de commander en toute simplicité vos plats préférés, préparés avec passion et livrés chez vous, au bureau ou à emporter en quelques minutes.
+            <span class="section-badge badge-accent" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#ffffff;">
+                À PROPOS D'ITAMYA
+            </span>
+            <h2 class="section-main-title" style="color:#ffffff; margin-bottom:16px;">Qui sommes-nous ?</h2>
+            
+            <p class="about-lead">
+                <strong>ITAMYA</strong> est la plateforme numérique de référence dédiée à la valorisation et à la commande auprès des meilleurs restaurants, maquis et traiteurs du Bénin.
+            </p>
+            
+            <p class="about-subtext">
+                Développée et propulsée par le cabinet d'ingénierie technologique <strong><a href="http://www.itainnovate.com" target="_blank">ITA INNOVATE</a></strong>, la solution ITAMYA allie haute technicité et simplicité d'usage pour offrir aux gourmets une expérience de commande fluide et sécurisée, tout en soutenant activement la croissance des restaurateurs locaux.
             </p>
             
             <div class="about-pillars">
                 <div class="about-pillar-item">
-                    <span class="about-pillar-icon">🍲</span>
-                    <div class="about-pillar-title">Le meilleur de la cuisine locale</div>
-                    <div class="about-pillar-desc">Plats africains authentiques, grillades savoureuses, spécialités contemporaines et boissons fraîches réunis en un seul endroit.</div>
+                    <span class="about-pillar-num">01</span>
+                    <div class="about-pillar-title">Richesse gastronomique locale</div>
+                    <div class="about-pillar-desc">Plats africains traditionnels, grillades soignées et spécialités régionales soigneusement sélectionnés pour vous.</div>
                 </div>
                 <div class="about-pillar-item">
-                    <span class="about-pillar-icon">⚡</span>
-                    <div class="about-pillar-title">Technologie rapide & accessible</div>
-                    <div class="about-pillar-desc">Une interface pensée pour être ultra-fluide sur mobile comme sur ordinateur, sans téléchargement d'application obligatoire.</div>
+                    <span class="about-pillar-num">02</span>
+                    <div class="about-pillar-title">Ingénierie signée ITA INNOVATE</div>
+                    <div class="about-pillar-desc">Une architecture web robuste, rapide et ergonomique, accessible instantanément sur smartphone et ordinateur sans téléchargement lourd.</div>
                 </div>
                 <div class="about-pillar-item">
-                    <span class="about-pillar-icon">🤝</span>
-                    <div class="about-pillar-title">Soutien aux restaurateurs</div>
-                    <div class="about-pillar-desc">Nous valorisons le savoir-faire de nos restaurateurs partenaires et les accompagnons avec des outils modernes de gestion.</div>
+                    <span class="about-pillar-num">03</span>
+                    <div class="about-pillar-title">Digitalisation des partenaires</div>
+                    <div class="about-pillar-desc">Un accompagnement complet des établissements locaux dans la modernisation de leur gestion et le suivi des commandes en temps réel.</div>
                 </div>
             </div>
         </div>
@@ -697,40 +711,34 @@
     <!-- ==================== 2. COMMENT ÇA MARCHE ? ==================== -->
     <div class="info-section alt-bg" id="comment-ca-marche">
         <div class="section-header">
-            <div class="section-badge badge-blue">
-                ⚡ Processus fluide
-            </div>
+            <span class="section-badge">FONCTIONNEMENT</span>
             <h2 class="section-main-title">Comment ça marche ?</h2>
-            <p class="section-subtitle">Commandez votre repas en 4 étapes simples et régalez-vous sans attendre.</p>
+            <p class="section-subtitle">Un parcours clair et transparent en quatre étapes pour recevoir votre repas en toute sérénité.</p>
         </div>
 
         <div class="steps-grid">
             <div class="step-card">
-                <div class="step-number">1</div>
-                <div class="step-icon-wrap" style="background:#eff6ff; color:#2563eb;">🍽️</div>
-                <div class="step-title">Choisissez vos plats</div>
-                <div class="step-desc">Parcourez nos restaurants partenaires, découvrez leurs menus gourmands et ajoutez vos envies au panier.</div>
+                <span class="step-number">01</span>
+                <div class="step-title">Sélection du menu</div>
+                <div class="step-desc">Parcourez nos restaurants certifiés, consultez les menus détaillés et composez votre commande en toute liberté.</div>
             </div>
 
             <div class="step-card">
-                <div class="step-number">2</div>
-                <div class="step-icon-wrap" style="background:#fef2f2; color:#dc2626;">🛵</div>
+                <span class="step-number">02</span>
                 <div class="step-title">Mode de réception</div>
-                <div class="step-desc">Choisissez la livraison rapide à votre adresse (domicile, bureau) ou le retrait à emporter directement au restaurant.</div>
+                <div class="step-desc">Définissez votre préférence : livraison express à votre domicile ou bureau, ou retrait à emporter directement sur place.</div>
             </div>
 
             <div class="step-card">
-                <div class="step-number">3</div>
-                <div class="step-icon-wrap" style="background:#ecfdf5; color:#059669;">💳</div>
-                <div class="step-title">Paiement sécurisé</div>
-                <div class="step-desc">Réglez en toute confiance via MTN Mobile Money, Moov Money avec FedaPay ou optez pour le paiement à la livraison.</div>
+                <span class="step-number">03</span>
+                <div class="step-title">Règlement sécurisé</div>
+                <div class="step-desc">Effectuez votre paiement instantané via MTN Mobile Money, Moov Money (FedaPay) ou choisissez le règlement à la réception.</div>
             </div>
 
             <div class="step-card">
-                <div class="step-number">4</div>
-                <div class="step-icon-wrap" style="background:#fef3c7; color:#d97706;">😋</div>
-                <div class="step-title">Dégustez chaud !</div>
-                <div class="step-desc">Suivez votre commande en direct et savourez un repas frais, préparé minute et livré dans les meilleures conditions.</div>
+                <span class="step-number">04</span>
+                <div class="step-title">Dégustation</div>
+                <div class="step-desc">Suivez l'évolution de la préparation en direct et recevez votre commande fraîche, prête à être dégustée bien chaude.</div>
             </div>
         </div>
     </div>
@@ -738,44 +746,34 @@
     <!-- ==================== 3. NOTRE CHARTE QUALITÉ ==================== -->
     <div class="info-section" id="charte-qualite">
         <div class="section-header">
-            <div class="section-badge badge-green">
-                ✨ Excellence & Hygiène
-            </div>
+            <span class="section-badge">ENGAGEMENTS</span>
             <h2 class="section-main-title">Notre Charte Qualité</h2>
-            <p class="section-subtitle">Nos engagements fermes pour vous garantir une expérience culinaire de premier ordre à chaque commande.</p>
+            <p class="section-subtitle">Des exigences opérationnelles rigoureuses pour assurer une expérience irréprochable à chaque commande.</p>
         </div>
 
         <div class="quality-grid">
             <div class="quality-card">
-                <div class="quality-icon">🌿</div>
-                <div>
-                    <div class="quality-title">Fraîcheur & Hygiène garantie</div>
-                    <div class="quality-desc">Ingrédients soigneusement sélectionnés et préparation minutieuse dans le respect le plus strict des règles d'hygiène alimentaire.</div>
-                </div>
+                <div class="quality-badge">STANDARD 01</div>
+                <div class="quality-title">Fraîcheur & Hygiène alimentaire</div>
+                <div class="quality-desc">Contrôle attentif des standards d'hygiène, ingrédients frais et préparation respectueuse des règles sanitaires les plus strictes.</div>
             </div>
 
             <div class="quality-card">
-                <div class="quality-icon" style="background:#eff6ff; color:#2563eb;">⏱️</div>
-                <div>
-                    <div class="quality-title">Rapidité & Ponctualité</div>
-                    <div class="quality-desc">Préparation instantanée dès confirmation et acheminement optimisé pour que vos plats arrivent toujours bien chauds.</div>
-                </div>
+                <div class="quality-badge">STANDARD 02</div>
+                <div class="quality-title">Ponctualité & Maîtrise des délais</div>
+                <div class="quality-desc">Prise en charge immédiate de la commande par les cuisines et coordination logistique pour maintenir les repas à bonne température.</div>
             </div>
 
             <div class="quality-card">
-                <div class="quality-icon" style="background:#fef3c7; color:#d97706;">🏷️</div>
-                <div>
-                    <div class="quality-title">Transparence des prix</div>
-                    <div class="quality-desc">Aucun frais caché ni mauvaise surprise : les tarifs affichés sur la plateforme sont rigoureusement identiques à ceux en restaurant.</div>
-                </div>
+                <div class="quality-badge">STANDARD 03</div>
+                <div class="quality-title">Transparence tarifaire intégrale</div>
+                <div class="quality-desc">Conformité stricte des tarifs affichés en ligne avec les prix réels pratiqués sur place par les établissements, sans aucun frais masqué.</div>
             </div>
 
             <div class="quality-card">
-                <div class="quality-icon" style="background:#ede9fe; color:#7c3aed;">🎧</div>
-                <div>
-                    <div class="quality-title">Service client à votre écoute</div>
-                    <div class="quality-desc">Une équipe disponible et réactive sur WhatsApp et par téléphone pour vous assister et répondre à toutes vos interrogations.</div>
-                </div>
+                <div class="quality-badge">STANDARD 04</div>
+                <div class="quality-title">Service d'assistance dédié</div>
+                <div class="quality-desc">Une équipe d'assistance proactive joignable en direct par WhatsApp et téléphone pour accompagner vos commandes de bout en bout.</div>
             </div>
         </div>
     </div>
@@ -783,17 +781,15 @@
     <!-- ==================== 4. ILS NOUS FONT DÉJÀ CONFIANCE ==================== -->
     <div class="info-section alt-bg" id="ils-nous-font-confiance">
         <div class="section-header">
-            <div class="section-badge badge-amber">
-                ⭐ Communauté & Confiance
-            </div>
+            <span class="section-badge">RÉFÉRENCES</span>
             <h2 class="section-main-title">Ils nous font déjà confiance</h2>
-            <p class="section-subtitle">Découvrez ce que disent les gourmets et les restaurateurs qui utilisent quotidiennement ITAMYA.</p>
+            <p class="section-subtitle">La satisfaction de nos clients et de nos partenaires constitue le premier indicateur de notre réussite.</p>
         </div>
 
         <!-- Chiffres clés de confiance -->
         <div class="trust-stats-grid">
             <div class="trust-stat-box">
-                <div class="trust-stat-val">4.9/5</div>
+                <div class="trust-stat-val">4.9 / 5</div>
                 <div class="trust-stat-lbl">Satisfaction globale</div>
             </div>
             <div class="trust-stat-box">
@@ -802,11 +798,11 @@
             </div>
             <div class="trust-stat-box">
                 <div class="trust-stat-val">+1 500</div>
-                <div class="trust-stat-lbl">Repas livrés avec soin</div>
+                <div class="trust-stat-lbl">Commandes honorées</div>
             </div>
             <div class="trust-stat-box">
                 <div class="trust-stat-val">100%</div>
-                <div class="trust-stat-lbl">Partenaires vérifiés</div>
+                <div class="trust-stat-lbl">Partenaires certifiés</div>
             </div>
         </div>
 
@@ -814,7 +810,7 @@
         <div class="testimonials-grid">
             <div class="testimonial-card">
                 <div class="testimonial-quote">
-                    "Je commande régulièrement sur ITAMYA pour mes pauses déjeuner au travail. Les plats de GinaCo Délices arrivent toujours chauds, bien emballés et à l'heure. Un vrai bonheur au quotidien !"
+                    « Je commande régulièrement sur ITAMYA pour mes déjeuners professionnels. Les plats préparés par GinaCo Délices arrivent systématiquement chauds, bien emballés et dans les temps impartis. Un service d'une grande efficacité. »
                 </div>
                 <div class="testimonial-author">
                     <div class="author-avatar">YS</div>
@@ -827,10 +823,10 @@
 
             <div class="testimonial-card">
                 <div class="testimonial-quote">
-                    "Depuis notre arrivée sur ITAMYA, nous recevons nos commandes de manière limpide et instantanée. Cela nous apporte une visibilité exceptionnelle et développe notre activité sereinement."
+                    « L'intégration sur ITAMYA nous a permis de structurer la réception des commandes et d'optimiser notre cuisine. Nous touchons une nouvelle clientèle de façon organisée et totalement transparente. »
                 </div>
                 <div class="testimonial-author">
-                    <div class="author-avatar" style="background:linear-gradient(135deg, #10b981, #059669);">GA</div>
+                    <div class="author-avatar" style="background:#0f766e;">GD</div>
                     <div class="author-info">
                         <div class="name">GinaCo Délices</div>
                         <div class="role">Restaurant partenaire certifié</div>
@@ -840,10 +836,10 @@
 
             <div class="testimonial-card">
                 <div class="testimonial-quote">
-                    "La commande est rapide, le paiement par Mobile Money est très simple et fluide. En cas de question, le support répond tout de suite sur WhatsApp. Je recommande chaudement !"
+                    « La plateforme est extrêmement fluide, la validation par Mobile Money se fait sans le moindre accroc, et le suivi client sur WhatsApp est exemplaire. Une solution numérique locale de très haut niveau. »
                 </div>
                 <div class="testimonial-author">
-                    <div class="author-avatar" style="background:linear-gradient(135deg, #3b82f6, #1d4ed8);">DI</div>
+                    <div class="author-avatar" style="background:#1e40af;">DI</div>
                     <div class="author-info">
                         <div class="name">Dilshad I.</div>
                         <div class="role">Client fidèle • Parakou</div>
