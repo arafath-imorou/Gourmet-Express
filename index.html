@@ -606,6 +606,205 @@
             margin-top: 2px;
         }
 
+        /* 5. Le Blog */
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        .blog-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1.5px solid #e2e8f0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.02);
+            text-decoration: none;
+            color: inherit;
+        }
+        .blog-card:hover {
+            transform: translateY(-3px);
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 28px rgba(15,23,42,0.06);
+        }
+        .blog-body {
+            padding: 26px 22px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .blog-tag {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #e63946;
+            margin-bottom: 8px;
+        }
+        .blog-tag.tech {
+            color: #2563eb;
+        }
+        .blog-tag.guide {
+            color: #059669;
+        }
+        .blog-meta {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+        .blog-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .blog-card-excerpt {
+            font-size: 0.86rem;
+            color: #64748b;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        .blog-card-action {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #0f172a;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 14px;
+            transition: color 0.2s ease;
+        }
+        .blog-card:hover .blog-card-action {
+            color: #e63946;
+        }
+        .blog-footer-cta {
+            text-align: center;
+            margin-top: 6px;
+        }
+        .btn-blog-all {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 28px;
+            border-radius: 50px;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(15,23,42,0.12);
+        }
+        .btn-blog-all:hover {
+            background: #1e293b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(15,23,42,0.2);
+        }
+
+        /* 6. Foire Aux Questions (FAQ) */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .faq-item {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+        .faq-item[open] {
+            background: #ffffff;
+            border-color: #0f172a;
+            box-shadow: 0 8px 24px rgba(15,23,42,0.05);
+        }
+        .faq-question {
+            padding: 18px 22px;
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: #0f172a;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .faq-question::-webkit-details-marker {
+            display: none;
+        }
+        .faq-indicator {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #64748b;
+            line-height: 1;
+            transition: transform 0.2s ease, color 0.2s ease;
+            margin-left: 12px;
+            flex-shrink: 0;
+        }
+        .faq-item[open] .faq-indicator {
+            transform: rotate(45deg);
+            color: #0f172a;
+        }
+        .faq-answer {
+            padding: 0 22px 20px 22px;
+            font-size: 0.88rem;
+            color: #475569;
+            line-height: 1.75;
+            border-top: 1px solid transparent;
+        }
+        .faq-item[open] .faq-answer {
+            border-top-color: #f1f5f9;
+            padding-top: 14px;
+        }
+        .faq-support-box {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 22px 20px;
+            text-align: center;
+        }
+        .faq-support-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+        .faq-support-desc {
+            font-size: 0.85rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+        .faq-support-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 22px;
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #0f172a;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .faq-support-btn:hover {
+            border-color: #0f172a;
+            background: #0f172a;
+            color: #ffffff;
+        }
+
         @media (max-width: 600px) {
             .info-section {
                 padding: 32px 16px;
@@ -635,6 +834,18 @@
             .testimonials-grid {
                 grid-template-columns: 1fr;
                 gap: 14px;
+            }
+            .blog-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+            .faq-question {
+                padding: 15px 16px;
+                font-size: 0.9rem;
+            }
+            .faq-answer {
+                padding: 0 16px 16px 16px;
+                font-size: 0.84rem;
             }
         }
     </style>
@@ -849,6 +1060,140 @@
         </div>
     </div>
 
+    <!-- ==================== 5. LE BLOG ITAMYA ==================== -->
+    <div class="info-section" id="blog">
+        <div class="section-header">
+            <span class="section-badge badge-accent">ACTUALITÉS & GASTRONOMIE</span>
+            <h2 class="section-main-title">Le Blog ITAMYA</h2>
+            <p class="section-subtitle">
+                Chroniques culinaires, découvertes des saveurs régionales et innovations numériques propulsées par les équipes d'ITA INNOVATE.
+            </p>
+        </div>
+
+        <div class="blog-grid">
+            <!-- Article 1 -->
+            <a href="blog.html#article-1" class="blog-card">
+                <div class="blog-body">
+                    <span class="blog-tag">Terroir & Gastronomie</span>
+                    <div class="blog-meta">Mars 2026 • 3 min de lecture</div>
+                    <h3 class="blog-card-title">Les secrets du Wagashi et des grillades d'exception du Nord-Bénin</h3>
+                    <p class="blog-card-excerpt">
+                        Histoire, savoir-faire pastoral et méthodes artisanales : plongez dans la tradition du fromage peul et des viandes assaisonnées préparées avec passion par nos restaurateurs partenaires.
+                    </p>
+                    <div class="blog-card-action">
+                        <span>Lire l'article</span>
+                        <span style="font-size:1.1rem; line-height:1;">→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Article 2 -->
+            <a href="blog.html#article-2" class="blog-card">
+                <div class="blog-body">
+                    <span class="blog-tag tech">Innovation & Digital</span>
+                    <div class="blog-meta">Février 2026 • 4 min de lecture</div>
+                    <h3 class="blog-card-title">Comment ITA INNOVATE transforme la restauration grâce au numérique</h3>
+                    <p class="blog-card-excerpt">
+                        De la prise de commande instantanée aux paiements Mobile Money sécurisés, découvrez l'architecture et les choix technologiques pensés pour valoriser le secteur culinaire.
+                    </p>
+                    <div class="blog-card-action">
+                        <span>Lire l'article</span>
+                        <span style="font-size:1.1rem; line-height:1;">→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Article 3 -->
+            <a href="blog.html#article-3" class="blog-card">
+                <div class="blog-body">
+                    <span class="blog-tag guide">Conseils & Entreprise</span>
+                    <div class="blog-meta">Janvier 2026 • 3 min de lecture</div>
+                    <h3 class="blog-card-title">Déjeuner au bureau : nos astuces pour des pauses équilibrées et ponctuelles</h3>
+                    <p class="blog-card-excerpt">
+                        Planifier ses déjeuners professionnels, varier ses menus sans perdre de temps et profiter de repas chauds livrés directement à l'heure souhaitée sur votre lieu de travail.
+                    </p>
+                    <div class="blog-card-action">
+                        <span>Lire l'article</span>
+                        <span style="font-size:1.1rem; line-height:1;">→</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="blog-footer-cta">
+            <a href="blog.html" class="btn-blog-all">Consulter l'ensemble de nos articles</a>
+        </div>
+    </div>
+
+    <!-- ==================== 6. FOIRE AUX QUESTIONS (FAQ) ==================== -->
+    <div class="info-section alt-bg" id="faq">
+        <div class="section-header">
+            <span class="section-badge">FAQ</span>
+            <h2 class="section-main-title">Foire Aux Questions</h2>
+            <p class="section-subtitle">
+                Les réponses claires et précises à toutes vos interrogations sur la commande, la livraison, les paiements et nos partenariats.
+            </p>
+        </div>
+
+        <div class="faq-list">
+            <details class="faq-item" open>
+                <summary class="faq-question">
+                    <span>Comment passer une commande sur la plateforme ITAMYA ?</span>
+                    <span class="faq-indicator">+</span>
+                </summary>
+                <div class="faq-answer">
+                    Parcourez la liste de nos restaurants partenaires certifiés, accédez au menu de votre choix et ajoutez vos plats au panier. Une fois votre sélection terminée, accédez à la validation, renseignez vos coordonnées de livraison ou choisissez le retrait sur place, puis confirmez votre commande.
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-question">
+                    <span>Quels sont les modes de paiement sécurisés acceptés ?</span>
+                    <span class="faq-indicator">+</span>
+                </summary>
+                <div class="faq-answer">
+                    ITAMYA intègre les paiements électroniques par Mobile Money (MTN MoMo, Moov Money et Celtiis Cash) via une passerelle certifiée et sécurisée. Selon l'établissement sélectionné, le règlement en espèces lors de la livraison ou au comptoir peut également être proposé.
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-question">
+                    <span>Quels sont les délais habituels de préparation et de livraison ?</span>
+                    <span class="faq-indicator">+</span>
+                </summary>
+                <div class="faq-answer">
+                    Le délai moyen est estimé entre 30 et 45 minutes selon la complexité culinaire de vos plats et votre situation géographique à Parakou. Dès la prise en charge de votre commande par la cuisine, le statut est actualisé en temps réel.
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-question">
+                    <span>Je gère un restaurant : comment rejoindre le réseau ITAMYA ?</span>
+                    <span class="faq-indicator">+</span>
+                </summary>
+                <div class="faq-answer">
+                    L'intégration de nouveaux partenaires fait l'objet d'un audit de conformité et d'hygiène rigoureux mené avec l'appui technique d'<strong>ITA INNOVATE</strong>. Contactez notre équipe via l'espace d'administration ou notre support pour recevoir votre accompagnement personnalisé et digitaliser votre établissement.
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-question">
+                    <span>Comment joindre le service client en cas de modification ou d'assistance ?</span>
+                    <span class="faq-indicator">+</span>
+                </summary>
+                <div class="faq-answer">
+                    Notre assistance est joignable rapidement via WhatsApp et par téléphone direct. En cas d'ajustement sur une commande en cours ou de question sur un plat, notre service assure un relais direct et immédiat avec le restaurant concerné.
+                </div>
+            </details>
+        </div>
+
+        <div class="faq-support-box">
+            <div class="faq-support-title">Une question complémentaire ?</div>
+            <div class="faq-support-desc">Notre équipe d'assistance et nos conseillers se tiennent à votre entière disposition.</div>
+            <a href="https://wa.me/2290199154910" target="_blank" class="faq-support-btn">Échanger avec le support client</a>
+        </div>
+    </div>
+
     <!-- MODAL DETAILS RESTAURANT -->
     <div id="restaurant-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.7); backdrop-filter:blur(5px); z-index:1000; align-items:center; justify-content:center; padding:16px;">
         <div style="background:white; border-radius:20px; max-width:480px; width:100%; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); animation:modalPop 0.25s ease-out;">
@@ -901,6 +1246,8 @@
             <a href="#comment-ca-marche">Comment ça marche ?</a>
             <a href="#charte-qualite">Notre Charte Qualité</a>
             <a href="#ils-nous-font-confiance">Avis & Confiance</a>
+            <a href="blog.html">Blog & Actualités</a>
+            <a href="#faq">FAQ</a>
             <a href="superadmin/login.html">Administration</a>
         </p>
         <p>&copy; 2026 ITAMYA. Tous droits réservés.</p>

@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Blog ITAMYA - Gastronomie, Terroir & Innovations Technologiques</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #f4f6f9;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #1e293b;
+        }
+
+        /* Top Bar / Nav */
+        .blog-navbar {
+            background: #0f172a;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .blog-navbar-inner {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .blog-brand {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .blog-brand img {
+            height: 38px;
+            width: auto;
+            object-fit: contain;
+        }
+        .blog-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            list-style: none;
+        }
+        .blog-nav-links a {
+            color: rgba(255,255,255,0.78);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .blog-nav-links a:hover {
+            color: #ffffff;
+        }
+        .btn-nav-order {
+            background: #e63946;
+            color: #ffffff !important;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.82rem !important;
+            font-weight: 700 !important;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .btn-nav-order:hover {
+            background: #d62828;
+            transform: translateY(-1px);
+        }
+
+        /* Hero Banner */
+        .blog-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f3460 100%);
+            color: #ffffff;
+            padding: clamp(48px, 6vw, 76px) 20px clamp(40px, 5vw, 64px);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom-left-radius: 28px;
+            border-bottom-right-radius: 28px;
+            box-shadow: 0 10px 30px rgba(15,23,42,0.12);
+        }
+        .blog-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 20%, rgba(255,255,255,0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .blog-hero-content {
+            max-width: 760px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        .blog-badge {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #ffffff;
+        }
+        .blog-hero-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(1.8rem, 4vw, 2.7rem);
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            line-height: 1.25;
+            margin-bottom: 14px;
+        }
+        .blog-hero-subtitle {
+            font-size: clamp(0.92rem, 2vw, 1.05rem);
+            line-height: 1.75;
+            color: rgba(255,255,255,0.82);
+            max-width: 660px;
+            margin: 0 auto;
+        }
+        .blog-hero-subtitle strong {
+            color: #f39c12;
+            font-weight: 600;
+        }
+
+        /* Container */
+        .blog-main {
+            max-width: 1080px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+            flex: 1;
+        }
+
+        /* Filter Tabs */
+        .blog-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 36px;
+            justify-content: center;
+        }
+        .filter-btn {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            color: #475569;
+            padding: 9px 20px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .filter-btn:hover {
+            border-color: #0f172a;
+            color: #0f172a;
+            background: #f8fafc;
+        }
+        .filter-btn.active {
+            background: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+            box-shadow: 0 4px 12px rgba(15,23,42,0.15);
+        }
+
+        /* Featured Article Spotlight */
+        .featured-card {
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 24px;
+            padding: clamp(28px, 4vw, 44px);
+            color: #ffffff;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 16px 40px rgba(15,23,42,0.08);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .featured-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 14px;
+        }
+        .featured-tag {
+            font-size: 0.74rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #f39c12;
+        }
+        .featured-meta {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.65);
+        }
+        .featured-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(1.35rem, 3vw, 1.85rem);
+            font-weight: 800;
+            line-height: 1.35;
+            color: #ffffff;
+        }
+        .featured-lead {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.85);
+        }
+        .featured-action {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding-top: 10px;
+        }
+        .btn-featured-read {
+            background: #ffffff;
+            color: #0f172a;
+            border: none;
+            padding: 12px 26px;
+            border-radius: 50px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-featured-read:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(255,255,255,0.2);
+        }
+        .featured-credit {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .featured-credit strong {
+            color: #f39c12;
+        }
+
+        /* Articles Grid */
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+            gap: 24px;
+            margin-bottom: 50px;
+        }
+        .article-card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.02);
+        }
+        .article-card:hover {
+            transform: translateY(-4px);
+            border-color: #cbd5e1;
+            box-shadow: 0 12px 30px rgba(15,23,42,0.07);
+        }
+        .article-body {
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .article-tag {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 8px;
+        }
+        .article-tag.terroir { color: #e63946; }
+        .article-tag.tech { color: #2563eb; }
+        .article-tag.guide { color: #059669; }
+        .article-meta {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+        .article-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+        .article-excerpt {
+            font-size: 0.88rem;
+            color: #64748b;
+            line-height: 1.7;
+            margin-bottom: 22px;
+            flex: 1;
+        }
+        .article-footer {
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .btn-read-modal {
+            background: none;
+            border: none;
+            color: #0f172a;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+        .btn-read-modal:hover {
+            color: #e63946;
+        }
+        .article-time {
+            font-size: 0.76rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        /* Newsletter / Stay Tuned */
+        .blog-newsletter {
+            background: #ffffff;
+            border-radius: 22px;
+            border: 1.5px solid #e2e8f0;
+            padding: clamp(28px, 4vw, 44px) 24px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .newsletter-badge {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+        .newsletter-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(1.2rem, 3vw, 1.55rem);
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+        .newsletter-desc {
+            font-size: 0.9rem;
+            color: #64748b;
+            max-width: 540px;
+            margin: 0 auto 22px;
+            line-height: 1.65;
+        }
+        .newsletter-form {
+            display: flex;
+            max-width: 460px;
+            margin: 0 auto;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .newsletter-input {
+            flex: 1 1 240px;
+            padding: 12px 18px;
+            border-radius: 50px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 0.88rem;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s ease;
+        }
+        .newsletter-input:focus {
+            border-color: #0f172a;
+        }
+        .newsletter-btn {
+            background: #0f172a;
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .newsletter-btn:hover {
+            background: #1e293b;
+        }
+        .newsletter-feedback {
+            font-size: 0.82rem;
+            color: #059669;
+            margin-top: 10px;
+            display: none;
+            font-weight: 600;
+        }
+
+        /* Reading Modal */
+        .reader-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.7);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .reader-modal-container {
+            background: #ffffff;
+            border-radius: 22px;
+            max-width: 740px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+            animation: modalFadeIn 0.25s ease-out;
+            position: relative;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reader-modal-header {
+            padding: 28px 28px 16px;
+            position: sticky;
+            top: 0;
+            background: #ffffff;
+            border-bottom: 1px solid #f1f5f9;
+            z-index: 2;
+        }
+        .reader-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f1f5f9;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 1rem;
+            color: #475569;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .reader-close-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+        .reader-tag {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #e63946;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .reader-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(1.25rem, 3vw, 1.6rem);
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.35;
+            padding-right: 40px;
+            margin-bottom: 8px;
+        }
+        .reader-meta {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .reader-modal-body {
+            padding: 24px 28px 36px;
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.85;
+        }
+        .reader-modal-body p {
+            margin-bottom: 18px;
+        }
+        .reader-modal-body h4 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.12rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 24px 0 10px;
+        }
+        .reader-modal-body blockquote {
+            background: #f8fafc;
+            border-left: 4px solid #0f172a;
+            padding: 16px 20px;
+            border-radius: 0 12px 12px 0;
+            font-style: normal;
+            color: #1e293b;
+            margin: 22px 0;
+            font-size: 0.94rem;
+        }
+        .reader-modal-body ul {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+        .reader-modal-body li {
+            margin-bottom: 8px;
+        }
+        .reader-tech-credit {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 0.82rem;
+            color: #64748b;
+            margin-top: 24px;
+        }
+        .reader-tech-credit strong {
+            color: #f39c12;
+        }
+
+        /* Footer */
+        footer {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 32px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        footer a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        footer a:hover {
+            color: #ffffff;
+        }
+        .brand-credit {
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+        .blink-orange {
+            color: #f39c12 !important;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .blog-nav-links {
+                display: none;
+            }
+            .blog-hero {
+                padding: 40px 16px 36px;
+                border-radius: 0 0 20px 20px;
+            }
+            .blog-main {
+                padding: 24px 14px 40px;
+            }
+            .articles-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .featured-card {
+                padding: 24px 18px;
+                border-radius: 18px;
+            }
+            .reader-modal-header {
+                padding: 20px 18px 12px;
+            }
+            .reader-modal-body {
+                padding: 18px 18px 24px;
+                font-size: 0.9rem;
+            }
+            .reader-title {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header class="blog-navbar">
+        <div class="blog-navbar-inner">
+            <a href="index.html" class="blog-brand">
+                <img src="assets/images/logoitamya.png" alt="Logo ITAMYA">
+            </a>
+            <ul class="blog-nav-links">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="index.html#restaurants-grid">Nos Restaurants</a></li>
+                <li><a href="index.html#qui-sommes-nous">Qui sommes-nous ?</a></li>
+                <li><a href="index.html#charte-qualite">Charte Qualité</a></li>
+                <li><a href="index.html#faq">FAQ</a></li>
+                <li><a href="superadmin/login.html">Administration</a></li>
+                <li><a href="index.html#restaurants-grid" class="btn-nav-order">Commander</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- HERO BANNER -->
+    <section class="blog-hero">
+        <div class="blog-hero-content">
+            <span class="blog-badge">ÉDITIONS & PERSPECTIVES CULINAIRES</span>
+            <h1 class="blog-hero-title">Le Blog ITAMYA</h1>
+            <p class="blog-hero-subtitle">
+                Explorations gastronomiques du terroir béninois, chroniques culinaires et innovations technologiques conçues et propulsées par l'équipe d'ingénierie <strong>ITA INNOVATE</strong>.
+            </p>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <main class="blog-main">
+
+        <!-- CATEGORY FILTERS -->
+        <nav class="blog-filters" aria-label="Filtrer les articles">
+            <button class="filter-btn active" onclick="filterArticles('all', this)">Tous les articles</button>
+            <button class="filter-btn" onclick="filterArticles('terroir', this)">Gastronomie & Terroir</button>
+            <button class="filter-btn" onclick="filterArticles('tech', this)">Innovation & Digital</button>
+            <button class="filter-btn" onclick="filterArticles('guide', this)">Conseils & Entreprise</button>
+        </nav>
+
+        <!-- FEATURED ARTICLE SPOTLIGHT -->
+        <article class="featured-card" data-category="tech" id="article-2">
+            <div class="featured-header">
+                <span class="featured-tag">À la une • Ingénierie & Numérique</span>
+                <span class="featured-meta">28 Février 2026 • 4 min de lecture</span>
+            </div>
+            <h2 class="featured-title">Comment ITA INNOVATE transforme la restauration grâce au numérique</h2>
+            <p class="featured-lead">
+                De la commande instantanée sur smartphone à la traçabilité des livraisons en temps réel, l'équipe d'ingénierie d'ITA INNOVATE redéfinit les standards numériques du secteur gastronomique local. Analyse d'une architecture pensée pour la fiabilité, la rapidité et la croissance des restaurateurs.
+            </p>
+            <div class="featured-action">
+                <button class="btn-featured-read" onclick="openArticleModal('article-2')">Lire l'article complet →</button>
+                <div class="featured-credit">Rédaction technique : <strong>Cabinet ITA INNOVATE</strong></div>
+            </div>
+        </article>
+
+        <!-- ARTICLES GRID -->
+        <section class="articles-grid">
+
+            <!-- ARTICLE 1 -->
+            <article class="article-card" data-category="terroir" id="article-1">
+                <div class="article-body">
+                    <span class="article-tag terroir">Terroir & Gastronomie</span>
+                    <div class="article-meta">15 Mars 2026 • 3 min de lecture</div>
+                    <h3 class="article-title">Les secrets du Wagashi et des grillades d'exception du Nord-Bénin</h3>
+                    <p class="article-excerpt">
+                        Histoire, savoir-faire pastoral peul et méthodes de fumage traditionnelles : découverte d'un patrimoine gustatif authentique sublimé par nos restaurateurs partenaires tels que GinaCo Délices.
+                    </p>
+                    <div class="article-footer">
+                        <button class="btn-read-modal" onclick="openArticleModal('article-1')">
+                            <span>Lire l'article</span>
+                            <span style="font-size:1.1rem; line-height:1;">→</span>
+                        </button>
+                        <span class="article-time">3 min</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ARTICLE 3 -->
+            <article class="article-card" data-category="guide" id="article-3">
+                <div class="article-body">
+                    <span class="article-tag guide">Conseils & Entreprise</span>
+                    <div class="article-meta">12 Février 2026 • 3 min de lecture</div>
+                    <h3 class="article-title">Déjeuner au bureau : nos astuces pour des pauses équilibrées et ponctuelles</h3>
+                    <p class="article-excerpt">
+                        Comment concilier journées intenses de travail, commande groupée pour vos équipes et repas chauds livrés sans le moindre retard à l'heure précise de votre pause méridienne.
+                    </p>
+                    <div class="article-footer">
+                        <button class="btn-read-modal" onclick="openArticleModal('article-3')">
+                            <span>Lire l'article</span>
+                            <span style="font-size:1.1rem; line-height:1;">→</span>
+                        </button>
+                        <span class="article-time">3 min</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ARTICLE 4 -->
+            <article class="article-card" data-category="terroir" id="article-4">
+                <div class="article-body">
+                    <span class="article-tag terroir">Charte & Sélection</span>
+                    <div class="article-meta">20 Janvier 2026 • 3 min de lecture</div>
+                    <h3 class="article-title">Fraîcheur, traçabilité et circuits courts : les piliers de notre sélection</h3>
+                    <p class="article-excerpt">
+                        Plongez dans les coulisses de la Charte Qualité ITAMYA. Critères d'hygiène, approvisionnement auprès des producteurs locaux et protocoles d'emballage thermique pour préserver chaque saveur.
+                    </p>
+                    <div class="article-footer">
+                        <button class="btn-read-modal" onclick="openArticleModal('article-4')">
+                            <span>Lire l'article</span>
+                            <span style="font-size:1.1rem; line-height:1;">→</span>
+                        </button>
+                        <span class="article-time">3 min</span>
+                    </div>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- NEWSLETTER / RESTERE INFORME -->
+        <section class="blog-newsletter">
+            <span class="newsletter-badge">VEILLE & ACTUALITÉS</span>
+            <h3 class="newsletter-title">Restez informé de nos parutions</h3>
+            <p class="newsletter-desc">
+                Recevez directement nos nouveaux dossiers sur le terroir béninois, les nouveaux restaurants certifiés et les évolutions de la plateforme ITAMYA.
+            </p>
+            <form class="newsletter-form" onsubmit="handleNewsletter(event)">
+                <input type="email" class="newsletter-input" id="newsletter-email" placeholder="Votre adresse email professionnelle" required>
+                <button type="submit" class="newsletter-btn">S'inscrire</button>
+            </form>
+            <div class="newsletter-feedback" id="newsletter-feedback">Merci pour votre inscription. Vous recevrez nos prochaines publications.</div>
+        </section>
+
+    </main>
+
+    <!-- ARTICLE READER MODAL -->
+    <div class="reader-modal-overlay" id="reader-modal" onclick="closeArticleModal(event)">
+        <div class="reader-modal-container" onclick="event.stopPropagation()">
+            <div class="reader-modal-header">
+                <button class="reader-close-btn" onclick="closeArticleModal()" aria-label="Fermer la lecture">✕</button>
+                <span class="reader-tag" id="modal-tag">Gastronomie & Terroir</span>
+                <h2 class="reader-title" id="modal-title">Titre de l'article</h2>
+                <div class="reader-meta" id="modal-meta">Date • Temps de lecture</div>
+            </div>
+            <div class="reader-modal-body" id="modal-body">
+                <!-- Contenu injecté dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p style="margin-bottom: 8px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px;">
+            <a href="index.html">Accueil</a>
+            <a href="index.html#qui-sommes-nous">Qui sommes-nous ?</a>
+            <a href="index.html#comment-ca-marche">Comment ça marche ?</a>
+            <a href="index.html#charte-qualite">Charte Qualité</a>
+            <a href="index.html#faq">FAQ</a>
+            <a href="superadmin/login.html">Administration</a>
+        </p>
+        <p>&copy; 2026 ITAMYA. Tous droits réservés.</p>
+        <p class="brand-credit">
+            <span>Développé et propulsé par</span> <a href="http://www.itainnovate.com" target="_blank" class="blink-orange">ITA INNOVATE</a>
+        </p>
+    </footer>
+
+    <!-- SCRIPT ARTICLES & NAVIGATION -->
+    <script>
+        const articlesDB = {
+            'article-1': {
+                tag: 'Terroir & Gastronomie',
+                tagClass: 'terroir',
+                meta: '15 Mars 2026 • 3 min de lecture • Par la Rédaction Culinaire ITAMYA',
+                title: "Les secrets du Wagashi et des spécialités culinaires du Nord-Bénin",
+                content: `
+                    <p>Au cœur du patrimoine gastronomique du septentrion béninois, le <strong>Wagashi</strong> (ou fromage traditionnel peul) occupe une place singulière. Fabriqué à base de lait de vache frais et caillé grâce à l'extrait végétal de <em>Calotropis procera</em>, ce mets combine douceur lactée et texture ferme incomparable.</p>
+                    
+                    <h4>Un savoir-faire artisanal perpétué</h4>
+                    <p>La préparation du Wagashi ne souffre aucun compromis : le lait est collecté au petit matin chez les éleveurs de la région de Parakou et des collines environnantes. Après caillage naturel, le fromage est moulé à la main puis souvent plongé dans une décoction de feuilles de sorgho rouge, lui conférant sa teinte extérieure écarlate si caractéristique.</p>
+                    
+                    <blockquote>
+                        « Préparer le Wagashi selon la méthode traditionnelle, c'est respecter un héritage vivant. Cuisiné en sauce graine, frit et assaisonné au piment sec ou servi avec des grillades, il incarne l'authenticité de notre terre. »
+                    </blockquote>
+
+                    <h4>Le mariage parfait avec les viandes grillées</h4>
+                    <p>Sur ITAMYA, plusieurs restaurateurs partenaires d'excellence, à l'image de <strong>GinaCo Délices</strong>, ont fait de ce fromage et des viandes braisées assaisonnées au piment de Parakou leurs signatures phares. L'accent est mis sur la fraîcheur immédiate des ingrédients, garantissant aux clients une expérience gustative d'une rare intensité.</p>
+
+                    <h4>Comment le savourer au quotidien ?</h4>
+                    <ul>
+                        <li><strong>En entrée :</strong> doré à l'huile avec une pincée de sel gemme et d'épices douces.</li>
+                        <li><strong>En plat de résistance :</strong> mijoté dans une sauce tomate parfumée et accompagné d'igname pilée (Télibo ou Foutou) ou de riz au gras.</li>
+                        <li><strong>À l'apéritif :</strong> en brochettes intercalées de légumes croquants.</li>
+                    </ul>
+
+                    <div class="reader-tech-credit">
+                        Contenu édité par le pôle culinaire ITAMYA en partenariat avec les artisans restaurateurs locaux. Infrastructure technologique assurée par <strong>ITA INNOVATE</strong>.
+                    </div>
+                `
+            },
+            'article-2': {
+                tag: 'Innovation & Digital',
+                tagClass: 'tech',
+                meta: '28 Février 2026 • 4 min de lecture • Par l\'Équipe Ingénierie ITA INNOVATE',
+                title: "Comment ITA INNOVATE transforme la restauration grâce au numérique",
+                content: `
+                    <p>Le secteur de la restauration au Bénin connaît une mutation profonde. Si le goût, la fraîcheur et la convivialité demeurent au centre de l'expérience culinaire, la gestion des commandes, la logistique de livraison et le suivi comptable exigent désormais une rigueur technologique sans faille.</p>
+                    
+                    <h4>Une ingénierie conçue pour éliminer les frictions</h4>
+                    <p>C'est pour répondre à ce défi que le cabinet <strong>ITA INNOVATE</strong> a conçu l'architecture intégrée d'ITAMYA. L'objectif initial était clair : offrir aux consommateurs une interface web ultra-réactive, accessible sans téléchargement lourd, tout en équipant les restaurateurs d'un centre de commande en temps réel adapté aux réalités locales.</p>
+                    
+                    <blockquote>
+                        « Notre philosophie chez ITA INNOVATE est d'adapter la technologie aux usages quotidiens, et non l'inverse. Permettre à un restaurateur de gérer ses menus, ses stocks et ses versements Mobile Money en trois clics sur son smartphone représente un véritable bond de productivité. »
+                    </blockquote>
+
+                    <h4>Les 3 piliers techniques de la solution</h4>
+                    <ul>
+                        <li><strong>Intégration Mobile Money native :</strong> encaissement sécurisé et instantané via MTN MoMo, Moov Money et Celtiis Cash, réduisant considérablement la manipulation d'espèces et les risques d'impayés.</li>
+                        <li><strong>Mise à jour en temps réel des menus :</strong> modification instantanée des disponibilités de plats par les gérants pour éviter toute déception client lors des ruptures de stock.</li>
+                        <li><strong>Suivi logistique transparent :</strong> synchronisation directe des notifications clients pour que chaque étape de préparation et d'expédition soit clairement suivie.</li>
+                    </ul>
+
+                    <h4>Accompagner les restaurateurs vers l'autonomie</h4>
+                    <p>Au-delà de la plateforme logicielle, l'équipe d'<strong>ITA INNOVATE</strong> dispense des formations dédiées aux équipes de cuisine et aux responsables d'établissement. Cette montée en compétences garantit un traitement rapide des commandes et pérennise l'activité économique de nos partenaires.</p>
+
+                    <div class="reader-tech-credit">
+                        Publication rédigée par l'équipe d'ingénierie logicielle d'<strong>ITA INNOVATE</strong> (www.itainnovate.com).
+                    </div>
+                `
+            },
+            'article-3': {
+                tag: 'Conseils & Entreprise',
+                tagClass: 'guide',
+                meta: '12 Février 2026 • 3 min de lecture • Par l\'Équipe ITAMYA',
+                title: "Déjeuner au bureau : nos astuces pour des pauses équilibrées et ponctuelles",
+                content: `
+                    <p>Entre réunions successives, délais serrés et dossiers urgents, la pause déjeuner est souvent négligée ou retardée en milieu professionnel. Pourtant, un repas équilibré et pris à heure fixe est indispensable pour maintenir sa concentration et son énergie tout au long de l'après-midi.</p>
+                    
+                    <h4>1. Anticiper sa commande dès le milieu de matinée</h4>
+                    <p>Pour éviter les pics d'attente entre 12h30 et 13h30, la méthode la plus efficace consiste à valider sa commande dès 11h00. Les cuisines de nos restaurants partenaires peuvent ainsi planifier la préparation minutieusement et programmer la livraison pour l'heure exacte de votre pause.</p>
+                    
+                    <h4>2. Préférer les commandes groupées au sein de l'équipe</h4>
+                    <p>Commander à plusieurs collègues présente un double avantage : cela réduit les frais de livraison mutualisés et garantit que toute l'équipe partage son repas en même temps, favorisant ainsi la cohésion et la convivialité au bureau.</p>
+
+                    <blockquote>
+                        « Une pause déjeuner bien organisée redonne de la sérénité aux équipes et supprime le stress des déplacements précipités à midi. »
+                    </blockquote>
+
+                    <h4>3. Trouver le juste équilibre nutritionnel</h4>
+                    <p>La richesse des cartes de nos restaurants partenaires permet d'alterner les types de repas :</p>
+                    <ul>
+                        <li>Associer féculents de qualité (riz, igname, aloko) et protéines bien préparées (poisson braisé, pintade, poulet bicyclette).</li>
+                        <li>Ne pas négliger les légumes cuits et crudités fraîches en accompagnement.</li>
+                        <li>Compléter par des jus naturels locaux (bissap, ananas, gingembre) pour s'hydrater sainement.</li>
+                    </ul>
+
+                    <div class="reader-tech-credit">
+                        Dossier rédigé par l'équipe ITAMYA. Plateforme propulsée par <strong>ITA INNOVATE</strong>.
+                    </div>
+                `
+            },
+            'article-4': {
+                tag: 'Charte & Sélection',
+                tagClass: 'terroir',
+                meta: '20 Janvier 2026 • 3 min de lecture • Par la Charte Qualité ITAMYA',
+                title: "Fraîcheur, traçabilité et circuits courts : les piliers de notre sélection",
+                content: `
+                    <p>Chez ITAMYA, le choix des établissements référencés ne se fait pas au hasard. Chaque restaurant qui rejoint le réseau s'engage à respecter un cahier des charges strict garantissant l'excellence sanitaire, le goût et l'éthique de travail.</p>
+                    
+                    <h4>L'approvisionnement en circuit court</h4>
+                    <p>Nous encourageons fermement nos partenaires à privilégier les approvisionnements directs auprès des maraîchers, éleveurs et pêcheurs de notre région. Cette proximité garantit une fraîcheur maximale des viandes, légumes et épices, tout en injectant directement de la valeur au sein de l'économie locale.</p>
+                    
+                    <h4>Des normes d'emballage exigeantes</h4>
+                    <p>Un bon plat préparé avec soin perd de sa valeur s'il n'est pas convenablement conditionné. La Charte ITAMYA impose des contenants hermétiques, aptes au contact alimentaire chaud, et protégeant l'intégrité visuelle et thermique du plat jusqu'à votre table.</p>
+
+                    <blockquote>
+                        « La satisfaction de nos clients repose sur un triptyque fondamental : la qualité des ingrédients, l'hygiène rigoureuse en cuisine et la rapidité du service. »
+                    </blockquote>
+
+                    <div class="reader-tech-credit">
+                        Texte officiel issu du protocole qualité ITAMYA. Supervision technique assurée par <strong>ITA INNOVATE</strong>.
+                    </div>
+                `
+            }
+        };
+
+        function filterArticles(category, btn) {
+            // Update active state on buttons
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            const articles = document.querySelectorAll('.article-card, .featured-card');
+            articles.forEach(art => {
+                const cat = art.getAttribute('data-category');
+                if (category === 'all' || cat === category) {
+                    art.style.display = 'flex';
+                } else {
+                    art.style.display = 'none';
+                }
+            });
+        }
+
+        function openArticleModal(id) {
+            const article = articlesDB[id];
+            if (!article) return;
+
+            document.getElementById('modal-tag').textContent = article.tag;
+            document.getElementById('modal-title').textContent = article.title;
+            document.getElementById('modal-meta').textContent = article.meta;
+            document.getElementById('modal-body').innerHTML = article.content;
+
+            const modal = document.getElementById('reader-modal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            // Update URL hash smoothly without reloading
+            if (history.pushState) {
+                history.pushState(null, null, '#' + id);
+            }
+        }
+
+        function closeArticleModal(e) {
+            if (e && e.target && e.target !== document.getElementById('reader-modal') && !e.target.classList.contains('reader-close-btn')) {
+                return;
+            }
+            const modal = document.getElementById('reader-modal');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+
+            if (history.pushState) {
+                history.pushState(null, null, window.location.pathname);
+            }
+        }
+
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeArticleModal();
+            }
+        });
+
+        // Check if hash matches an article on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && articlesDB[hash]) {
+                openArticleModal(hash);
+            }
+        });
+
+        function handleNewsletter(e) {
+            e.preventDefault();
+            const input = document.getElementById('newsletter-email');
+            const feedback = document.getElementById('newsletter-feedback');
+            if (input && input.value) {
+                input.value = '';
+                feedback.style.display = 'block';
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
