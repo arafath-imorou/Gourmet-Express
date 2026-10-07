@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+www/
+dist/
+build/
+.gradle/
+android/app/build/
+android/build/
+android/.gradle/
+android/app/src/main/assets/public/
+
+# Environment and sensitive files
+.env
+.env.local
+*.jks
+*.keystore
+google-services.json
+
+# IDE and OS
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+[Dd]esktop.ini
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+capacitor.log

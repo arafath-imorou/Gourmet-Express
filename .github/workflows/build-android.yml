@@ -1,0 +1,66 @@
+name: Build Android App (APK & AAB)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android Release AAB & Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Node Dependencies
+        run: npm install
+
+      - name: Prepare Web Assets & Sync Capacitor
+        run: npm run cap:sync
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant Execute Permission for Gradle Wrapper
+        run: chmod +x android/gradlew
+
+      - name: Build Debug APK
+        run: cd android && ./gradlew assembleDebug --no-daemon
+
+      - name: Build Release Bundle (AAB)
+        run: cd android && ./gradlew bundleRelease --no-daemon
+
+      - name: Prepare Artifacts
+        run: |
+          mkdir -p build-output
+          cp android/app/build/outputs/apk/debug/app-debug.apk build-output/ITAMYA-debug.apk || echo "APK not found"
+          cp android/app/build/outputs/bundle/release/app-release.aab build-output/ITAMYA-release.aab || echo "AAB not found"
+
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ITAMYA-debug-apk
+          path: build-output/ITAMYA-debug.apk
+          if-no-files-found: warn
+
+      - name: Upload Release AAB Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ITAMYA-release-aab
+          path: build-output/ITAMYA-release.aab
+          if-no-files-found: warn
