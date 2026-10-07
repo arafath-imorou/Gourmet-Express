@@ -268,9 +268,18 @@ L'application intègre le module `assets/js/mobile.js` :
 - **Barre de navigation mobile inférieure (Bottom Navigation)** :
   - Boutons ergonomiques tactiles : *Accueil*, *Restaurants*, *Panier (avec compteur d'articles en direct)*, *Blog*, *Mon Compte / Admin*.
   - S'adapte automatiquement selon que l'utilisateur est un client connecté, un gérant ou un visiteur.
-  - Masquée automatiquement sur ordinateur pour préserver l'affichage de bureau.
-- **Deep Links** :
-  - L'application est configurée pour ouvrir automatiquement les liens `https://itamya.com` ou `itamya://`.
+- **Android App Links & Deep Links (Domaine officiel : https://itamya.store)** :
+  - L'application est configurée pour ouvrir automatiquement les liens `https://itamya.store/*` ou `itamya://*`.
+  - Fichier de vérification Digital Asset Links déployé : `https://itamya.store/.well-known/assetlinks.json`.
+  - Pour activer la validation automatique Android sans boîte de dialogue de choix de navigateur :
+    1. Rendez-vous sur la **Google Play Console > Configuration > Intégrité de l'application**.
+    2. Copiez l'**Empreinte du certificat SHA-256** sous la section *Clé de signature d'application Google Play*.
+    3. Collez cette empreinte dans le fichier `.well-known/assetlinks.json` à l'emplacement prévu.
+    4. Déployez le fichier à la racine de votre hébergement Web `https://itamya.store/.well-known/assetlinks.json` (ContentType `application/json`).
+- **Bandeau Intelligent Web (Smart App Banner)** :
+  - Lorsqu'un utilisateur Android visite `https://itamya.store` depuis son navigateur sans l'application installée, un bandeau discret lui propose l'installation de l'application officielle depuis Google Play.
+- **Découverte Desktop via QR Code** :
+  - Sur ordinateur, un bouton ergonomique et une modale permettent de scanner le QR Code officiel de téléchargement de l'application.
 
 ---
 
@@ -278,5 +287,6 @@ L'application intègre le module `assets/js/mobile.js` :
 
 Pour toute assistance technique, évolution ou audit d'ingénierie logicielle sur la plateforme ITAMYA :
 - **Équipe d'ingénierie** : ITA INNOVATE
-- **Site officiel** : [www.itainnovate.com](http://www.itainnovate.com)
+- **Domaine officiel de production** : [https://itamya.store](https://itamya.store)
+- **Site vitrine ITA INNOVATE** : [www.itainnovate.com](http://www.itainnovate.com)
 - **Support client ITAMYA** : +229 01 99 15 49 10

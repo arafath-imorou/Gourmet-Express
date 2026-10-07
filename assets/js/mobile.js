@@ -1,21 +1,36 @@
 /**
  * ITAMYA Mobile & Capacitor Bridge
  * Gestion de l'expérience mobile native Android & PWA
- * Développé pour ITAMYA par ITA INNOVATE
+ * Domaine officiel : https://itamya.store
+ * Développé pour ITAMYA par ITA INNOVATE (www.itainnovate.com)
  */
 
 (function () {
     'use strict';
 
-    // 1. Initialisation de l'environnement
+    // 1. Constantes officielles de production
+    const OFFICIAL_DOMAIN = "https://itamya.store";
+    const PLAY_STORE_URL = "URL_DE_L_APPLICATION_ITAMYA_SUR_GOOGLE_PLAY";
+    const FALLBACK_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=bj.itamya.app";
+    const effectivePlayStoreUrl = (PLAY_STORE_URL && !PLAY_STORE_URL.startsWith("URL_")) ? PLAY_STORE_URL : FALLBACK_PLAY_STORE_URL;
+
+    // 2. Initialisation de l'environnement
     const isCapacitor = typeof window.Capacitor !== 'undefined';
     const isAndroid = isCapacitor && window.Capacitor.getPlatform() === 'android';
+    const isAndroidBrowser = !isCapacitor && /android/i.test(navigator.userAgent || '');
+    const isDesktop = !isCapacitor && window.innerWidth > 768 && !('ontouchstart' in window);
 
-    // 2. Gestion du bouton Retour Android (Hardware Back Button)
+    // 3. Gestion du bouton Retour Android (Hardware Back Button)
     let lastBackPressTime = 0;
 
     function handleAndroidBack() {
         // A. Vérifier si une modale est ouverte et la fermer en priorité
+        const qrModal = document.getElementById('itamya-qr-modal');
+        if (qrModal && qrModal.style.display === 'flex') {
+            qrModal.style.display = 'none';
+            return;
+        }
+
         const restaurantModal = document.getElementById('restaurant-modal');
         if (restaurantModal && (restaurantModal.style.display === 'flex' || restaurantModal.style.display === 'block')) {
             if (typeof window.closeRestaurantModal === 'function') {
@@ -69,7 +84,7 @@
         }
     }
 
-    // 3. Liaison avec Capacitor Native Plugins
+    // 4. Liaison avec Capacitor Native Plugins & Deep Links
     document.addEventListener('DOMContentLoaded', () => {
         if (isCapacitor && window.Capacitor.Plugins) {
             const { App, StatusBar, SplashScreen } = window.Capacitor.Plugins;
@@ -91,16 +106,44 @@
                 App.addListener('backButton', () => {
                     handleAndroidBack();
                 });
+
+                // Écouter l'ouverture des Deep Links / Android App Links (https://itamya.store/* ou itamya://*)
+                App.addListener('appUrlOpen', (event) => {
+                    console.log('[ITAMYA Deep Link] URL reçue :', event.url);
+                    try {
+                        let targetRoute = '';
+                        if (event.url.startsWith('itamya://')) {
+                            targetRoute = event.url.replace('itamya://', '');
+                        } else if (event.url.includes('itamya.store')) {
+                            const parsed = new URL(event.url);
+                            targetRoute = parsed.pathname + parsed.search + parsed.hash;
+                        }
+
+                        if (targetRoute) {
+                            if (targetRoute.startsWith('/')) targetRoute = targetRoute.substring(1);
+                            if (!targetRoute) targetRoute = 'index.html';
+                            window.location.href = targetRoute;
+                        }
+                    } catch (err) {
+                        console.warn('[ITAMYA Deep Link] Erreur lors du routage :', err);
+                    }
+                });
             }
         }
 
-        // 4. Détection Réseau & Mode Hors-ligne
+        // 5. Détection Réseau & Mode Hors-ligne
         setupNetworkMonitoring();
 
-        // 5. Injection de la barre de navigation mobile
+        // 6. Injection de la barre de navigation mobile
         setupMobileBottomNav();
 
-        // 6. Enregistrement PWA Service Worker
+        // 7. Smart App Banner pour les utilisateurs du Web sur Android
+        setupSmartAppBanner();
+
+        // 8. Découverte de l'application sur ordinateur (QR Code)
+        setupDesktopPromo();
+
+        // 9. Enregistrement PWA Service Worker
         setupServiceWorker();
     });
 
@@ -190,9 +233,178 @@
         }
     }
 
+    // Smart App Banner pour navigateurs Android Web
+    function setupSmartAppBanner() {
+        if (!isAndroidBrowser || sessionStorage.getItem('itamya_banner_dismissed')) {
+            return;
+        }
+
+        const banner = document.createElement('div');
+        banner.id = 'itamya-smart-banner';
+        banner.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            z-index: 10001;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            font-size: 0.8rem;
+            animation: bannerSlideDown 0.3s ease-out;
+        `;
+        banner.innerHTML = `
+            <style>
+                @keyframes bannerSlideDown {
+                    from { transform: translateY(-100%); }
+                    to { transform: translateY(0); }
+                }
+                .smart-banner-info strong {
+                    display: block;
+                    font-size: 0.85rem;
+                    color: #ffffff;
+                    margin-bottom: 2px;
+                }
+                .smart-banner-info span {
+                    font-size: 0.74rem;
+                    color: #94a3b8;
+                    line-height: 1.3;
+                    display: block;
+                }
+                .smart-banner-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-shrink: 0;
+                }
+                .btn-smart-install {
+                    background: #e63946;
+                    color: #ffffff;
+                    padding: 6px 14px;
+                    border-radius: 50px;
+                    font-weight: 700;
+                    font-size: 0.76rem;
+                    text-decoration: none;
+                    white-space: nowrap;
+                    display: inline-block;
+                }
+                .btn-smart-close {
+                    background: none;
+                    border: none;
+                    color: #94a3b8;
+                    font-size: 1.1rem;
+                    cursor: pointer;
+                    padding: 4px;
+                    line-height: 1;
+                }
+            </style>
+            <div class="smart-banner-info">
+                <strong>ITAMYA est aussi disponible sur Android</strong>
+                <span>Installez l'application pour profiter d'une expérience mobile optimisée.</span>
+            </div>
+            <div class="smart-banner-actions">
+                <a href="${effectivePlayStoreUrl}" target="_blank" class="btn-smart-install">Installer l'application</a>
+                <button class="btn-smart-close" onclick="dismissSmartBanner()" aria-label="Fermer le bandeau">✕</button>
+            </div>
+        `;
+        document.body.prepend(banner);
+
+        window.dismissSmartBanner = function () {
+            const el = document.getElementById('itamya-smart-banner');
+            if (el) el.remove();
+            sessionStorage.setItem('itamya_banner_dismissed', 'true');
+        };
+    }
+
+    // Présentation sur Ordinateur / QR Code
+    function setupDesktopPromo() {
+        if (!isDesktop) return;
+
+        // Bouton discret en bas à gauche de l'écran
+        const promoBtn = document.createElement('button');
+        promoBtn.id = 'itamya-desktop-promo-btn';
+        promoBtn.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #0f172a;
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            z-index: 998;
+            box-shadow: 0 4px 16px rgba(15,23,42,0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        `;
+        promoBtn.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+            </svg>
+            <span>App Android ITAMYA</span>
+        `;
+        promoBtn.onclick = openDesktopQrModal;
+        document.body.appendChild(promoBtn);
+
+        // Modale QR Code
+        const modal = document.createElement('div');
+        modal.id = 'itamya-qr-modal';
+        modal.style.cssText = `
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 10005;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        `;
+        modal.onclick = (e) => {
+            if (e.target === modal) closeDesktopQrModal();
+        };
+
+        const qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(effectivePlayStoreUrl)}`;
+
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 20px; max-width: 380px; width: 100%; padding: 28px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.25); position: relative;">
+                <button onclick="closeDesktopQrModal()" style="position: absolute; top: 14px; right: 14px; background: #f1f5f9; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 0.95rem; cursor: pointer; color: #475569;">✕</button>
+                <div style="font-size: 0.72rem; font-weight: 800; color: #e63946; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px;">Application Mobile</div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">Découvrez ITAMYA sur mobile</h3>
+                <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6; margin-bottom: 20px;">
+                    Scannez le QR Code avec l'appareil photo de votre smartphone pour installer l'application Android officielle.
+                </p>
+                <div style="background: #f8fafc; padding: 14px; border-radius: 14px; border: 1.5px solid #e2e8f0; display: inline-block; margin-bottom: 18px;">
+                    <img src="${qrDataUrl}" alt="QR Code ITAMYA Google Play" width="180" height="180" style="display: block; border-radius: 8px;">
+                </div>
+                <div>
+                    <a href="${effectivePlayStoreUrl}" target="_blank" style="display: inline-block; background: #0f172a; color: white; padding: 10px 22px; border-radius: 50px; font-size: 0.84rem; font-weight: 700; text-decoration: none;">Voir sur le Google Play Store</a>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        window.openDesktopQrModal = function () {
+            document.getElementById('itamya-qr-modal').style.display = 'flex';
+        };
+        window.closeDesktopQrModal = function () {
+            document.getElementById('itamya-qr-modal').style.display = 'none';
+        };
+    }
+
     // Barre de navigation mobile inférieure (Bottom Navigation)
     function setupMobileBottomNav() {
-        // Ne pas afficher sur certaines pages d'administration spécifiques ou si déjà présent
         if (document.getElementById('itamya-bottom-nav')) return;
 
         const path = window.location.pathname;
@@ -200,13 +412,11 @@
         const isAdmin = path.includes('/admin/');
         const isSuperAdmin = path.includes('/superadmin/');
 
-        // Déterminer le préfixe relatif pour les liens selon la sous-arborescence
         let rootPrefix = '';
         if (isClient || isAdmin || isSuperAdmin) {
             rootPrefix = '../';
         }
 
-        // Calculer l'état de session utilisateur
         let accountLink = rootPrefix + 'login.html';
         let accountLabel = 'Compte';
         try {
@@ -222,7 +432,6 @@
             }
         } catch (e) {}
 
-        // Récupérer le nombre d'articles dans le panier
         let cartCount = 0;
         try {
             const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -347,10 +556,10 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
                     .then((reg) => {
-                        console.log('[ITAMYA PWA] Service Worker actif:', reg.scope);
+                        console.log('[ITAMYA PWA] Service Worker actif :', reg.scope);
                     })
                     .catch((err) => {
-                        console.warn('[ITAMYA PWA] Enregistrement Service Worker ignoré:', err);
+                        console.warn('[ITAMYA PWA] Enregistrement Service Worker ignoré :', err);
                     });
             });
         }
@@ -360,6 +569,8 @@
     window.ITAMYAMobile = {
         isCapacitor,
         isAndroid,
+        OFFICIAL_DOMAIN,
+        effectivePlayStoreUrl,
         showToast: showMobileToast,
         handleBack: handleAndroidBack
     };

@@ -25,6 +25,7 @@ const itemsToCopy = [
     'blog.html',
     'manifest.json',
     'sw.js',
+    '.well-known',
     'assets',
     'admin',
     'client',
