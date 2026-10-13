@@ -873,9 +873,9 @@
             <p>Découvrez nos restaurants partenaires et commandez vos plats préférés, livrés chez vous ou à emporter.</p>
             
             <div class="hero-btns" id="hero-btns-container">
+                <a href="menu.html" class="btn-hero btn-hero-order" id="btn-hero-order">Commander maintenant</a>
                 <a href="login.html" class="btn-hero btn-hero-login" id="btn-hero-login">Se connecter</a>
                 <a href="register.html" class="btn-hero btn-hero-register" id="btn-hero-register">Créer un compte</a>
-                <a href="#restaurants-grid" class="btn-hero btn-hero-order" id="btn-hero-order" style="display:none;">Commander maintenant</a>
                 <a href="client/index.html" class="btn-hero btn-hero-login" id="btn-hero-account" style="display:none;">Voir mon compte</a>
             </div>
         </div>
@@ -1239,9 +1239,10 @@
                     </div>
                 </div>
 
-                <!-- Action Button -->
-                <div>
-                    <button onclick="closeRestaurantModal()" class="btn btn-secondary" style="width:100%; border-radius:12px; padding:12px; font-weight:700; background:#f1f5f9; color:#334155; border:none; cursor:pointer; font-size:0.95rem;">Fermer</button>
+                <!-- Action Buttons -->
+                <div style="display:flex; gap:10px;">
+                    <button onclick="closeRestaurantModal()" class="btn btn-secondary" style="flex:1; border-radius:12px; padding:12px; font-weight:700; background:#f1f5f9; color:#334155; border:none; cursor:pointer; font-size:0.92rem;">Fermer</button>
+                    <button onclick="goToSelectedRestaurantMenu()" class="btn btn-primary" style="flex:1.4; border-radius:12px; padding:12px; font-weight:700; background:#e63946; color:#ffffff; border:none; cursor:pointer; font-size:0.92rem;">Commander</button>
                 </div>
             </div>
         </div>
@@ -1283,14 +1284,11 @@
             document.getElementById('resto-modal-city').textContent = resto.city ? resto.city : 'Bénin';
             
             // Logo
-            const logoEl = document.getElementById('resto-modal-logo-img');
             const avatarContainer = document.getElementById('resto-modal-avatar');
             if (resto.logo) {
-                logoEl.src = resto.logo;
-                logoEl.style.display = 'block';
+                avatarContainer.innerHTML = `<img id="resto-modal-logo-img" src="${resto.logo}" alt="Logo" style="width:100%; height:100%; object-fit:cover; display:block;">`;
             } else {
-                logoEl.style.display = 'none';
-                avatarContainer.innerHTML = '<span style="font-size:1.8rem; font-weight:800; color:#e63946;">' + (resto.name ? resto.name.charAt(0) : 'R') + '</span>';
+                avatarContainer.innerHTML = '<span style="font-size:1.8rem; font-weight:800; color:#e63946;">' + (resto.name ? resto.name.charAt(0).toUpperCase() : 'R') + '</span>';
             }
 
             // Spécialités / Description
@@ -1312,6 +1310,13 @@
         function closeRestaurantModal() {
             const modal = document.getElementById('restaurant-modal');
             if (modal) modal.style.display = 'none';
+        }
+
+        function goToSelectedRestaurantMenu() {
+            if (selectedRestaurantForModal) {
+                DataManager.setCurrentRestaurant(selectedRestaurantForModal.id, selectedRestaurantForModal.name);
+                window.location.href = 'menu.html';
+            }
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -1380,7 +1385,8 @@
                     <div class="info">
                         <div class="name">${r.name}</div>
                         <div class="address">${r.address || (r.city ? r.city : 'En savoir plus...')}</div>
-                    </div>`;
+                    </div>
+                    <span style="font-size:0.74rem; font-weight:700; color:#e63946; background:#fff1f2; padding:5px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;">Commander</span>`;
                 grid.appendChild(a);
             });
         });

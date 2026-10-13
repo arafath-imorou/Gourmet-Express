@@ -14,6 +14,9 @@
     const FALLBACK_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=bj.itamya.app";
     const effectivePlayStoreUrl = (PLAY_STORE_URL && !PLAY_STORE_URL.startsWith("URL_")) ? PLAY_STORE_URL : FALLBACK_PLAY_STORE_URL;
 
+    // Désactivé tant que l'application n'est pas encore publiée (demande utilisateur)
+    const SHOW_APP_INSTALL_PROMPT = false;
+
     // 2. Initialisation de l'environnement
     const isCapacitor = typeof window.Capacitor !== 'undefined';
     const isAndroid = isCapacitor && window.Capacitor.getPlatform() === 'android';
@@ -134,16 +137,13 @@
         // 5. Détection Réseau & Mode Hors-ligne
         setupNetworkMonitoring();
 
-        // 6. Injection de la barre de navigation mobile
-        setupMobileBottomNav();
+        // 6. Bandeau d'installation (désactivé par défaut tant que non souhaité)
+        if (SHOW_APP_INSTALL_PROMPT) {
+            setupSmartAppBanner();
+            setupDesktopPromo();
+        }
 
-        // 7. Smart App Banner pour les utilisateurs du Web sur Android
-        setupSmartAppBanner();
-
-        // 8. Découverte de l'application sur ordinateur (QR Code)
-        setupDesktopPromo();
-
-        // 9. Enregistrement PWA Service Worker
+        // 7. Enregistrement PWA Service Worker
         setupServiceWorker();
     });
 
@@ -155,7 +155,7 @@
             toast.id = 'itamya-mobile-toast';
             toast.style.cssText = `
                 position: fixed;
-                bottom: calc(85px + env(safe-area-inset-bottom, 0px));
+                bottom: calc(95px + env(safe-area-inset-bottom, 0px));
                 left: 50%;
                 transform: translateX(-50%);
                 background: rgba(15, 23, 42, 0.94);
@@ -233,12 +233,11 @@
         }
     }
 
-    // Smart App Banner pour navigateurs Android Web
+    // Smart App Banner pour navigateurs Android Web (activable via SHOW_APP_INSTALL_PROMPT)
     function setupSmartAppBanner() {
         if (!isAndroidBrowser || sessionStorage.getItem('itamya_banner_dismissed')) {
             return;
         }
-
         const banner = document.createElement('div');
         banner.id = 'itamya-smart-banner';
         banner.style.cssText = `
@@ -256,64 +255,18 @@
             z-index: 10001;
             box-shadow: 0 4px 16px rgba(0,0,0,0.2);
             font-size: 0.8rem;
-            animation: bannerSlideDown 0.3s ease-out;
         `;
         banner.innerHTML = `
-            <style>
-                @keyframes bannerSlideDown {
-                    from { transform: translateY(-100%); }
-                    to { transform: translateY(0); }
-                }
-                .smart-banner-info strong {
-                    display: block;
-                    font-size: 0.85rem;
-                    color: #ffffff;
-                    margin-bottom: 2px;
-                }
-                .smart-banner-info span {
-                    font-size: 0.74rem;
-                    color: #94a3b8;
-                    line-height: 1.3;
-                    display: block;
-                }
-                .smart-banner-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    flex-shrink: 0;
-                }
-                .btn-smart-install {
-                    background: #e63946;
-                    color: #ffffff;
-                    padding: 6px 14px;
-                    border-radius: 50px;
-                    font-weight: 700;
-                    font-size: 0.76rem;
-                    text-decoration: none;
-                    white-space: nowrap;
-                    display: inline-block;
-                }
-                .btn-smart-close {
-                    background: none;
-                    border: none;
-                    color: #94a3b8;
-                    font-size: 1.1rem;
-                    cursor: pointer;
-                    padding: 4px;
-                    line-height: 1;
-                }
-            </style>
             <div class="smart-banner-info">
-                <strong>ITAMYA est aussi disponible sur Android</strong>
-                <span>Installez l'application pour profiter d'une expérience mobile optimisée.</span>
+                <strong style="display:block;font-size:0.85rem;color:#fff;margin-bottom:2px;">ITAMYA est aussi disponible sur Android</strong>
+                <span style="font-size:0.74rem;color:#94a3b8;line-height:1.3;display:block;">Installez l'application pour profiter d'une expérience mobile optimisée.</span>
             </div>
-            <div class="smart-banner-actions">
-                <a href="${effectivePlayStoreUrl}" target="_blank" class="btn-smart-install">Installer l'application</a>
-                <button class="btn-smart-close" onclick="dismissSmartBanner()" aria-label="Fermer le bandeau">✕</button>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                <a href="${effectivePlayStoreUrl}" target="_blank" style="background:#e63946;color:#fff;padding:6px 14px;border-radius:50px;font-weight:700;font-size:0.76rem;text-decoration:none;white-space:nowrap;">Installer l'application</a>
+                <button onclick="dismissSmartBanner()" style="background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;padding:4px;" aria-label="Fermer">✕</button>
             </div>
         `;
         document.body.prepend(banner);
-
         window.dismissSmartBanner = function () {
             const el = document.getElementById('itamya-smart-banner');
             if (el) el.remove();
@@ -321,233 +274,8 @@
         };
     }
 
-    // Présentation sur Ordinateur / QR Code
     function setupDesktopPromo() {
         if (!isDesktop) return;
-
-        // Bouton discret en bas à gauche de l'écran
-        const promoBtn = document.createElement('button');
-        promoBtn.id = 'itamya-desktop-promo-btn';
-        promoBtn.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: #0f172a;
-            color: #ffffff;
-            border: 1px solid rgba(255,255,255,0.15);
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            cursor: pointer;
-            z-index: 998;
-            box-shadow: 0 4px 16px rgba(15,23,42,0.15);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        `;
-        promoBtn.innerHTML = `
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                <line x1="12" y1="18" x2="12.01" y2="18"></line>
-            </svg>
-            <span>App Android ITAMYA</span>
-        `;
-        promoBtn.onclick = openDesktopQrModal;
-        document.body.appendChild(promoBtn);
-
-        // Modale QR Code
-        const modal = document.createElement('div');
-        modal.id = 'itamya-qr-modal';
-        modal.style.cssText = `
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15,23,42,0.7);
-            backdrop-filter: blur(5px);
-            z-index: 10005;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        `;
-        modal.onclick = (e) => {
-            if (e.target === modal) closeDesktopQrModal();
-        };
-
-        const qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(effectivePlayStoreUrl)}`;
-
-        modal.innerHTML = `
-            <div style="background: white; border-radius: 20px; max-width: 380px; width: 100%; padding: 28px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.25); position: relative;">
-                <button onclick="closeDesktopQrModal()" style="position: absolute; top: 14px; right: 14px; background: #f1f5f9; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 0.95rem; cursor: pointer; color: #475569;">✕</button>
-                <div style="font-size: 0.72rem; font-weight: 800; color: #e63946; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px;">Application Mobile</div>
-                <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">Découvrez ITAMYA sur mobile</h3>
-                <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6; margin-bottom: 20px;">
-                    Scannez le QR Code avec l'appareil photo de votre smartphone pour installer l'application Android officielle.
-                </p>
-                <div style="background: #f8fafc; padding: 14px; border-radius: 14px; border: 1.5px solid #e2e8f0; display: inline-block; margin-bottom: 18px;">
-                    <img src="${qrDataUrl}" alt="QR Code ITAMYA Google Play" width="180" height="180" style="display: block; border-radius: 8px;">
-                </div>
-                <div>
-                    <a href="${effectivePlayStoreUrl}" target="_blank" style="display: inline-block; background: #0f172a; color: white; padding: 10px 22px; border-radius: 50px; font-size: 0.84rem; font-weight: 700; text-decoration: none;">Voir sur le Google Play Store</a>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-
-        window.openDesktopQrModal = function () {
-            document.getElementById('itamya-qr-modal').style.display = 'flex';
-        };
-        window.closeDesktopQrModal = function () {
-            document.getElementById('itamya-qr-modal').style.display = 'none';
-        };
-    }
-
-    // Barre de navigation mobile inférieure (Bottom Navigation)
-    function setupMobileBottomNav() {
-        if (document.getElementById('itamya-bottom-nav')) return;
-
-        const path = window.location.pathname;
-        const isClient = path.includes('/client/');
-        const isAdmin = path.includes('/admin/');
-        const isSuperAdmin = path.includes('/superadmin/');
-
-        let rootPrefix = '';
-        if (isClient || isAdmin || isSuperAdmin) {
-            rootPrefix = '../';
-        }
-
-        let accountLink = rootPrefix + 'login.html';
-        let accountLabel = 'Compte';
-        try {
-            const client = localStorage.getItem('it_current_client') || localStorage.getItem('it_client_session');
-            const staff = localStorage.getItem('it_current_staff') || localStorage.getItem('it_staff_session');
-            if (staff) {
-                const parsed = JSON.parse(staff);
-                accountLink = parsed.role === 'superadmin' ? rootPrefix + 'superadmin/index.html' : rootPrefix + 'admin/index.html';
-                accountLabel = 'Admin';
-            } else if (client) {
-                accountLink = rootPrefix + 'client/index.html';
-                accountLabel = 'Mon Espace';
-            }
-        } catch (e) {}
-
-        let cartCount = 0;
-        try {
-            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            if (Array.isArray(cart)) {
-                cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-            }
-        } catch (e) {}
-
-        const isHome = path.endsWith('index.html') || path === '/' || (!path.includes('cart') && !path.includes('order') && !path.includes('login') && !path.includes('client') && !path.includes('admin') && !path.includes('blog'));
-        const isCart = path.includes('cart.html');
-        const isAccount = path.includes('login.html') || path.includes('/client/') || path.includes('/admin/') || path.includes('/superadmin/');
-        const isBlog = path.includes('blog.html');
-
-        const nav = document.createElement('nav');
-        nav.id = 'itamya-bottom-nav';
-        nav.setAttribute('aria-label', 'Navigation mobile');
-        nav.innerHTML = `
-            <style>
-                #itamya-bottom-nav {
-                    display: none;
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    background: rgba(15, 23, 42, 0.98);
-                    backdrop-filter: blur(12px);
-                    -webkit-backdrop-filter: blur(12px);
-                    border-top: 1px solid rgba(255, 255, 255, 0.1);
-                    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
-                    z-index: 999;
-                    justify-content: space-around;
-                    align-items: center;
-                    box-shadow: 0 -4px 20px rgba(0,0,0,0.18);
-                }
-                @media (max-width: 768px) {
-                    #itamya-bottom-nav {
-                        display: flex;
-                    }
-                    body {
-                        padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-                    }
-                }
-                .nav-item-btn {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    color: rgba(255, 255, 255, 0.65);
-                    text-decoration: none;
-                    font-size: 0.68rem;
-                    font-weight: 600;
-                    gap: 3px;
-                    padding: 4px 10px;
-                    position: relative;
-                    transition: color 0.2s ease;
-                }
-                .nav-item-btn.active {
-                    color: #ffffff;
-                }
-                .nav-item-btn svg {
-                    width: 20px;
-                    height: 20px;
-                    stroke: currentColor;
-                    fill: none;
-                    stroke-width: 2;
-                    stroke-linecap: round;
-                    stroke-linejoin: round;
-                }
-                .nav-item-btn.active svg {
-                    stroke: #e63946;
-                }
-                .nav-cart-badge {
-                    position: absolute;
-                    top: 2px;
-                    right: 8px;
-                    background: #e63946;
-                    color: #ffffff;
-                    font-size: 0.62rem;
-                    font-weight: 800;
-                    min-width: 16px;
-                    height: 16px;
-                    border-radius: 8px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 0 4px;
-                }
-            </style>
-            <!-- Accueil -->
-            <a href="${rootPrefix}index.html" class="nav-item-btn ${isHome && !isBlog ? 'active' : ''}">
-                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                <span>Accueil</span>
-            </a>
-            <!-- Restaurants -->
-            <a href="${rootPrefix}index.html#restaurants-grid" class="nav-item-btn">
-                <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                <span>Restaurants</span>
-            </a>
-            <!-- Panier -->
-            <a href="${rootPrefix}cart.html" class="nav-item-btn ${isCart ? 'active' : ''}">
-                <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                <span>Panier</span>
-                ${cartCount > 0 ? `<span class="nav-cart-badge" id="bottom-nav-cart-count">${cartCount}</span>` : ''}
-            </a>
-            <!-- Blog -->
-            <a href="${rootPrefix}blog.html" class="nav-item-btn ${isBlog ? 'active' : ''}">
-                <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                <span>Blog</span>
-            </a>
-            <!-- Compte -->
-            <a href="${accountLink}" class="nav-item-btn ${isAccount ? 'active' : ''}">
-                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <span>${accountLabel}</span>
-            </a>
-        `;
-        document.body.appendChild(nav);
     }
 
     // Enregistrement PWA Service Worker
@@ -570,6 +298,7 @@
         isCapacitor,
         isAndroid,
         OFFICIAL_DOMAIN,
+        PLAY_STORE_URL,
         effectivePlayStoreUrl,
         showToast: showMobileToast,
         handleBack: handleAndroidBack

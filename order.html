@@ -76,12 +76,34 @@
             user-select: none;
             font-weight: 600 !important;
         }
+        .mode-selector-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .mode-option-card {
+            border: 1.5px solid #cbd5e1;
+            padding: 12px 8px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            background: #ffffff;
+            transition: all 0.2s ease;
+        }
+        .mode-option-card:has(input:checked) {
+            border-color: var(--primary-color);
+            background: #fff1f2;
+        }
         @media (max-width: 480px) {
             .payment-box {
                 padding: 16px 14px;
             }
             .payment-networks-grid {
                 grid-template-columns: 1fr !important;
+            }
+            .mode-option-card {
+                padding: 10px 4px;
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -93,7 +115,7 @@
             <span style="font-size: 24px;">←</span>
             <span class="nav-back-text">Retour</span>
         </a>
-        <h2 style="font-size: 1.2rem; margin: 0; font-family:'Poppins', sans-serif;">Paiement & Validation</h2>
+        <h2 style="font-size: 1.15rem; margin: 0; font-family:'Poppins', sans-serif;">Paiement & Validation</h2>
     </header>
 
     <div class="container" style="padding-top: 16px; padding-bottom: 40px; max-width: 600px;">
@@ -106,7 +128,7 @@
         <form id="order-form">
             <h3 class="mb-4" style="font-size:1.1rem; color:#1e293b;">1. Vos Coordonnées</h3>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 16px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px;">
                 <div class="input-group" style="margin-bottom: 0;">
                     <label for="name">Nom complet *</label>
                     <input type="text" id="name" name="name" required placeholder="Nom et Prénom" readonly>
@@ -120,18 +142,18 @@
 
             <h3 class="mb-4" style="margin-top: 24px; font-size:1.1rem; color:#1e293b;">2. Mode de réception</h3>
 
-            <div class="input-group" style="display:flex; gap:8px;">
-                <label style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
+            <div class="input-group mode-selector-grid">
+                <label class="mode-option-card">
                     <input type="radio" name="mode" value="takeaway" checked>
-                    <div style="font-weight: 600; margin-top: 4px;">À emporter</div>
+                    <div style="font-weight: 700; margin-top: 4px;">À emporter</div>
                 </label>
-                <label style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
+                <label class="mode-option-card">
                     <input type="radio" name="mode" value="dinein">
-                    <div style="font-weight: 600; margin-top: 4px;">Sur place</div>
+                    <div style="font-weight: 700; margin-top: 4px;">Sur place</div>
                 </label>
-                <label style="flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;">
+                <label class="mode-option-card">
                     <input type="radio" name="mode" value="delivery">
-                    <div style="font-weight: 600; margin-top: 4px;">Livraison</div>
+                    <div style="font-weight: 700; margin-top: 4px;">Livraison</div>
                 </label>
             </div>
 
@@ -147,12 +169,12 @@
 
             <!-- Bloc Paiement FedaPay Obligatoire -->
             <div class="payment-box">
-                <div style="display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:1.4rem;">🔒</span>
-                        <strong style="font-size:1.05rem; color:#0f172a;">Paiement Sécurisé FedaPay</strong>
+                        <span style="font-size:1.25rem;">🔒</span>
+                        <strong style="font-size:1rem; color:#0f172a;">Paiement Sécurisé FedaPay</strong>
                     </div>
-                    <span style="background:#ecfdf5; color:#065f46; font-size:0.75rem; font-weight:700; padding:4px 8px; border-radius:6px;">Requis avant validation</span>
+                    <span style="background:#ecfdf5; color:#065f46; font-size:0.74rem; font-weight:700; padding:4px 8px; border-radius:6px;">Requis avant validation</span>
                 </div>
                 
                 <p style="font-size:0.85rem; color:#64748b; margin: 8px 0 14px;">
