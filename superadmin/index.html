@@ -44,6 +44,10 @@
         #nav-clients .icon { background: rgba(69, 170, 242, 0.2); }
         #nav-clients.active { background: linear-gradient(135deg, #45aaf2, #2d98da); color: white; box-shadow: 0 4px 16px rgba(45, 152, 218, 0.45); }
         #nav-clients.active .icon { background: rgba(255,255,255,0.25); }
+
+        #nav-webhooks .icon { background: rgba(245, 158, 11, 0.2); }
+        #nav-webhooks.active { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.45); }
+        #nav-webhooks.active .icon { background: rgba(255,255,255,0.25); }
         
         .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
         .logout-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: rgba(231,76,60,0.15); color: #ff6b6b; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(231,76,60,0.3); width: 100%; transition: all 0.2s; }
@@ -199,6 +203,9 @@
             <button class="nav-item" id="nav-clients" onclick="showSection('clients')">
                 <span class="icon">👥</span> <span>Clients</span>
             </button>
+            <button class="nav-item" id="nav-webhooks" onclick="showSection('webhooks')">
+                <span class="icon">⚡</span> <span>Webhooks & API</span>
+            </button>
         </nav>
         <div class="sidebar-footer">
             <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-bottom:10px;" id="staff-name">Superadmin</div>
@@ -353,6 +360,147 @@
                     <input type="text" id="search-clients" placeholder="🔍 Rechercher par nom, téléphone, email..." class="search-input" style="max-width:320px;" oninput="filterClientsList()">
                 </div>
                 <div id="clients-list" style="overflow-x:auto;">Chargement des clients...</div>
+            </div>
+        </section>
+
+        <!-- ==================== 5. WEBHOOKS & API MODULE ==================== -->
+        <section id="section-webhooks" style="display:none;">
+            <div class="page-header">
+                <div>
+                    <h1>⚡ Passerelles Webhooks & Automatisations</h1>
+                    <p>Supervision des webhooks FedaPay (MTN, Moov, Celtiis), notifications instantanées WhatsApp et intégrations API.</p>
+                </div>
+            </div>
+
+            <!-- Stats / Status Grid -->
+            <div class="stats-row" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+                <div class="stat-card" style="border-left: 4px solid #10b981;">
+                    <div class="label">Webhook FedaPay (Paiement)</div>
+                    <div class="value" style="font-size:1.4rem; color:#10b981; display:flex; align-items:center; gap:8px;">
+                        <span>🟢 En Ligne</span>
+                    </div>
+                    <div class="sub-value" style="color:#64748b; font-size:0.8rem; margin-top:6px;">
+                        Écoute : <code>transaction.approved</code>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+                    <div class="label">Dispatcher Commandes</div>
+                    <div class="value" style="font-size:1.4rem; color:#3b82f6; display:flex; align-items:center; gap:8px;">
+                        <span>🟢 Actif</span>
+                    </div>
+                    <div class="sub-value" style="color:#64748b; font-size:0.8rem; margin-top:6px;">
+                        Format : WhatsApp & JSON
+                    </div>
+                </div>
+
+                <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+                    <div class="label">Mode FedaPay</div>
+                    <div class="value" style="font-size:1.4rem; color:#d97706;">
+                        LIVE (Production)
+                    </div>
+                    <div class="sub-value" style="color:#64748b; font-size:0.8rem; margin-top:6px;">
+                        Passerelle : <code>https://itamya.store</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 1: FedaPay Webhook -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">🔒 1. Webhook FedaPay (Validation Automatique des Paiements)</span>
+                    <span class="badge badge-active">Point de Terminaison Officiel</span>
+                </div>
+
+                <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:18px; margin-bottom:20px;">
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:8px;">
+                        URL du Webhook à enregistrer dans FedaPay :
+                    </label>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input type="text" id="fedapay-webhook-url-input" value="https://itamya.store/api/fedapay-webhook" readonly style="flex:1; min-width:280px; padding:12px 14px; font-weight:700; font-family:monospace; background:white; border:1.5px solid #cbd5e1; border-radius:10px; color:#0f172a; font-size:0.95rem;">
+                        <button class="btn-primary" style="background:linear-gradient(135deg, #10b981, #059669); padding:12px 20px;" onclick="copyWebhookUrl('https://itamya.store/api/fedapay-webhook')">
+                            📋 Copier l'URL
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:24px;">
+                    <h4 style="font-size:0.95rem; font-weight:800; color:#1e293b; margin-bottom:12px;">
+                        📖 Instructions de configuration sur FedaPay :
+                    </h4>
+                    <ol style="margin-left:20px; line-height:1.7; color:#475569; font-size:0.9rem;">
+                        <li>Connectez-vous à votre espace marchand <strong>FedaPay</strong> (<a href="https://fedapay.com" target="_blank" style="color:#e74c3c; font-weight:700;">fedapay.com</a>).</li>
+                        <li>Allez dans <strong>Paramètres</strong> → <strong>Développeurs</strong> → <strong>Webhooks</strong>.</li>
+                        <li>Cliquez sur <strong>"Ajouter un point de terminaison"</strong>.</li>
+                        <li>Collez l'URL : <code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:700; color:#0f172a;">https://itamya.store/api/fedapay-webhook</code></li>
+                        <li>Sélectionnez les événements : <strong style="color:#059669;">transaction.approved</strong>, <strong>transaction.canceled</strong> et <strong>transaction.declined</strong>.</li>
+                        <li>Cliquez sur <strong>Enregistrer</strong>.</li>
+                    </ol>
+                    <div style="background:#ecfdf5; border-left:4px solid #10b981; padding:12px 16px; border-radius:8px; margin-top:14px; font-size:0.85rem; color:#065f46;">
+                        💡 <strong>Avantage :</strong> Lorsqu'un client paie par MoMo ou Carte mais ferme sa page web avant la redirection, le Webhook FedaPay reçoit immédiatement la confirmation, marque la commande comme <strong>"En cours"</strong>, attribue les points de fidélité et alerte le restaurant !
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; border-top:1px solid #f1f5f9; padding-top:18px;">
+                    <button class="btn-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); box-shadow:0 4px 14px rgba(245, 158, 11, 0.35);" id="btn-test-fedapay" onclick="testFedaPayWebhookLive()">
+                        ⚡ Tester le Webhook FedaPay (Simulation en Direct)
+                    </button>
+                    <span id="fedapay-test-status" style="font-size:0.85rem; font-weight:700; color:#64748b;">Prêt pour le test</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Order Notification & WhatsApp Dispatcher -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📲 2. Notifications Commandes & Passerelle WhatsApp</span>
+                    <span class="badge badge-active">Temps Réel</span>
+                </div>
+
+                <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:18px; margin-bottom:20px;">
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:8px;">
+                        URL du Dispatcher de Commande (Endpoint ITAMYA) :
+                    </label>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
+                        <input type="text" value="https://itamya.store/api/order-webhook" readonly style="flex:1; min-width:280px; padding:12px 14px; font-weight:700; font-family:monospace; background:white; border:1.5px solid #cbd5e1; border-radius:10px; color:#0f172a; font-size:0.95rem;">
+                        <button class="btn-primary" style="background:linear-gradient(135deg, #3b82f6, #2563eb); padding:12px 20px;" onclick="copyWebhookUrl('https://itamya.store/api/order-webhook')">
+                            📋 Copier l'URL
+                        </button>
+                    </div>
+
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:8px;">
+                        URL de Destination Externe (Webhook WhatsApp, Make, n8n ou Bot) :
+                    </label>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input type="url" id="custom-external-webhook" placeholder="Ex: https://hook.eu1.make.com/... ou https://api.ultramsg.com/..." style="flex:1; min-width:280px; padding:12px 14px; font-weight:600; background:white; border:1.5px solid #cbd5e1; border-radius:10px; color:#0f172a; font-size:0.92rem;">
+                        <button class="btn-primary" style="background:#1e293b; padding:12px 20px;" onclick="saveCustomExternalWebhook()">
+                            💾 Enregistrer l'URL
+                        </button>
+                    </div>
+                    <span style="font-size:0.75rem; color:#64748b; margin-top:6px; display:block;">
+                        Chaque nouvelle commande ou paiement validé peut être transféré instantanément vers cette URL avec le message formaté prêt pour WhatsApp.
+                    </span>
+                </div>
+
+                <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; border-top:1px solid #f1f5f9; padding-top:18px;">
+                    <button class="btn-primary" style="background:linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow:0 4px 14px rgba(37, 99, 235, 0.35);" id="btn-test-order" onclick="testOrderWebhookLive()">
+                        📨 Tester la Notification Commande (Format WhatsApp)
+                    </button>
+                    <span id="order-test-status" style="font-size:0.85rem; font-weight:700; color:#64748b;">Prêt pour la simulation</span>
+                </div>
+            </div>
+
+            <!-- Card 3: Live Test Console & Logs -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">🖥️ Console des Événements & Tests en Direct</span>
+                    <button class="btn-secondary" onclick="clearWebhookConsole()">🗑️ Effacer la console</button>
+                </div>
+                <div id="webhook-console" style="background:#0f172a; color:#f8fafc; font-family:'Courier New', monospace; font-size:0.85rem; padding:16px; border-radius:12px; min-height:160px; max-height:360px; overflow-y:auto; line-height:1.6; white-space:pre-wrap;">
+[CONSOLE INITIALISÉE] Passerelles Webhook prêtes sur https://itamya.store
+- Webhook FedaPay : /api/fedapay-webhook (Écouteur actif)
+- Dispatcher Commandes : /api/order-webhook (Générateur WhatsApp actif)
+Cliquez sur les boutons de test ci-dessus pour simuler des requêtes en direct.
+                </div>
             </div>
         </section>
 
@@ -1662,6 +1810,173 @@
             });
 
             doc.save('clients_gourmet_express.pdf');
+        }
+
+        // ==================== WEBHOOKS & API HELPERS ====================
+        function copyWebhookUrl(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ URL copiée dans le presse-papier :\n' + url);
+            }).catch(() => {
+                prompt('Copiez l\'URL ci-dessous :', url);
+            });
+        }
+
+        function logToWebhookConsole(message) {
+            const consoleEl = document.getElementById('webhook-console');
+            if (!consoleEl) return;
+            const time = new Date().toLocaleTimeString('fr-FR');
+            consoleEl.textContent = `[${time}] ${message}\n` + consoleEl.textContent;
+        }
+
+        function clearWebhookConsole() {
+            const consoleEl = document.getElementById('webhook-console');
+            if (consoleEl) {
+                consoleEl.textContent = `[CONSOLE INITIALISÉE] Prête pour de nouveaux tests.`;
+            }
+        }
+
+        function saveCustomExternalWebhook() {
+            const input = document.getElementById('custom-external-webhook');
+            const val = input ? input.value.trim() : '';
+            localStorage.setItem('itamya_custom_webhook', val);
+            alert('✅ URL de notification externe enregistrée avec succès !');
+            logToWebhookConsole(`Configuration URL externe mise à jour : ${val || '(aucune)'}`);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedHook = localStorage.getItem('itamya_custom_webhook');
+            const input = document.getElementById('custom-external-webhook');
+            if (input && savedHook) input.value = savedHook;
+        });
+
+        async function testFedaPayWebhookLive() {
+            const btn = document.getElementById('btn-test-fedapay');
+            const statusEl = document.getElementById('fedapay-test-status');
+            if (btn) btn.disabled = true;
+            if (statusEl) {
+                statusEl.style.color = '#3b82f6';
+                statusEl.textContent = '⏳ Envoi du ping de test vers /api/fedapay-webhook...';
+            }
+
+            const testTxId = 'SIMU-' + Date.now().toString().slice(-5);
+            logToWebhookConsole(`▶️ Début du test Webhook FedaPay (Simulation transaction.approved, Réf: ${testTxId})...`);
+
+            try {
+                const response = await fetch('/api/fedapay-webhook?simulation=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-fedapay-simulation': 'true'
+                    },
+                    body: JSON.stringify({
+                        name: 'transaction.approved',
+                        entity: {
+                            id: testTxId,
+                            reference: 'TRX-' + testTxId,
+                            amount: 12500,
+                            status: 'approved',
+                            mode: 'mtn_open',
+                            custom_metadata: {
+                                order_id: 'CMD-TEST-WEBHOOK'
+                            },
+                            customer: {
+                                firstname: 'Client',
+                                lastname: 'Simulation',
+                                phone_number: { number: '0169310405', country: 'bj' }
+                            }
+                        }
+                    })
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    if (statusEl) {
+                        statusEl.style.color = '#10b981';
+                        statusEl.textContent = `🟢 Succès (HTTP ${response.status} OK - Webhook Actif)`;
+                    }
+                    logToWebhookConsole(`✅ Réponse HTTP ${response.status} OK reçue du Webhook FedaPay !\n${JSON.stringify(data, null, 2)}`);
+                } else {
+                    if (statusEl) {
+                        statusEl.style.color = '#ef4444';
+                        statusEl.textContent = `🔴 Erreur HTTP ${response.status}`;
+                    }
+                    logToWebhookConsole(`⚠️ Erreur HTTP ${response.status} : ${JSON.stringify(data, null, 2)}`);
+                }
+            } catch (err) {
+                if (statusEl) {
+                    statusEl.style.color = '#ef4444';
+                    statusEl.textContent = `🔴 Erreur de connexion locale (${err.message})`;
+                }
+                logToWebhookConsole(`❌ Erreur réseau lors de l'appel du webhook : ${err.message}\n(Note: Sur le domaine déployé https://itamya.store, le webhook répond sur l'infrastructure Vercel Serverless)`);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function testOrderWebhookLive() {
+            const btn = document.getElementById('btn-test-order');
+            const statusEl = document.getElementById('order-test-status');
+            const customHook = localStorage.getItem('itamya_custom_webhook') || '';
+
+            if (btn) btn.disabled = true;
+            if (statusEl) {
+                statusEl.style.color = '#3b82f6';
+                statusEl.textContent = '⏳ Génération et dispatch de la notification...';
+            }
+
+            logToWebhookConsole(`▶️ Début du test Dispatcher /api/order-webhook (Format WhatsApp)...`);
+
+            try {
+                const response = await fetch('/api/order-webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        order: {
+                            id: 'CMD-' + Date.now().toString().slice(-6),
+                            client_name: 'Arafath (Test Client)',
+                            phone: '+229 01 69 31 04 05',
+                            type: 'delivery',
+                            address: 'Haie Vive, Cotonou, Bénin',
+                            total: 18500,
+                            items: [
+                                { frozenName: 'Burger Gourmand Double', frozenPrice: 8500, quantity: 2 },
+                                { frozenName: 'Cocktail Fruité Frais', frozenPrice: 1500, quantity: 1 }
+                            ],
+                            comment: '[Paiement FedaPay Validé - MTN MoMo]'
+                        },
+                        restaurant_name: 'Saveurs du Terroir Cotonou',
+                        target_webhook: customHook
+                    })
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    if (statusEl) {
+                        statusEl.style.color = '#10b981';
+                        statusEl.textContent = `🟢 Succès (Format WhatsApp prêt et validé)`;
+                    }
+                    logToWebhookConsole(`✅ Message WhatsApp généré avec succès :\n--------------------\n${data.whatsapp_message}\n--------------------`);
+                    if (data.dispatch_results && data.dispatch_results.length > 0) {
+                        logToWebhookConsole(`Envoi externe : ${JSON.stringify(data.dispatch_results, null, 2)}`);
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.style.color = '#ef4444';
+                        statusEl.textContent = `🔴 Erreur HTTP ${response.status}`;
+                    }
+                    logToWebhookConsole(`⚠️ Erreur : ${JSON.stringify(data, null, 2)}`);
+                }
+            } catch (err) {
+                if (statusEl) {
+                    statusEl.style.color = '#ef4444';
+                    statusEl.textContent = `🔴 Erreur : ${err.message}`;
+                }
+                logToWebhookConsole(`❌ Erreur réseau : ${err.message}`);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         }
 
         // ==================== NAVIGATION & MODALS ====================

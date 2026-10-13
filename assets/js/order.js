@@ -129,13 +129,32 @@ function setupForm() {
             submitBtn.innerHTML = `<span>⏳ Traitement paiement ${paymentNetwork}...</span>`;
         }
 
+        const orderId = 'CMD-' + Date.now().toString().slice(-6);
         const nameParts = clientName.split(' ');
         const firstname = nameParts[0] || 'Client';
         const lastname = nameParts.slice(1).join(' ') || firstname;
 
+        // Pré-création de la commande avec statut 'En attente'
+        // Permet au Webhook FedaPay de valider la commande même si le client ferme son navigateur
+        await DataManager.createPendingOrder({
+            id: orderId,
+            clientName: clientName,
+            phone: phone,
+            type: mode,
+            address: address,
+            comment: `[En attente paiement FedaPay - ${paymentNetwork} - Tel: ${paymentPhone}] ${userComment}`.trim(),
+            total: orderTotal
+        });
+
         FedaPayManager.pay({
             amount: orderTotal,
-            description: `Commande ${DataManager.getCurrentRestaurantName() || 'ITAMYA'} (${paymentNetwork})`,
+            description: `Commande #${orderId} - ${DataManager.getCurrentRestaurantName() || 'ITAMYA'} (${paymentNetwork})`,
+            custom_metadata: {
+                order_id: orderId,
+                restaurant_id: DataManager.getCurrentRestaurantId(),
+                client_id: client ? client.id : null,
+                phone: paymentPhone
+            },
             customer: {
                 name: clientName,
                 firstname: firstname,
@@ -153,29 +172,26 @@ function setupForm() {
                 const paymentInfo = `[Paiement FedaPay Validé - ${actualMethod} - Tel Débit: ${paymentPhone} - Réf: ${paymentResult.transactionId || 'FEDA'}]`;
                 const finalComment = userComment ? `${paymentInfo} ${userComment}` : paymentInfo;
 
-                const orderDetails = {
-                    clientName: clientName,
-                    phone: phone,
-                    type: mode,
-                    address: address,
-                    comment: finalComment,
-                    total: orderTotal,
-                    status: 'Nouvelle'
-                };
+                const confirmed = await DataManager.confirmOrderPayment(orderId, paymentResult, userComment);
 
-                const newOrder = await DataManager.placeOrder(orderDetails);
-
-                if (newOrder) {
-                    window.location.href = `confirmation.html?id=${newOrder.id}`;
+                if (confirmed) {
+                    window.location.href = `confirmation.html?id=${orderId}`;
                 } else {
-                    alert('Votre paiement a été validé mais une erreur est survenue lors de l\'enregistrement de la commande. Veuillez contacter le support.');
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<span>🔒 Réessayer de valider</span>';
-                    }
+                    const fallbackOrder = await DataManager.placeOrder({
+                        id: orderId,
+                        clientName: clientName,
+                        phone: phone,
+                        type: mode,
+                        address: address,
+                        comment: finalComment,
+                        total: orderTotal,
+                        status: 'En cours'
+                    });
+                    window.location.href = `confirmation.html?id=${(fallbackOrder && fallbackOrder.id) || orderId}`;
                 }
             },
             onError: (errorMessage) => {
+                DataManager.cancelPendingOrder(orderId, errorMessage);
                 alert(`Échec du paiement : ${errorMessage || 'Impossible de compléter la transaction.'}`);
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -183,6 +199,7 @@ function setupForm() {
                 }
             },
             onCancel: () => {
+                DataManager.cancelPendingOrder(orderId, 'Annulation utilisateur');
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<span>🔒 Payer & Valider la commande</span>';

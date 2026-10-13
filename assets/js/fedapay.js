@@ -38,7 +38,7 @@ const FedaPayManager = {
     /**
      * Ouvre le widget de paiement sécurisé FedaPay
      */
-    pay: async ({ amount, description, customer, onSuccess, onError, onCancel }) => {
+    pay: async ({ amount, description, customer, custom_metadata, onSuccess, onError, onCancel }) => {
         await FedaPayManager.init();
 
         const cleanAmount = Math.round(Number(amount));
@@ -50,16 +50,18 @@ const FedaPayManager = {
         // Si le SDK officiel FedaPay est disponible
         if (window.FedaPay && typeof window.FedaPay.init === 'function') {
             try {
+                const finalMetadata = Object.assign({
+                    restaurant_id: DataManager.getCurrentRestaurantId(),
+                    client_name: customer.name || 'Client'
+                }, custom_metadata || {});
+
                 const widget = window.FedaPay.init({
                     public_key: FedaPayConfig.PUBLIC_KEY,
                     environment: FedaPayConfig.ENVIRONMENT,
                     transaction: {
                         amount: cleanAmount,
                         description: description || 'Commande ITAMYA',
-                        custom_metadata: {
-                            restaurant_id: DataManager.getCurrentRestaurantId(),
-                            client_name: customer.name || 'Client'
-                        }
+                        custom_metadata: finalMetadata
                     },
                     customer: {
                         firstname: customer.firstname || (customer.name ? customer.name.split(' ')[0] : 'Client'),

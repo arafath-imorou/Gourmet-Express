@@ -1345,8 +1345,8 @@ const DataManager = {
         });
         const client = DataManager.getCurrentClient();
         const newOrder = {
-            id: 'CMD-' + Date.now().toString().slice(-6),
-            status: 'Nouvelle',
+            id: orderDetails.id || ('CMD-' + Date.now().toString().slice(-6)),
+            status: orderDetails.status || 'Nouvelle',
             restaurant_id: restaurantId,
             type: orderDetails.type,
             address: orderDetails.address,
@@ -1360,7 +1360,99 @@ const DataManager = {
         const { data, error } = await window.supabaseClient.from('restau_orders').insert([newOrder]).select();
         if (error) return null;
         DataManager.clearCart();
+        DataManager.dispatchOrderWebhook(data[0]);
         return data[0];
+    },
+    createPendingOrder: async (orderDetails) => {
+        const restaurantId = DataManager.getCurrentRestaurantId();
+        const menu = DataManager.getCachedMenuSync(restaurantId) || await DataManager.getMenu(restaurantId);
+        const cart = DataManager.getCart();
+        const enrichedItems = cart.map(cartItem => {
+            const p = (menu || []).find(m => m.id === cartItem.productId) || DataManager.getProductByIdSync(cartItem.productId);
+            return {
+                productId: cartItem.productId,
+                quantity: cartItem.quantity,
+                frozenName: p ? p.name : (cartItem.name || '?'),
+                frozenPrice: p ? p.price : (cartItem.price || 0),
+                frozenImage: p ? p.image : (cartItem.image || '')
+            };
+        });
+        const client = DataManager.getCurrentClient();
+        const orderId = orderDetails.id || ('CMD-' + Date.now().toString().slice(-6));
+        const pendingOrder = {
+            id: orderId,
+            status: 'En attente',
+            restaurant_id: restaurantId,
+            type: orderDetails.type,
+            address: orderDetails.address,
+            phone: orderDetails.phone,
+            client_name: orderDetails.clientName,
+            client_id: client ? client.id : null,
+            total: orderDetails.total,
+            items: enrichedItems,
+            comment: orderDetails.comment || '[En attente de paiement FedaPay]'
+        };
+        const { data, error } = await window.supabaseClient.from('restau_orders').insert([pendingOrder]).select();
+        if (error) {
+            console.warn('[ORDER] Erreur pré-création commande:', error);
+            return null;
+        }
+        return data[0];
+    },
+    confirmOrderPayment: async (orderId, paymentResult, customComment = '') => {
+        const actualMethod = (paymentResult && (paymentResult.method || paymentResult.network)) || 'FedaPay Mobile Money';
+        const txId = (paymentResult && (paymentResult.transactionId || paymentResult.id)) || 'FEDA';
+        const paymentInfo = `[Paiement FedaPay Validé - ${actualMethod} - Réf: ${txId}]`;
+        const finalComment = customComment ? `${paymentInfo} ${customComment}` : paymentInfo;
+
+        const { data, error } = await window.supabaseClient
+            .from('restau_orders')
+            .update({
+                status: 'En cours',
+                comment: finalComment
+            })
+            .eq('id', orderId)
+            .select();
+
+        if (error) {
+            console.error('[ORDER] Erreur validation paiement commande:', error);
+            return false;
+        }
+
+        DataManager.clearCart();
+        const updatedOrder = data && data[0];
+        if (updatedOrder) {
+            await DataManager.awardPoints(updatedOrder);
+            DataManager.dispatchOrderWebhook(updatedOrder);
+        }
+        return true;
+    },
+    cancelPendingOrder: async (orderId, reason = 'Annulé par l\'utilisateur') => {
+        try {
+            await window.supabaseClient
+                .from('restau_orders')
+                .update({
+                    status: 'Annulée',
+                    comment: `[Paiement non complété: ${reason}]`
+                })
+                .eq('id', orderId)
+                .eq('status', 'En attente');
+        } catch (e) {
+            console.warn('[ORDER] Annulation commande silencieuse:', e);
+        }
+    },
+    dispatchOrderWebhook: (order) => {
+        if (!order) return;
+        try {
+            fetch('/api/order-webhook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    order: order,
+                    restaurant_name: DataManager.getCurrentRestaurantName() || 'ITAMYA'
+                })
+            }).catch(() => {});
+        } catch (e) {}
     },
     updateOrderStatus: async (id, status) => {
         const { data, error } = await window.supabaseClient
