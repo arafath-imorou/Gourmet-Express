@@ -13,9 +13,9 @@ const STORAGE_KEYS = {
 };
 
 const FAST_CACHE_KEYS = {
-    RESTAURANTS: 'it_fast_cache_restaurants_v2',
-    MENU_PREFIX: 'it_fast_cache_menu_v2_',
-    PRODUCTS_MAP: 'it_fast_products_map_v2'
+    RESTAURANTS: 'it_fast_cache_restaurants_v3',
+    MENU_PREFIX: 'it_fast_cache_menu_v3_',
+    PRODUCTS_MAP: 'it_fast_products_map_v3'
 };
 
 const CACHE_TTL_MS = 90000; // 90s fresh window + instant Stale-While-Revalidate
@@ -26,7 +26,9 @@ const _DATA_CACHE = {
     productsById: {}
 };
 
-// Safe sessionStorage helpers for cross-page 0ms cache
+let _CART_RAM = null;
+
+// Safe sessionStorage helpers for cross-page 0ms cache (with automatic lightweight fallback if base64 images hit quota)
 function _readSessionCache(key) {
     try {
         const raw = sessionStorage.getItem(key);
@@ -36,11 +38,32 @@ function _readSessionCache(key) {
     }
 }
 
+function _stripLargeBase64(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(_stripLargeBase64);
+    const copy = {};
+    for (const k of Object.keys(obj)) {
+        const val = obj[k];
+        if (typeof val === 'string' && val.length > 2000 && val.startsWith('data:')) {
+            copy[k] = ''; // Omit giant base64 from sessionStorage only
+        } else if (Array.isArray(val)) {
+            copy[k] = val.map(_stripLargeBase64);
+        } else {
+            copy[k] = val;
+        }
+    }
+    return copy;
+}
+
 function _writeSessionCache(key, value) {
     try {
         sessionStorage.setItem(key, JSON.stringify(value));
     } catch (e) {
-        // Ignore quota errors if base64 images are large
+        try {
+            sessionStorage.setItem(key, JSON.stringify(_stripLargeBase64(value)));
+        } catch (e2) {
+            // Ignore if sessionStorage is completely disabled
+        }
     }
 }
 
@@ -54,13 +77,17 @@ function _indexProducts(menuItems) {
     if (!Array.isArray(menuItems)) return;
     let map = _readSessionCache(FAST_CACHE_KEYS.PRODUCTS_MAP) || {};
     menuItems.forEach(p => {
-        if (p && p.id) {
-            _DATA_CACHE.productsById[p.id] = p;
-            map[p.id] = {
-                id: p.id,
-                name: p.name,
-                price: p.price,
-                image: p.image,
+        if (p && p.id !== undefined && p.id !== null) {
+            const pid = String(p.id);
+            const normalizedPrice = Number(p.price) || 0;
+            const normalizedProduct = { ...p, id: pid, price: normalizedPrice };
+            _DATA_CACHE.productsById[pid] = normalizedProduct;
+            _DATA_CACHE.productsById[p.id] = normalizedProduct;
+            map[pid] = {
+                id: pid,
+                name: p.name || 'Plat',
+                price: normalizedPrice,
+                image: (p.image && typeof p.image === 'string' && p.image.length < 1500) ? p.image : undefined,
                 category: p.category,
                 restaurant_id: p.restaurant_id,
                 active: p.active,
@@ -80,7 +107,11 @@ function _indexProducts(menuItems) {
     }
     const cachedMap = _readSessionCache(FAST_CACHE_KEYS.PRODUCTS_MAP);
     if (cachedMap && typeof cachedMap === 'object') {
-        Object.assign(_DATA_CACHE.productsById, cachedMap);
+        Object.keys(cachedMap).forEach(k => {
+            if (!_DATA_CACHE.productsById[k]) {
+                _DATA_CACHE.productsById[k] = cachedMap[k];
+            }
+        });
     }
 })();
 
@@ -770,12 +801,24 @@ const DataManager = {
 
     // ==================== MENU (0ms Sync + SWR Async) ====================
     getProductByIdSync: (productId) => {
-        if (!productId) return null;
+        if (productId === undefined || productId === null) return null;
+        const pid = String(productId);
+        if (_DATA_CACHE.productsById[pid]) return _DATA_CACHE.productsById[pid];
         if (_DATA_CACHE.productsById[productId]) return _DATA_CACHE.productsById[productId];
+        if (Array.isArray(window.allProducts)) {
+            const fromWin = window.allProducts.find(p => p && String(p.id) === pid);
+            if (fromWin) {
+                const norm = { ...fromWin, id: pid, price: Number(fromWin.price) || 0 };
+                _DATA_CACHE.productsById[pid] = norm;
+                return norm;
+            }
+        }
         const map = _readSessionCache(FAST_CACHE_KEYS.PRODUCTS_MAP);
-        if (map && map[productId]) {
-            _DATA_CACHE.productsById[productId] = map[productId];
-            return map[productId];
+        if (map && (map[pid] || map[productId])) {
+            const entry = map[pid] || map[productId];
+            entry.price = Number(entry.price) || 0;
+            _DATA_CACHE.productsById[pid] = entry;
+            return entry;
         }
         return null;
     },
@@ -815,13 +858,18 @@ const DataManager = {
                     .eq('restaurant_id', rid)
                     .order('category');
                 if (!error && data) {
+                    const normalizedData = data.map(p => ({
+                        ...p,
+                        id: String(p.id),
+                        price: Number(p.price) || 0
+                    }));
                     const expires = Date.now() + CACHE_TTL_MS;
-                    _DATA_CACHE.menus[rid].data = data;
+                    _DATA_CACHE.menus[rid].data = normalizedData;
                     _DATA_CACHE.menus[rid].expires = expires;
-                    _writeSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + rid, { data, expires });
-                    _indexProducts(data);
-                    window.dispatchEvent(new CustomEvent('menu-refreshed', { detail: { restaurantId: rid, data } }));
-                    return data;
+                    _writeSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + rid, { data: normalizedData, expires });
+                    _indexProducts(normalizedData);
+                    window.dispatchEvent(new CustomEvent('menu-refreshed', { detail: { restaurantId: rid, data: normalizedData } }));
+                    return normalizedData;
                 }
             } catch (e) {
                 console.error('Erreur _fetchMenuNetwork:', e);
@@ -901,61 +949,110 @@ const DataManager = {
         }
     },
 
-    // ==================== CART (localStorage + Enriched Snapshot for 0ms Cart/Order) ====================
+    // ==================== CART (0ms RAM + Lightweight localStorage Snapshot) ====================
     getCart: () => {
+        if (Array.isArray(_CART_RAM)) {
+            return _CART_RAM;
+        }
         try {
             const s = localStorage.getItem(STORAGE_KEYS.CART);
-            return s ? JSON.parse(s) : [];
+            const parsed = s ? JSON.parse(s) : [];
+            _CART_RAM = Array.isArray(parsed) ? parsed.map(i => ({
+                ...i,
+                productId: String(i.productId),
+                quantity: Number(i.quantity) || 1,
+                price: i.price !== undefined ? (Number(i.price) || 0) : undefined,
+                image: (i.image && typeof i.image === 'string' && i.image.length < 1500) ? i.image : undefined
+            })) : [];
+            return _CART_RAM;
         } catch (e) {
-            return [];
+            _CART_RAM = [];
+            return _CART_RAM;
         }
     },
-    saveCart: (cart) => localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart)),
-    addToCart: (productId, quantity = 1) => {
-        let cart = DataManager.getCart();
-        const product = DataManager.getProductByIdSync(productId);
-        const item = cart.find(i => i.productId === productId);
+    saveCart: (cart) => {
+        const cleanCart = (Array.isArray(cart) ? cart : []).map(i => ({
+            productId: String(i.productId),
+            quantity: Number(i.quantity) || 1,
+            note: i.note || '',
+            name: i.name,
+            price: i.price !== undefined ? (Number(i.price) || 0) : undefined,
+            image: (i.image && typeof i.image === 'string' && i.image.length < 1500) ? i.image : undefined,
+            restaurantId: i.restaurantId
+        }));
+        _CART_RAM = cleanCart;
+        try {
+            localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cleanCart));
+        } catch (e) {
+            console.warn('saveCart localStorage warning:', e);
+        }
+    },
+    addToCart: (productId, quantity = 1, meta = null) => {
+        const pid = String(productId);
+        const qtyDelta = Number(quantity) || 1;
+        let cart = [...DataManager.getCart()];
+        const product = DataManager.getProductByIdSync(pid) || meta;
+        const unitPrice = product && product.price !== undefined ? (Number(product.price) || 0) : undefined;
+        const prodName = product && product.name ? product.name : undefined;
+        const prodImg = product && product.image && typeof product.image === 'string' && product.image.length < 1500 ? product.image : undefined;
+        const prodRestoId = product ? (product.restaurant_id || product.restaurantId) : undefined;
+
+        const item = cart.find(i => String(i.productId) === pid);
         if (item) {
-            item.quantity += quantity;
-            if (product) {
-                item.name = product.name;
-                item.price = product.price;
-                item.image = product.image;
-                item.restaurantId = product.restaurant_id;
-            }
+            item.quantity = (Number(item.quantity) || 0) + qtyDelta;
+            if (prodName) item.name = prodName;
+            if (unitPrice !== undefined) item.price = unitPrice;
+            if (prodImg) item.image = prodImg;
+            if (prodRestoId) item.restaurantId = prodRestoId;
         } else {
             cart.push({
-                productId,
-                quantity,
+                productId: pid,
+                quantity: qtyDelta,
                 note: '',
-                name: product ? product.name : undefined,
-                price: product ? product.price : undefined,
-                image: product ? product.image : undefined,
-                restaurantId: product ? product.restaurant_id : undefined
+                name: prodName,
+                price: unitPrice,
+                image: prodImg,
+                restaurantId: prodRestoId
             });
         }
         DataManager.saveCart(cart);
         window.dispatchEvent(new Event('cart-updated'));
     },
     removeFromCart: (productId) => {
-        DataManager.saveCart(DataManager.getCart().filter(i => i.productId !== productId));
+        const pid = String(productId);
+        const nextCart = DataManager.getCart().filter(i => String(i.productId) !== pid);
+        DataManager.saveCart(nextCart);
         window.dispatchEvent(new Event('cart-updated'));
     },
     updateCartQuantity: (productId, delta) => {
-        let cart = DataManager.getCart();
-        const item = cart.find(i => i.productId === productId);
+        const pid = String(productId);
+        const d = Number(delta) || 0;
+        let cart = [...DataManager.getCart()];
+        const item = cart.find(i => String(i.productId) === pid);
         if (item) {
-            item.quantity += delta;
-            if (item.quantity <= 0) cart = cart.filter(i => i.productId !== productId);
+            item.quantity = (Number(item.quantity) || 1) + d;
+            const product = DataManager.getProductByIdSync(pid);
+            if (product) {
+                item.name = product.name || item.name;
+                item.price = Number(product.price) || item.price || 0;
+            }
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => String(i.productId) !== pid);
+            }
             DataManager.saveCart(cart);
             window.dispatchEvent(new Event('cart-updated'));
+        } else if (d > 0) {
+            DataManager.addToCart(pid, d);
         }
     },
     clearCart: () => {
-        localStorage.removeItem(STORAGE_KEYS.CART);
+        _CART_RAM = [];
+        try {
+            localStorage.removeItem(STORAGE_KEYS.CART);
+        } catch (e) {}
         window.dispatchEvent(new Event('cart-updated'));
     },
-    getCartItemCount: () => DataManager.getCart().reduce((acc, i) => acc + (i.quantity || 1), 0),
+    getCartItemCount: () => DataManager.getCart().reduce((acc, i) => acc + (Number(i.quantity) || 1), 0),
 
     getCartTotalSync: () => {
         const cart = DataManager.getCart();
@@ -964,9 +1061,10 @@ const DataManager = {
         let allResolved = true;
         for (const item of cart) {
             const p = DataManager.getProductByIdSync(item.productId);
-            const price = p ? p.price : item.price;
-            if (typeof price === 'number') {
-                total += price * (item.quantity || 1);
+            const rawPrice = (p && p.price !== undefined) ? p.price : item.price;
+            const numPrice = Number(rawPrice);
+            if (!Number.isNaN(numPrice) && rawPrice !== undefined && rawPrice !== null) {
+                total += numPrice * (Number(item.quantity) || 1);
             } else {
                 allResolved = false;
             }
@@ -984,9 +1082,10 @@ const DataManager = {
         const rid = restaurantId || DataManager.getCurrentRestaurantId();
         const menu = await DataManager.getMenu(rid);
         return cart.reduce((total, item) => {
-            const p = menu.find(m => m.id === item.productId) || DataManager.getProductByIdSync(item.productId);
-            const price = p ? p.price : (item.price || 0);
-            return total + price * (item.quantity || 1);
+            const pid = String(item.productId);
+            const p = (menu || []).find(m => String(m.id) === pid) || DataManager.getProductByIdSync(pid);
+            const price = Number(p ? p.price : item.price) || 0;
+            return total + price * (Number(item.quantity) || 1);
         }, 0);
     },
 

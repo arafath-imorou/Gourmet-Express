@@ -1,11 +1,46 @@
 /**
- * Menu.js - Ultra-Fast Zero-Latency Menu & Live Cart Engine
- * Instant 0ms rendering from SWR cache, parallel fetching, and surgical DOM updates ("tac tac").
+ * Menu.js - Ultra-Fast Zero-Latency Menu & Live Total Calculator ("tac tac")
+ * Instant 0ms rendering from SWR cache, parallel fetching, and real-time Total à payer calculation.
  */
 
 let allRestaurantsList = [];
 let currentCategoryFilter = 'all';
 const knownProductsMap = {};
+let pulseTimeoutId = null;
+
+function registerKnownProducts(list) {
+    if (!Array.isArray(list)) return;
+    list.forEach(p => {
+        if (p && p.id !== undefined && p.id !== null) {
+            const pid = String(p.id);
+            const norm = {
+                ...p,
+                id: pid,
+                price: Number(p.price) || 0
+            };
+            knownProductsMap[pid] = norm;
+            knownProductsMap[p.id] = norm;
+        }
+    });
+}
+
+function findProductSync(productId) {
+    if (productId === undefined || productId === null) return null;
+    const pid = String(productId);
+    if (knownProductsMap[pid]) return knownProductsMap[pid];
+    if (knownProductsMap[productId]) return knownProductsMap[productId];
+    const fromDM = DataManager.getProductByIdSync(pid);
+    if (fromDM) {
+        knownProductsMap[pid] = { ...fromDM, id: pid, price: Number(fromDM.price) || 0 };
+        return knownProductsMap[pid];
+    }
+    const fromWin = (window.allProducts || []).find(p => p && String(p.id) === pid);
+    if (fromWin) {
+        knownProductsMap[pid] = { ...fromWin, id: pid, price: Number(fromWin.price) || 0 };
+        return knownProductsMap[pid];
+    }
+    return null;
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Show client orders link immediately if logged in
@@ -32,14 +67,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cachedMenu = DataManager.getCachedMenuSync(restaurantId);
         if (cachedMenu && cachedMenu.length > 0) {
             window.allProducts = cachedMenu;
-            cachedMenu.forEach(p => { if (p && p.id) knownProductsMap[p.id] = p; });
+            registerKnownProducts(cachedMenu);
             renderMenu(currentCategoryFilter);
             setupCategoryFilters();
-            updateLiveCartUI();
+            updateLiveCartUI(false);
+        } else {
+            updateLiveCartUI(false);
         }
+    } else {
+        updateLiveCartUI(false);
     }
 
-    // 2. Parallel fetch / background validation (never sequential waterfall!)
+    // 2. Listen for cart updates: surgical DOM update + 0ms live total calculation
+    window.addEventListener('cart-updated', () => {
+        updateAllProductCardsQtyDOM();
+        updateLiveCartUI(true);
+    });
+
+    // Listen for background SWR menu refresh
+    window.addEventListener('menu-refreshed', (e) => {
+        if (e.detail && e.detail.restaurantId === DataManager.getCurrentRestaurantId()) {
+            window.allProducts = e.detail.data || [];
+            registerKnownProducts(window.allProducts);
+            renderMenu(currentCategoryFilter);
+            setupCategoryFilters();
+            updateLiveCartUI(false);
+        }
+    });
+
+    // 3. Parallel fetch / background validation (never sequential waterfall!)
     const [freshRestos, freshMenu] = await Promise.all([
         DataManager.getRestaurants(true),
         restaurantId ? DataManager.getMenu(restaurantId) : Promise.resolve(null)
@@ -57,30 +113,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateRestaurantSwitcher(restaurantId);
 
     const finalMenu = freshMenu !== null ? freshMenu : await DataManager.getMenu(restaurantId);
-    if (!window.allProducts || JSON.stringify(window.allProducts) !== JSON.stringify(finalMenu)) {
+    registerKnownProducts(finalMenu || []);
+
+    if (!window.allProducts || window.allProducts.length === 0 || JSON.stringify(window.allProducts) !== JSON.stringify(finalMenu)) {
         window.allProducts = finalMenu || [];
-        (window.allProducts || []).forEach(p => { if (p && p.id) knownProductsMap[p.id] = p; });
         renderMenu(currentCategoryFilter);
         setupCategoryFilters();
     }
-    updateLiveCartUI();
-
-    // 3. Listen for cart updates: surgical DOM update (< 1ms, zero image flicker!)
-    window.addEventListener('cart-updated', () => {
-        updateAllProductCardsQtyDOM();
-        updateLiveCartUI();
-    });
-
-    // Listen for background SWR menu refresh
-    window.addEventListener('menu-refreshed', (e) => {
-        if (e.detail && e.detail.restaurantId === DataManager.getCurrentRestaurantId()) {
-            window.allProducts = e.detail.data || [];
-            window.allProducts.forEach(p => { if (p && p.id) knownProductsMap[p.id] = p; });
-            renderMenu(currentCategoryFilter);
-            setupCategoryFilters();
-            updateLiveCartUI();
-        }
-    });
+    updateLiveCartUI(false);
 });
 
 function populateRestaurantSwitcher(currentId) {
@@ -88,7 +128,7 @@ function populateRestaurantSwitcher(currentId) {
     if (!select) return;
 
     select.innerHTML = allRestaurantsList.map(r => `
-        <option value="${r.id}" ${r.id === currentId ? 'selected' : ''}>
+        <option value="${r.id}" ${String(r.id) === String(currentId) ? 'selected' : ''}>
             ${r.name}
         </option>
     `).join('');
@@ -97,7 +137,7 @@ function populateRestaurantSwitcher(currentId) {
 }
 
 function updateSwitcherBadge(restaurantId) {
-    const currentResto = allRestaurantsList.find(r => r.id === restaurantId);
+    const currentResto = allRestaurantsList.find(r => String(r.id) === String(restaurantId));
     const nameEl = document.getElementById('switcher-resto-name');
     const avatarEl = document.getElementById('switcher-resto-avatar');
     const headerTitle = document.querySelector('header h2');
@@ -118,7 +158,7 @@ function updateSwitcherBadge(restaurantId) {
 
 async function switchRestaurantFromMenu(newRestaurantId) {
     if (!newRestaurantId) return;
-    const targetResto = allRestaurantsList.find(r => r.id === newRestaurantId);
+    const targetResto = allRestaurantsList.find(r => String(r.id) === String(newRestaurantId));
     if (!targetResto) return;
 
     DataManager.setCurrentRestaurant(targetResto.id, targetResto.name);
@@ -136,36 +176,39 @@ async function loadMenuForRestaurant(restaurantId) {
     const cached = DataManager.getCachedMenuSync(restaurantId);
     if (cached && cached.length > 0) {
         window.allProducts = cached;
-        cached.forEach(p => { if (p && p.id) knownProductsMap[p.id] = p; });
+        registerKnownProducts(cached);
         renderMenu(currentCategoryFilter);
         setupCategoryFilters();
-        updateLiveCartUI();
+        updateLiveCartUI(false);
     } else if (menuContainer) {
         menuContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 40px; font-weight:600;">Chargement de la carte...</div>';
     }
 
     const fresh = await DataManager.getMenu(restaurantId);
     window.allProducts = fresh || [];
-    window.allProducts.forEach(p => { if (p && p.id) knownProductsMap[p.id] = p; });
+    registerKnownProducts(window.allProducts);
 
     renderMenu(currentCategoryFilter);
     setupCategoryFilters();
-    updateLiveCartUI();
+    updateLiveCartUI(false);
 }
 
 function getProductActionHTML(product, qty) {
+    const pid = String(product.id);
+    const unitPrice = Number(product.price) || 0;
     if (qty > 0) {
+        const subTotal = unitPrice * qty;
         return `
             <div class="card-qty-row">
-                <button type="button" class="card-qty-btn minus" onclick="changeProductQty('${product.id}', -1)" aria-label="Retirer">−</button>
-                <span class="card-qty-label">${qty} × ${formatPrice(product.price * qty)}</span>
-                <button type="button" class="card-qty-btn plus" onclick="changeProductQty('${product.id}', 1)" aria-label="Ajouter">+</button>
+                <button type="button" class="card-qty-btn minus" onclick="changeProductQty('${pid}', -1)" aria-label="Retirer">−</button>
+                <span class="card-qty-label">${qty} choisi${qty > 1 ? 's' : ''} • ${formatPrice(subTotal)}</span>
+                <button type="button" class="card-qty-btn plus" onclick="changeProductQty('${pid}', 1)" aria-label="Ajouter">+</button>
             </div>
         `;
     }
     return `
-        <button type="button" class="btn btn-primary btn-sm add-to-cart-btn" onclick="addToCart('${product.id}')">
-            + Ajouter au panier
+        <button type="button" class="btn btn-primary btn-sm add-to-cart-btn" onclick="addToCart('${pid}')">
+            + Choisir (${formatPrice(unitPrice)})
         </button>
     `;
 }
@@ -191,21 +234,23 @@ function renderMenu(categoryFilter = 'all') {
     const fragment = document.createDocumentFragment();
 
     activeProducts.forEach(product => {
-        const cartItem = cart.find(i => i.productId === product.id);
-        const qty = cartItem ? cartItem.quantity : 0;
+        const pid = String(product.id);
+        const unitPrice = Number(product.price) || 0;
+        const cartItem = cart.find(i => String(i.productId) === pid);
+        const qty = cartItem ? (Number(cartItem.quantity) || 0) : 0;
 
         const card = document.createElement('div');
         card.className = `card product-card ${qty > 0 ? 'in-cart' : ''}`;
-        card.dataset.productId = product.id;
+        card.dataset.productId = pid;
         card.innerHTML = `
             <div class="product-image" style="background-image: url('${product.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=60'}');">
-                <span class="in-cart-badge" style="display: ${qty > 0 ? 'inline-block' : 'none'};">${qty} au panier</span>
+                <span class="in-cart-badge" style="display: ${qty > 0 ? 'inline-block' : 'none'};">${qty} × ${formatPrice(unitPrice)} = ${formatPrice(unitPrice * qty)}</span>
             </div>
             <div class="product-details">
                 <div>
                     <div class="product-header">
                         <h3 class="product-title">${product.name}</h3>
-                        <span class="product-price">${formatPrice(product.price)}</span>
+                        <span class="product-price">${formatPrice(unitPrice)}</span>
                     </div>
                     <p class="product-desc text-muted text-sm">${product.description || ''}</p>
                 </div>
@@ -226,19 +271,20 @@ function updateAllProductCardsQtyDOM() {
     const cart = DataManager.getCart();
     const cards = document.querySelectorAll('.product-card[data-product-id]');
     cards.forEach(card => {
-        const pid = card.dataset.productId;
-        const product = knownProductsMap[pid] || DataManager.getProductByIdSync(pid);
+        const pid = String(card.dataset.productId);
+        const product = findProductSync(pid);
         if (!product) return;
 
-        const cartItem = cart.find(i => i.productId === pid);
-        const qty = cartItem ? cartItem.quantity : 0;
+        const unitPrice = Number(product.price) || 0;
+        const cartItem = cart.find(i => String(i.productId) === pid);
+        const qty = cartItem ? (Number(cartItem.quantity) || 0) : 0;
 
         card.classList.toggle('in-cart', qty > 0);
 
         const badge = card.querySelector('.in-cart-badge');
         if (badge) {
             if (qty > 0) {
-                badge.textContent = `${qty} au panier`;
+                badge.textContent = `${qty} × ${formatPrice(unitPrice)} = ${formatPrice(unitPrice * qty)}`;
                 badge.style.display = 'inline-block';
             } else {
                 badge.style.display = 'none';
@@ -290,12 +336,15 @@ function setupCategoryFilters() {
     });
 }
 
-function updateLiveCartUI() {
+// Instant 0ms calculation of "Total à payer" as meals are selected
+function updateLiveCartUI(animate = false) {
     const cart = DataManager.getCart();
     const stripEl = document.getElementById('live-cart-items-strip');
     const countLabelEl = document.getElementById('live-cart-count-label');
     const totalAmountEl = document.getElementById('live-cart-total-amount');
     const orderBtnEl = document.getElementById('live-cart-order-btn');
+    const clearBtnEl = document.getElementById('live-cart-clear-btn');
+    const headerTotalEl = document.getElementById('header-cart-total');
 
     if (!countLabelEl || !totalAmountEl || !orderBtnEl) return;
 
@@ -304,56 +353,94 @@ function updateLiveCartUI() {
     const chipsHtml = [];
 
     cart.forEach(item => {
-        const product = knownProductsMap[item.productId] || DataManager.getProductByIdSync(item.productId) || (window.allProducts || []).find(p => p.id === item.productId);
-        const qty = item.quantity || 1;
+        const pid = String(item.productId);
+        const product = findProductSync(pid);
+        const qty = Number(item.quantity) || 1;
         totalItems += qty;
 
-        const name = product ? product.name : (item.name || 'Article');
-        const unitPrice = product ? (product.price || 0) : (item.price || 0);
+        const name = product ? product.name : (item.name || 'Repas');
+        const unitPrice = Number(product ? product.price : item.price) || 0;
         const sub = unitPrice * qty;
         totalPrice += sub;
 
         chipsHtml.push(`
             <div class="live-cart-chip">
-                <span class="live-cart-chip-name">${name}</span>
+                <span class="live-cart-chip-name">${qty}× ${name}</span>
                 <span class="live-cart-chip-price">${formatPrice(sub)}</span>
                 <div class="live-cart-chip-controls">
-                    <button type="button" class="chip-qty-btn minus" onclick="changeProductQty('${item.productId}', -1)">−</button>
+                    <button type="button" class="chip-qty-btn minus" onclick="changeProductQty('${pid}', -1)">−</button>
                     <span class="chip-qty-val">${qty}</span>
-                    <button type="button" class="chip-qty-btn plus" onclick="changeProductQty('${item.productId}', 1)">+</button>
+                    <button type="button" class="chip-qty-btn plus" onclick="changeProductQty('${pid}', 1)">+</button>
                 </div>
             </div>
         `);
     });
 
+    const formattedTotal = formatPrice(totalPrice);
+
     if (totalItems > 0) {
         if (stripEl) {
             stripEl.innerHTML = chipsHtml.join('');
-            stripEl.style.display = chipsHtml.length > 0 ? 'flex' : 'none';
+            stripEl.style.display = 'flex';
         }
-        countLabelEl.textContent = `${totalItems} article${totalItems > 1 ? 's' : ''} dans votre panier`;
-        totalAmountEl.textContent = formatPrice(totalPrice);
+        countLabelEl.textContent = `TOTAL À PAYER • ${totalItems} repas choisi${totalItems > 1 ? 's' : ''}`;
+        totalAmountEl.textContent = formattedTotal;
         orderBtnEl.classList.remove('empty');
-        orderBtnEl.innerHTML = `Commander (${totalItems}) →`;
+        orderBtnEl.innerHTML = `Commander • ${formattedTotal} →`;
+        if (clearBtnEl) clearBtnEl.style.display = 'inline-flex';
+        if (headerTotalEl) {
+            headerTotalEl.textContent = formattedTotal;
+            headerTotalEl.style.display = 'inline-block';
+        }
     } else {
         if (stripEl) {
             stripEl.innerHTML = '';
             stripEl.style.display = 'none';
         }
-        countLabelEl.textContent = 'Panier vide (ajoutez vos plats)';
+        countLabelEl.textContent = 'TOTAL À PAYER • 0 repas choisi';
         totalAmountEl.textContent = formatPrice(0);
         orderBtnEl.classList.add('empty');
         orderBtnEl.innerHTML = 'Voir le panier';
+        if (clearBtnEl) clearBtnEl.style.display = 'none';
+        if (headerTotalEl) {
+            headerTotalEl.style.display = 'none';
+        }
     }
+
+    if (animate && totalAmountEl) {
+        totalAmountEl.classList.add('pulse');
+        if (pulseTimeoutId) clearTimeout(pulseTimeoutId);
+        pulseTimeoutId = setTimeout(() => {
+            totalAmountEl.classList.remove('pulse');
+        }, 220);
+    }
+
+    return { totalItems, totalPrice, formattedTotal };
 }
 
 window.addToCart = (id) => {
-    DataManager.addToCart(id, 1);
-    showToast('Plat ajouté au panier');
+    const pid = String(id);
+    const product = findProductSync(pid);
+    DataManager.addToCart(pid, 1, product);
+    const stats = updateLiveCartUI(true);
+    if (stats) {
+        showToast(`✓ Total à payer : ${stats.formattedTotal} (${stats.totalItems} repas)`);
+    }
 };
 
 window.changeProductQty = (id, delta) => {
-    DataManager.updateCartQuantity(id, delta);
+    const pid = String(id);
+    DataManager.updateCartQuantity(pid, delta);
+    const stats = updateLiveCartUI(true);
+    if (stats && stats.totalItems > 0) {
+        showToast(`Total à payer : ${stats.formattedTotal} (${stats.totalItems} repas)`);
+    }
+};
+
+window.clearLiveCart = () => {
+    DataManager.clearCart();
+    updateLiveCartUI(true);
+    showToast('Sélection réinitialisée (0 FCFA)');
 };
 
 function showToast(message) {
@@ -369,7 +456,7 @@ function showToast(message) {
         toast.classList.add('show');
         setTimeout(() => {
             toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 250);
-        }, 1400);
+            setTimeout(() => toast.remove(), 220);
+        }, 1200);
     }, 10);
 }

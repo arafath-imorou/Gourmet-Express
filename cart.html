@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ITAMYA">
     <link rel="apple-touch-icon" href="assets/images/icon-192.png">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         .header-fixed {
@@ -167,10 +167,10 @@
             <div class="bottom-panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-weight: 700; font-size: 1.15rem;">
                     <span>Total à payer</span>
-                    <span id="cart-total" style="color: var(--primary-color); font-size: 1.25rem; font-weight: 800;">0 FCFA</span>
+                    <span id="cart-total" style="color: var(--primary-color); font-size: 1.3rem; font-weight: 800;">0 FCFA</span>
                 </div>
                 <!-- Redirect to Order Page -->
-                <a href="order.html" class="btn btn-primary" style="border-radius: 50px; padding: 14px 24px; font-size: 1rem; font-weight: 800; box-shadow: 0 6px 20px rgba(230, 57, 70, 0.35);">
+                <a href="order.html" id="cart-checkout-btn" class="btn btn-primary" style="border-radius: 50px; padding: 14px 24px; font-size: 1rem; font-weight: 800; box-shadow: 0 6px 20px rgba(230, 57, 70, 0.35);">
                     Commander • Valider la commande
                 </a>
             </div>
@@ -178,11 +178,11 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="assets/js/supabase.js"></script>
-    <script src="assets/js/data.js"></script>
-    <script src="assets/js/app.js"></script>
-    <script src="assets/js/mobile.js"></script>
-    <script src="assets/js/cart.js"></script>
+    <script src="assets/js/supabase.js?v=3"></script>
+    <script src="assets/js/data.js?v=3"></script>
+    <script src="assets/js/app.js?v=3"></script>
+    <script src="assets/js/mobile.js?v=3"></script>
+    <script src="assets/js/cart.js?v=3"></script>
 </body>
 
 </html>

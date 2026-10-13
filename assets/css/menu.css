@@ -78,6 +78,14 @@
     justify-content: center;
 }
 
+.header-cart-total {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #fbbf24;
+    padding-left: 4px;
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+}
+
 .category-scroll {
     display: flex;
     gap: 8px;
@@ -456,7 +464,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
 }
 
 .live-cart-summary {
@@ -466,20 +474,58 @@
 }
 
 .live-cart-count-label {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    font-weight: 600;
+    font-size: 0.72rem;
+    color: #fbbf24;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.live-cart-total-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
 }
 
 .live-cart-total-amount {
-    font-size: 1.15rem;
+    font-size: 1.28rem;
     font-weight: 800;
     color: #ffffff;
-    line-height: 1.2;
+    line-height: 1.15;
+    display: inline-block;
+    transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.16s ease;
+}
+
+.live-cart-total-amount.pulse {
+    transform: scale(1.12);
+    color: #4ade80;
 }
 
 .live-cart-actions {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.live-cart-clear-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 9px 12px;
+    border-radius: 50px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    touch-action: manipulation;
+}
+
+.live-cart-clear-btn:hover,
+.live-cart-clear-btn:active {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ffffff;
+    border-color: rgba(239, 68, 68, 0.5);
 }
 
 .live-cart-order-btn {
@@ -489,9 +535,9 @@
     gap: 8px;
     background: linear-gradient(135deg, #e63946, #d62828);
     color: #ffffff;
-    padding: 12px 24px;
+    padding: 12px 22px;
     border-radius: 50px;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     font-weight: 800;
     text-decoration: none;
     box-shadow: 0 4px 16px rgba(230, 57, 70, 0.45);

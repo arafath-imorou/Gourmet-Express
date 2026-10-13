@@ -12,8 +12,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ITAMYA">
     <link rel="apple-touch-icon" href="assets/images/icon-192.png">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/menu.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=3">
+    <link rel="stylesheet" href="assets/css/menu.css?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 </head>
 
@@ -27,9 +27,10 @@
         <h2 class="menu-header-title">Notre Carte</h2>
         <div class="menu-header-actions">
             <a href="client/orders.html" id="client-orders-header-btn" class="header-orders-btn" style="display:none;">Commandes</a>
-            <a href="cart.html" class="header-cart-pill">
+            <a href="cart.html" class="header-cart-pill" id="header-cart-pill">
                 <span>Panier</span>
-                <span class="header-cart-count cart-counter">0</span>
+                <span class="header-cart-count cart-counter" id="header-cart-count">0</span>
+                <span class="header-cart-total" id="header-cart-total" style="display:none;">0 FCFA</span>
             </a>
         </div>
     </header>
@@ -58,23 +59,28 @@
         <!-- JS renders products here -->
     </div>
 
-    <!-- Barre de Panier Progressive en Temps Réel (visible au fur et à mesure) -->
+    <!-- Barre de Calcul Progressif en Temps Réel du Total à Payer -->
     <div class="live-cart-bar" id="live-cart-bar">
         <div class="live-cart-inner">
-            <!-- Liste progressive des plats ajoutés -->
+            <!-- Liste progressive des plats choisis au fur et à mesure -->
             <div class="live-cart-items-strip" id="live-cart-items-strip" style="display: none;">
                 <!-- Rempli dynamiquement au fur et à mesure -->
             </div>
 
-            <!-- Résumé Total & Bouton Commander -->
+            <!-- Résumé Total à payer & Bouton Commander -->
             <div class="live-cart-main-row">
                 <div class="live-cart-summary">
-                    <span class="live-cart-count-label" id="live-cart-count-label">Panier vide (0 article)</span>
-                    <span class="live-cart-total-amount" id="live-cart-total-amount">0 FCFA</span>
+                    <span class="live-cart-count-label" id="live-cart-count-label">TOTAL À PAYER • 0 repas choisi</span>
+                    <div class="live-cart-total-wrap">
+                        <span class="live-cart-total-amount" id="live-cart-total-amount">0 FCFA</span>
+                    </div>
                 </div>
                 <div class="live-cart-actions">
-                    <a href="cart.html" class="live-cart-order-btn" id="live-cart-order-btn">
-                        Commander
+                    <button type="button" class="live-cart-clear-btn" id="live-cart-clear-btn" onclick="clearLiveCart()" style="display: none;" title="Vider la sélection">
+                        Vider
+                    </button>
+                    <a href="cart.html" class="live-cart-order-btn empty" id="live-cart-order-btn">
+                        Voir le panier
                     </a>
                 </div>
             </div>
@@ -82,11 +88,11 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="assets/js/supabase.js"></script>
-    <script src="assets/js/data.js"></script>
-    <script src="assets/js/app.js"></script>
-    <script src="assets/js/mobile.js"></script>
-    <script src="assets/js/menu.js"></script>
+    <script src="assets/js/supabase.js?v=3"></script>
+    <script src="assets/js/data.js?v=3"></script>
+    <script src="assets/js/app.js?v=3"></script>
+    <script src="assets/js/mobile.js?v=3"></script>
+    <script src="assets/js/menu.js?v=3"></script>
 </body>
 
 </html>
