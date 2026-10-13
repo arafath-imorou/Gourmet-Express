@@ -50,6 +50,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (btn) btn.style.display = 'inline-block';
     }
 
+    // 0. Render saved restaurant name & logo immediately at 0ms
+    const savedRestoName = DataManager.getCurrentRestaurantName();
+    const savedRestoLogo = DataManager.getCurrentRestaurantLogo();
+    if (savedRestoName || savedRestoLogo) {
+        applyRestaurantHeaderLogo(savedRestoName || 'ITAMYA', savedRestoLogo);
+    }
+
     // 1. Instant 0ms synchronous render if cache exists
     const cachedRestos = DataManager.getCachedRestaurantsSync(true);
     let restaurantId = DataManager.getCurrentRestaurantId();
@@ -58,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         allRestaurantsList = cachedRestos;
         if (!restaurantId) {
             restaurantId = allRestaurantsList[0].id;
-            DataManager.setCurrentRestaurant(restaurantId, allRestaurantsList[0].name);
+            DataManager.setCurrentRestaurant(restaurantId, allRestaurantsList[0].name, allRestaurantsList[0].logo);
         }
         populateRestaurantSwitcher(restaurantId);
     }
@@ -104,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     allRestaurantsList = freshRestos || [];
     if (!restaurantId && allRestaurantsList.length > 0) {
         restaurantId = allRestaurantsList[0].id;
-        DataManager.setCurrentRestaurant(restaurantId, allRestaurantsList[0].name);
+        DataManager.setCurrentRestaurant(restaurantId, allRestaurantsList[0].name, allRestaurantsList[0].logo);
     } else if (!restaurantId) {
         window.location.href = 'index.html';
         return;
@@ -136,23 +143,36 @@ function populateRestaurantSwitcher(currentId) {
     updateSwitcherBadge(currentId);
 }
 
-function updateSwitcherBadge(restaurantId) {
-    const currentResto = allRestaurantsList.find(r => String(r.id) === String(restaurantId));
+let _currentDisplayedLogoSrc = null;
+
+function applyRestaurantHeaderLogo(name, logo) {
     const nameEl = document.getElementById('switcher-resto-name');
     const avatarEl = document.getElementById('switcher-resto-avatar');
     const headerTitle = document.querySelector('header h2');
 
-    if (currentResto) {
-        if (nameEl) nameEl.textContent = currentResto.name;
-        if (avatarEl) {
-            const initial = currentResto.name ? currentResto.name.charAt(0).toUpperCase() : 'R';
-            avatarEl.innerHTML = currentResto.logo
-                ? `<img src="${currentResto.logo}" alt="${currentResto.name}" loading="lazy" decoding="async">`
+    if (nameEl && name) nameEl.textContent = name;
+    if (avatarEl) {
+        const logoKey = logo || ('initial:' + (name ? name.charAt(0).toUpperCase() : 'R'));
+        if (_currentDisplayedLogoSrc !== logoKey) {
+            _currentDisplayedLogoSrc = logoKey;
+            const initial = name ? name.charAt(0).toUpperCase() : 'R';
+            avatarEl.innerHTML = logo
+                ? `<img src="${logo}" alt="${name || 'Restaurant'}" decoding="sync" fetchpriority="high">`
                 : `<span>${initial}</span>`;
         }
-        if (headerTitle) {
-            headerTitle.innerHTML = `Notre Carte<div style="font-size:0.72rem; color:#e63946; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${currentResto.name}</div>`;
+    }
+    if (headerTitle && name) {
+        headerTitle.innerHTML = `Notre Carte<div style="font-size:0.72rem; color:#e63946; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</div>`;
+    }
+}
+
+function updateSwitcherBadge(restaurantId) {
+    const currentResto = allRestaurantsList.find(r => String(r.id) === String(restaurantId));
+    if (currentResto) {
+        if (currentResto.logo) {
+            try { localStorage.setItem('restaurant_current_logo', currentResto.logo); } catch (e) {}
         }
+        applyRestaurantHeaderLogo(currentResto.name, currentResto.logo);
     }
 }
 
@@ -161,7 +181,7 @@ async function switchRestaurantFromMenu(newRestaurantId) {
     const targetResto = allRestaurantsList.find(r => String(r.id) === String(newRestaurantId));
     if (!targetResto) return;
 
-    DataManager.setCurrentRestaurant(targetResto.id, targetResto.name);
+    DataManager.setCurrentRestaurant(targetResto.id, targetResto.name, targetResto.logo);
     updateSwitcherBadge(targetResto.id);
 
     showToast(`Passage au restaurant : ${targetResto.name}`);

@@ -9,13 +9,14 @@ const STORAGE_KEYS = {
     STAFF_SESSION: 'restaurant_staff_session',
     CURRENT_RESTAURANT_ID: 'restaurant_current_id',
     CURRENT_RESTAURANT_NAME: 'restaurant_current_name',
+    CURRENT_RESTAURANT_LOGO: 'restaurant_current_logo',
     PAYOUTS: 'restaurant_payouts_local'
 };
 
 const FAST_CACHE_KEYS = {
-    RESTAURANTS: 'it_fast_cache_restaurants_v3',
-    MENU_PREFIX: 'it_fast_cache_menu_v3_',
-    PRODUCTS_MAP: 'it_fast_products_map_v3'
+    RESTAURANTS: 'it_fast_cache_restaurants_v4',
+    MENU_PREFIX: 'it_fast_cache_menu_v4_',
+    PRODUCTS_MAP: 'it_fast_products_map_v4'
 };
 
 const CACHE_TTL_MS = 90000; // 90s fresh window + instant Stale-While-Revalidate
@@ -28,26 +29,26 @@ const _DATA_CACHE = {
 
 let _CART_RAM = null;
 
-// Safe sessionStorage helpers for cross-page 0ms cache (with automatic lightweight fallback if base64 images hit quota)
+// Safe persistent cache helpers (localStorage + sessionStorage) for permanent 0ms logos & data
 function _readSessionCache(key) {
     try {
-        const raw = sessionStorage.getItem(key);
+        const raw = sessionStorage.getItem(key) || localStorage.getItem(key);
         return raw ? JSON.parse(raw) : null;
     } catch (e) {
         return null;
     }
 }
 
-function _stripLargeBase64(obj) {
+function _stripLargeBase64(obj, maxLen = 120000) {
     if (!obj || typeof obj !== 'object') return obj;
-    if (Array.isArray(obj)) return obj.map(_stripLargeBase64);
+    if (Array.isArray(obj)) return obj.map(item => _stripLargeBase64(item, maxLen));
     const copy = {};
     for (const k of Object.keys(obj)) {
         const val = obj[k];
-        if (typeof val === 'string' && val.length > 2000 && val.startsWith('data:')) {
-            copy[k] = ''; // Omit giant base64 from sessionStorage only
+        if (typeof val === 'string' && val.length > maxLen && val.startsWith('data:')) {
+            copy[k] = '';
         } else if (Array.isArray(val)) {
-            copy[k] = val.map(_stripLargeBase64);
+            copy[k] = val.map(item => _stripLargeBase64(item, maxLen));
         } else {
             copy[k] = val;
         }
@@ -56,13 +57,22 @@ function _stripLargeBase64(obj) {
 }
 
 function _writeSessionCache(key, value) {
+    const jsonStr = JSON.stringify(value);
     try {
-        sessionStorage.setItem(key, JSON.stringify(value));
+        sessionStorage.setItem(key, jsonStr);
     } catch (e) {
         try {
-            sessionStorage.setItem(key, JSON.stringify(_stripLargeBase64(value)));
-        } catch (e2) {
-            // Ignore if sessionStorage is completely disabled
+            sessionStorage.setItem(key, JSON.stringify(_stripLargeBase64(value, 2000)));
+        } catch (e2) {}
+    }
+    // Persist restaurants and products map in localStorage so logos stay permanently available at 0ms
+    if (key === FAST_CACHE_KEYS.RESTAURANTS || key === FAST_CACHE_KEYS.PRODUCTS_MAP) {
+        try {
+            localStorage.setItem(key, jsonStr);
+        } catch (e) {
+            try {
+                localStorage.setItem(key, JSON.stringify(_stripLargeBase64(value, 60000)));
+            } catch (e2) {}
         }
     }
 }
@@ -70,6 +80,7 @@ function _writeSessionCache(key, value) {
 function _removeSessionCache(key) {
     try {
         sessionStorage.removeItem(key);
+        localStorage.removeItem(key);
     } catch (e) {}
 }
 
@@ -218,9 +229,23 @@ const DataManager = {
         if (staff && staff.restaurant_name) return staff.restaurant_name;
         return localStorage.getItem(STORAGE_KEYS.CURRENT_RESTAURANT_NAME) || '';
     },
-    setCurrentRestaurant: (id, name) => {
+    getCurrentRestaurantLogo: () => {
+        const staff = DataManager.getCurrentStaff();
+        if (staff && staff.restaurant_logo) return staff.restaurant_logo;
+        return localStorage.getItem(STORAGE_KEYS.CURRENT_RESTAURANT_LOGO) || '';
+    },
+    setCurrentRestaurant: (id, name, logo) => {
         localStorage.setItem(STORAGE_KEYS.CURRENT_RESTAURANT_ID, id);
         localStorage.setItem(STORAGE_KEYS.CURRENT_RESTAURANT_NAME, name || '');
+        let resolvedLogo = logo;
+        if (resolvedLogo === undefined) {
+            const cached = DataManager.getCachedRestaurantsSync(false);
+            const found = cached ? cached.find(r => String(r.id) === String(id)) : null;
+            resolvedLogo = found && found.logo ? found.logo : '';
+        }
+        try {
+            localStorage.setItem(STORAGE_KEYS.CURRENT_RESTAURANT_LOGO, resolvedLogo || '');
+        } catch (e) {}
         const session = DataManager.getCurrentClient();
         if (session) {
             session.currentRestaurantId = id;
@@ -233,6 +258,7 @@ const DataManager = {
         localStorage.removeItem(STORAGE_KEYS.STAFF_SESSION);
         localStorage.removeItem(STORAGE_KEYS.CURRENT_RESTAURANT_ID);
         localStorage.removeItem(STORAGE_KEYS.CURRENT_RESTAURANT_NAME);
+        localStorage.removeItem(STORAGE_KEYS.CURRENT_RESTAURANT_LOGO);
     },
     logoutClient: () => localStorage.removeItem(STORAGE_KEYS.CLIENT_SESSION),
     logoutStaff: () => localStorage.removeItem(STORAGE_KEYS.STAFF_SESSION),
