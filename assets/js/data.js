@@ -65,13 +65,17 @@ function _writeSessionCache(key, value) {
             sessionStorage.setItem(key, JSON.stringify(_stripLargeBase64(value, 2000)));
         } catch (e2) {}
     }
-    // Persist restaurants and products map in localStorage so logos stay permanently available at 0ms
-    if (key === FAST_CACHE_KEYS.RESTAURANTS || key === FAST_CACHE_KEYS.PRODUCTS_MAP) {
+    // Persist restaurants, menus, and products map in localStorage so everything stays permanently available at 0ms
+    if (
+        key === FAST_CACHE_KEYS.RESTAURANTS ||
+        key === FAST_CACHE_KEYS.PRODUCTS_MAP ||
+        key.startsWith(FAST_CACHE_KEYS.MENU_PREFIX)
+    ) {
         try {
             localStorage.setItem(key, jsonStr);
         } catch (e) {
             try {
-                localStorage.setItem(key, JSON.stringify(_stripLargeBase64(value, 60000)));
+                localStorage.setItem(key, JSON.stringify(_stripLargeBase64(value, 35000)));
             } catch (e2) {}
         }
     }
@@ -91,14 +95,16 @@ function _indexProducts(menuItems) {
         if (p && p.id !== undefined && p.id !== null) {
             const pid = String(p.id);
             const normalizedPrice = Number(p.price) || 0;
-            const normalizedProduct = { ...p, id: pid, price: normalizedPrice };
+            const existing = _DATA_CACHE.productsById[pid];
+            const mergedImg = p.image || (existing && existing.image) || undefined;
+            const normalizedProduct = { ...p, id: pid, price: normalizedPrice, image: mergedImg };
             _DATA_CACHE.productsById[pid] = normalizedProduct;
             _DATA_CACHE.productsById[p.id] = normalizedProduct;
             map[pid] = {
                 id: pid,
                 name: p.name || 'Plat',
                 price: normalizedPrice,
-                image: (p.image && typeof p.image === 'string' && p.image.length < 1500) ? p.image : undefined,
+                image: (mergedImg && typeof mergedImg === 'string' && mergedImg.length < 1500) ? mergedImg : undefined,
                 category: p.category,
                 restaurant_id: p.restaurant_id,
                 active: p.active,
@@ -109,13 +115,64 @@ function _indexProducts(menuItems) {
     _writeSessionCache(FAST_CACHE_KEYS.PRODUCTS_MAP, map);
 }
 
-// Hydrate RAM cache immediately on script load
+// Instant 0ms bootstrap seed (used on cold first visit before Supabase responds, then immediately synced in background)
+const _BOOTSTRAP_RESTAURANTS = [
+    {
+        id: '46d15959-ed3d-4e46-a342-f470a20c997a',
+        name: 'GinaCo Délices',
+        slug: 'ginaco-delices-1787140056205',
+        address: 'Quartier Zongo, Parakou',
+        phone: '0199154910',
+        logo: '',
+        description: 'Spécialités africaines',
+        status: 'active'
+    },
+    {
+        id: '03e1f852-5d6d-40ff-8ca9-8d9a6b3072a5',
+        name: '1000 Délices',
+        slug: '1000-delices-1791297588532',
+        address: 'Gbodjè ABOMEY CALAVI',
+        phone: '0167616161',
+        logo: null,
+        description: 'Pâtisserie, Fast Food et Mignardise',
+        status: 'active'
+    }
+];
+
+const _BOOTSTRAP_MENUS = {
+    '46d15959-ed3d-4e46-a342-f470a20c997a': [
+        { id: 'prod_1787140471873_qrin5', name: 'Atchéké + Cuisse de poulet', price: 2600, category: 'Repas', description: '', restaurant_id: '46d15959-ed3d-4e46-a342-f470a20c997a', active: true, available: true },
+        { id: 'prod_1787140549852_0kacd', name: 'Atchéké + 1/2 poulet', price: 3600, category: 'Repas', description: '', restaurant_id: '46d15959-ed3d-4e46-a342-f470a20c997a', active: true, available: true },
+        { id: 'prod_1787140628189_gb4ob', name: 'Atchéké + poulet complet', price: 7200, category: 'Repas', description: '', restaurant_id: '46d15959-ed3d-4e46-a342-f470a20c997a', active: true, available: true },
+        { id: 'prod_1787141772771_1b5i4', name: 'Atchéké + Poisson Silvie Moyen', price: 2100, category: 'Repas', description: '', restaurant_id: '46d15959-ed3d-4e46-a342-f470a20c997a', active: true, available: true },
+        { id: 'prod_1787141824292_780p6', name: 'Atchéké + Poisson Silvie Grand', price: 2600, category: 'Repas', description: '', restaurant_id: '46d15959-ed3d-4e46-a342-f470a20c997a', active: true, available: true },
+        { id: 'prod_1787141910021_94col', name: 'Atchéké + Poisson carpe', price: 3600, category: 'Repas', description: '', restaurant_id: '46d15959-ed3d-4e46-a342-f470a20c997a', active: true, available: true },
+        { id: 'ITEM-045877', name: 'Attieke poisson', price: 2000, category: 'Repas', description: 'Attieke poisson ,alloco,piment ,jus de mayo', restaurant_id: '46d15959-ed3d-4e46-a342-f470a20c997a', active: true, available: true }
+    ]
+};
+
+// Hydrate RAM cache immediately on script load (0ms)
 (function _hydrateCacheOnBoot() {
     const cachedRestos = _readSessionCache(FAST_CACHE_KEYS.RESTAURANTS);
-    if (cachedRestos && Array.isArray(cachedRestos.data)) {
+    if (cachedRestos && Array.isArray(cachedRestos.data) && cachedRestos.data.length > 0) {
         _DATA_CACHE.restaurants.data = cachedRestos.data;
         _DATA_CACHE.restaurants.expires = cachedRestos.expires || 0;
+    } else {
+        _DATA_CACHE.restaurants.data = _BOOTSTRAP_RESTAURANTS;
+        _DATA_CACHE.restaurants.expires = 0; // Triggers background SWR refresh while rendering in 0ms
     }
+
+    Object.keys(_BOOTSTRAP_MENUS).forEach(rid => {
+        const cachedMenu = _readSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + rid);
+        if (cachedMenu && Array.isArray(cachedMenu.data) && cachedMenu.data.length > 0) {
+            _DATA_CACHE.menus[rid] = { data: cachedMenu.data, expires: cachedMenu.expires || 0, inFlight: null };
+            _indexProducts(cachedMenu.data);
+        } else {
+            _DATA_CACHE.menus[rid] = { data: _BOOTSTRAP_MENUS[rid], expires: 0, inFlight: null };
+            _indexProducts(_BOOTSTRAP_MENUS[rid]);
+        }
+    });
+
     const cachedMap = _readSessionCache(FAST_CACHE_KEYS.PRODUCTS_MAP);
     if (cachedMap && typeof cachedMap === 'object') {
         Object.keys(cachedMap).forEach(k => {
@@ -138,6 +195,11 @@ const DataManager = {
             Object.keys(sessionStorage).forEach(k => {
                 if (k.startsWith(FAST_CACHE_KEYS.MENU_PREFIX)) {
                     sessionStorage.removeItem(k);
+                }
+            });
+            Object.keys(localStorage).forEach(k => {
+                if (k.startsWith(FAST_CACHE_KEYS.MENU_PREFIX)) {
+                    localStorage.removeItem(k);
                 }
             });
         } catch (e) {}
@@ -166,7 +228,7 @@ const DataManager = {
     },
 
     // ==================== IMAGE WEBP COMPRESSION ====================
-    convertToWebP: (file, maxDimension = 800, quality = 0.82) => {
+    convertToWebP: (file, maxDimension = 450, quality = 0.74) => {
         return new Promise((resolve, reject) => {
             if (!file) { resolve(''); return; }
             if (!file.type || !file.type.match(/image.*/)) {
@@ -878,24 +940,70 @@ const DataManager = {
         _DATA_CACHE.menus[rid].inFlight = (async () => {
             try {
                 if (!window.supabaseClient) return _DATA_CACHE.menus[rid].data || [];
-                const { data, error } = await window.supabaseClient
+                // Stage 1: Ultra-fast metadata query (~1.4 KB, <200ms) without waiting for heavy images
+                const { data: metaData, error: metaErr } = await window.supabaseClient
                     .from('restau_menu')
-                    .select('*')
+                    .select('id,name,price,category,description,restaurant_id,active,available')
                     .eq('restaurant_id', rid)
                     .order('category');
-                if (!error && data) {
-                    const normalizedData = data.map(p => ({
-                        ...p,
-                        id: String(p.id),
-                        price: Number(p.price) || 0
-                    }));
+
+                if (!metaErr && metaData) {
+                    const prevList = (_DATA_CACHE.menus[rid] && _DATA_CACHE.menus[rid].data) || [];
+                    const prevImgMap = {};
+                    prevList.forEach(p => { if (p && p.id && p.image) prevImgMap[String(p.id)] = p.image; });
+
+                    const fastData = metaData.map(p => {
+                        const pid = String(p.id);
+                        const cachedProd = _DATA_CACHE.productsById[pid];
+                        return {
+                            ...p,
+                            id: pid,
+                            price: Number(p.price) || 0,
+                            image: prevImgMap[pid] || (cachedProd && cachedProd.image) || ''
+                        };
+                    });
+
                     const expires = Date.now() + CACHE_TTL_MS;
-                    _DATA_CACHE.menus[rid].data = normalizedData;
+                    _DATA_CACHE.menus[rid].data = fastData;
                     _DATA_CACHE.menus[rid].expires = expires;
-                    _writeSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + rid, { data: normalizedData, expires });
-                    _indexProducts(normalizedData);
-                    window.dispatchEvent(new CustomEvent('menu-refreshed', { detail: { restaurantId: rid, data: normalizedData } }));
-                    return normalizedData;
+                    _writeSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + rid, { data: fastData, expires });
+                    _indexProducts(fastData);
+                    window.dispatchEvent(new CustomEvent('menu-refreshed', { detail: { restaurantId: rid, data: fastData } }));
+
+                    // Stage 2: Non-blocking background image hydration
+                    window.supabaseClient
+                        .from('restau_menu')
+                        .select('id,image')
+                        .eq('restaurant_id', rid)
+                        .then(({ data: imgRows, error: imgErr }) => {
+                            if (!imgErr && Array.isArray(imgRows)) {
+                                let hasNewImage = false;
+                                const imgById = {};
+                                imgRows.forEach(row => {
+                                    if (row && row.id && row.image) {
+                                        imgById[String(row.id)] = row.image;
+                                    }
+                                });
+                                const currentMenu = (_DATA_CACHE.menus[rid] && _DATA_CACHE.menus[rid].data) || fastData;
+                                const enriched = currentMenu.map(item => {
+                                    const pid = String(item.id);
+                                    if (imgById[pid] && item.image !== imgById[pid]) {
+                                        hasNewImage = true;
+                                        return { ...item, image: imgById[pid] };
+                                    }
+                                    return item;
+                                });
+                                if (hasNewImage) {
+                                    _DATA_CACHE.menus[rid].data = enriched;
+                                    _writeSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + rid, { data: enriched, expires });
+                                    _indexProducts(enriched);
+                                    window.dispatchEvent(new CustomEvent('menu-images-hydrated', { detail: { restaurantId: rid, imagesById: imgById } }));
+                                }
+                            }
+                        })
+                        .catch(() => {});
+
+                    return fastData;
                 }
             } catch (e) {
                 console.error('Erreur _fetchMenuNetwork:', e);

@@ -94,11 +94,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Listen for background SWR menu refresh
     window.addEventListener('menu-refreshed', (e) => {
         if (e.detail && e.detail.restaurantId === DataManager.getCurrentRestaurantId()) {
-            window.allProducts = e.detail.data || [];
-            registerKnownProducts(window.allProducts);
-            renderMenu(currentCategoryFilter);
-            setupCategoryFilters();
+            const incoming = e.detail.data || [];
+            registerKnownProducts(incoming);
+            const oldSig = (window.allProducts || []).map(p => `${p.id}:${p.name}:${p.price}:${p.category}`).join('|');
+            const newSig = incoming.map(p => `${p.id}:${p.name}:${p.price}:${p.category}`).join('|');
+            window.allProducts = incoming;
+            if (oldSig !== newSig) {
+                renderMenu(currentCategoryFilter);
+                setupCategoryFilters();
+            }
             updateLiveCartUI(false);
+        }
+    });
+
+    // Listen for Stage-2 background image hydration (updates dish photos in place without DOM rebuild!)
+    window.addEventListener('menu-images-hydrated', (e) => {
+        if (e.detail && e.detail.restaurantId === DataManager.getCurrentRestaurantId()) {
+            const imagesById = e.detail.imagesById || {};
+            Object.keys(imagesById).forEach(pid => {
+                if (knownProductsMap[pid]) knownProductsMap[pid].image = imagesById[pid];
+                const card = document.querySelector(`.product-card[data-product-id="${pid}"]`);
+                if (card) {
+                    const imgDiv = card.querySelector('.product-image');
+                    if (imgDiv && imagesById[pid]) {
+                        imgDiv.style.backgroundImage = `url('${imagesById[pid]}')`;
+                    }
+                }
+            });
         }
     });
 
@@ -122,8 +144,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const finalMenu = freshMenu !== null ? freshMenu : await DataManager.getMenu(restaurantId);
     registerKnownProducts(finalMenu || []);
 
-    if (!window.allProducts || window.allProducts.length === 0 || JSON.stringify(window.allProducts) !== JSON.stringify(finalMenu)) {
-        window.allProducts = finalMenu || [];
+    const prevSig = (window.allProducts || []).map(p => `${p.id}:${p.name}:${p.price}:${p.category}`).join('|');
+    const finalSig = (finalMenu || []).map(p => `${p.id}:${p.name}:${p.price}:${p.category}`).join('|');
+    window.allProducts = finalMenu || [];
+
+    if (prevSig !== finalSig || document.querySelectorAll('.product-card').length === 0) {
         renderMenu(currentCategoryFilter);
         setupCategoryFilters();
     }
