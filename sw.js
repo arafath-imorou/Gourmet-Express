@@ -1,5 +1,5 @@
-// ITAMYA Service Worker - PWA & Offline Support
-const CACHE_NAME = 'itamya-cache-v1';
+// ITAMYA Service Worker - Ultra-Fast Stale-While-Revalidate (SWR) Engine
+const CACHE_NAME = 'itamya-fast-cache-v2';
 
 const STATIC_ASSETS = [
     './',
@@ -19,7 +19,10 @@ const STATIC_ASSETS = [
     './assets/images/icon-512.png',
     './assets/js/supabase.js',
     './assets/js/data.js',
+    './assets/js/app.js',
+    './assets/js/menu.js',
     './assets/js/cart.js',
+    './assets/js/order.js',
     './assets/js/mobile.js'
 ];
 
@@ -47,32 +50,36 @@ self.addEventListener('fetch', (event) => {
     const request = event.request;
     const url = new URL(request.url);
 
-    // Ne pas intercepter les requêtes non-GET ou externes sensibles (Supabase API, FedaPay)
-    if (request.method !== 'GET' || url.hostname.includes('supabase.co') || url.hostname.includes('fedapay.com')) {
+    // Ne jamais mettre en cache les appels API dynamiques (Supabase REST/Auth, FedaPay)
+    if (
+        request.method !== 'GET' ||
+        url.hostname.includes('supabase.co') ||
+        url.hostname.includes('fedapay.com')
+    ) {
         return;
     }
 
-    // Stratégie Network-First avec fallback Cache
+    // Stratégie Stale-While-Revalidate :
+    // Répond immédiatement depuis le cache (0ms) s'il est disponible, et met à jour en arrière-plan !
     event.respondWith(
-        fetch(request)
-            .then((networkResponse) => {
-                if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(request, responseToCache);
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.match(request).then((cachedResponse) => {
+                const fetchPromise = fetch(request)
+                    .then((networkResponse) => {
+                        if (networkResponse && networkResponse.status === 200) {
+                            cache.put(request, networkResponse.clone());
+                        }
+                        return networkResponse;
+                    })
+                    .catch(() => {
+                        if (cachedResponse) return cachedResponse;
+                        if (request.headers.get('accept')?.includes('text/html')) {
+                            return cache.match('./index.html');
+                        }
                     });
-                }
-                return networkResponse;
-            })
-            .catch(() => {
-                return caches.match(request).then((cachedResponse) => {
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
-                    if (request.headers.get('accept')?.includes('text/html')) {
-                        return caches.match('./index.html');
-                    }
-                });
-            })
+
+                return cachedResponse || fetchPromise;
+            });
+        })
     );
 });

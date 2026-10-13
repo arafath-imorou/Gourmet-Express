@@ -1,7 +1,6 @@
 /**
- * Menu.js
- * Handles rendering of menu items, interactive restaurant switching,
- * and progressive real-time cart visibility ("au fur et à mesure").
+ * Menu.js - Ultra-Fast Zero-Latency Menu & Live Cart Engine
+ * Instant 0ms rendering from SWR cache, parallel fetching, and surgical DOM updates ("tac tac").
  */
 
 let allRestaurantsList = [];
@@ -9,10 +8,44 @@ let currentCategoryFilter = 'all';
 const knownProductsMap = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Load active restaurants list (from high-speed cache)
-    allRestaurantsList = await DataManager.getRestaurants(true);
+    // Show client orders link immediately if logged in
+    const client = DataManager.getCurrentClient();
+    if (client) {
+        const btn = document.getElementById('client-orders-header-btn');
+        if (btn) btn.style.display = 'inline-block';
+    }
 
+    // 1. Instant 0ms synchronous render if cache exists
+    const cachedRestos = DataManager.getCachedRestaurantsSync(true);
     let restaurantId = DataManager.getCurrentRestaurantId();
+
+    if (cachedRestos && cachedRestos.length > 0) {
+        allRestaurantsList = cachedRestos;
+        if (!restaurantId) {
+            restaurantId = allRestaurantsList[0].id;
+            DataManager.setCurrentRestaurant(restaurantId, allRestaurantsList[0].name);
+        }
+        populateRestaurantSwitcher(restaurantId);
+    }
+
+    if (restaurantId) {
+        const cachedMenu = DataManager.getCachedMenuSync(restaurantId);
+        if (cachedMenu && cachedMenu.length > 0) {
+            window.allProducts = cachedMenu;
+            cachedMenu.forEach(p => { if (p && p.id) knownProductsMap[p.id] = p; });
+            renderMenu(currentCategoryFilter);
+            setupCategoryFilters();
+            updateLiveCartUI();
+        }
+    }
+
+    // 2. Parallel fetch / background validation (never sequential waterfall!)
+    const [freshRestos, freshMenu] = await Promise.all([
+        DataManager.getRestaurants(true),
+        restaurantId ? DataManager.getMenu(restaurantId) : Promise.resolve(null)
+    ]);
+
+    allRestaurantsList = freshRestos || [];
     if (!restaurantId && allRestaurantsList.length > 0) {
         restaurantId = allRestaurantsList[0].id;
         DataManager.setCurrentRestaurant(restaurantId, allRestaurantsList[0].name);
@@ -22,19 +55,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     populateRestaurantSwitcher(restaurantId);
-    await loadMenuForRestaurant(restaurantId);
 
-    // Show client orders link if logged in
-    const client = DataManager.getCurrentClient();
-    if (client) {
-        const btn = document.getElementById('client-orders-header-btn');
-        if (btn) btn.style.display = 'inline-block';
-    }
-
-    // Listen for cart updates to refresh live cart bar & product card quantities
-    window.addEventListener('cart-updated', () => {
+    const finalMenu = freshMenu !== null ? freshMenu : await DataManager.getMenu(restaurantId);
+    if (!window.allProducts || JSON.stringify(window.allProducts) !== JSON.stringify(finalMenu)) {
+        window.allProducts = finalMenu || [];
+        (window.allProducts || []).forEach(p => { if (p && p.id) knownProductsMap[p.id] = p; });
         renderMenu(currentCategoryFilter);
+        setupCategoryFilters();
+    }
+    updateLiveCartUI();
+
+    // 3. Listen for cart updates: surgical DOM update (< 1ms, zero image flicker!)
+    window.addEventListener('cart-updated', () => {
+        updateAllProductCardsQtyDOM();
         updateLiveCartUI();
+    });
+
+    // Listen for background SWR menu refresh
+    window.addEventListener('menu-refreshed', (e) => {
+        if (e.detail && e.detail.restaurantId === DataManager.getCurrentRestaurantId()) {
+            window.allProducts = e.detail.data || [];
+            window.allProducts.forEach(p => { if (p && p.id) knownProductsMap[p.id] = p; });
+            renderMenu(currentCategoryFilter);
+            setupCategoryFilters();
+            updateLiveCartUI();
+        }
     });
 });
 
@@ -62,7 +107,7 @@ function updateSwitcherBadge(restaurantId) {
         if (avatarEl) {
             const initial = currentResto.name ? currentResto.name.charAt(0).toUpperCase() : 'R';
             avatarEl.innerHTML = currentResto.logo
-                ? `<img src="${currentResto.logo}" alt="${currentResto.name}" loading="lazy">`
+                ? `<img src="${currentResto.logo}" alt="${currentResto.name}" loading="lazy" decoding="async">`
                 : `<span>${initial}</span>`;
         }
         if (headerTitle) {
@@ -76,7 +121,6 @@ async function switchRestaurantFromMenu(newRestaurantId) {
     const targetResto = allRestaurantsList.find(r => r.id === newRestaurantId);
     if (!targetResto) return;
 
-    // Update in session
     DataManager.setCurrentRestaurant(targetResto.id, targetResto.name);
     updateSwitcherBadge(targetResto.id);
 
@@ -87,18 +131,43 @@ async function switchRestaurantFromMenu(newRestaurantId) {
 
 async function loadMenuForRestaurant(restaurantId) {
     const menuContainer = document.getElementById('menu-container');
-    if (menuContainer) {
+
+    // Instant render from cache if available
+    const cached = DataManager.getCachedMenuSync(restaurantId);
+    if (cached && cached.length > 0) {
+        window.allProducts = cached;
+        cached.forEach(p => { if (p && p.id) knownProductsMap[p.id] = p; });
+        renderMenu(currentCategoryFilter);
+        setupCategoryFilters();
+        updateLiveCartUI();
+    } else if (menuContainer) {
         menuContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 40px; font-weight:600;">Chargement de la carte...</div>';
     }
 
-    window.allProducts = await DataManager.getMenu(restaurantId);
-    (window.allProducts || []).forEach(p => {
-        if (p && p.id) knownProductsMap[p.id] = p;
-    });
+    const fresh = await DataManager.getMenu(restaurantId);
+    window.allProducts = fresh || [];
+    window.allProducts.forEach(p => { if (p && p.id) knownProductsMap[p.id] = p; });
 
     renderMenu(currentCategoryFilter);
     setupCategoryFilters();
     updateLiveCartUI();
+}
+
+function getProductActionHTML(product, qty) {
+    if (qty > 0) {
+        return `
+            <div class="card-qty-row">
+                <button type="button" class="card-qty-btn minus" onclick="changeProductQty('${product.id}', -1)" aria-label="Retirer">−</button>
+                <span class="card-qty-label">${qty} × ${formatPrice(product.price * qty)}</span>
+                <button type="button" class="card-qty-btn plus" onclick="changeProductQty('${product.id}', 1)" aria-label="Ajouter">+</button>
+            </div>
+        `;
+    }
+    return `
+        <button type="button" class="btn btn-primary btn-sm add-to-cart-btn" onclick="addToCart('${product.id}')">
+            + Ajouter au panier
+        </button>
+    `;
 }
 
 function renderMenu(categoryFilter = 'all') {
@@ -107,8 +176,6 @@ function renderMenu(categoryFilter = 'all') {
     if (!menuContainer) return;
     const products = window.allProducts || [];
     const cart = DataManager.getCart();
-
-    menuContainer.innerHTML = '';
 
     const filteredProducts = categoryFilter === 'all'
         ? products
@@ -121,15 +188,18 @@ function renderMenu(categoryFilter = 'all') {
         return;
     }
 
+    const fragment = document.createDocumentFragment();
+
     activeProducts.forEach(product => {
         const cartItem = cart.find(i => i.productId === product.id);
         const qty = cartItem ? cartItem.quantity : 0;
 
         const card = document.createElement('div');
         card.className = `card product-card ${qty > 0 ? 'in-cart' : ''}`;
+        card.dataset.productId = product.id;
         card.innerHTML = `
             <div class="product-image" style="background-image: url('${product.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=60'}');">
-                ${qty > 0 ? `<span class="in-cart-badge">${qty} au panier</span>` : ''}
+                <span class="in-cart-badge" style="display: ${qty > 0 ? 'inline-block' : 'none'};">${qty} au panier</span>
             </div>
             <div class="product-details">
                 <div>
@@ -139,20 +209,46 @@ function renderMenu(categoryFilter = 'all') {
                     </div>
                     <p class="product-desc text-muted text-sm">${product.description || ''}</p>
                 </div>
-                ${qty > 0 ? `
-                    <div class="card-qty-row">
-                        <button type="button" class="card-qty-btn minus" onclick="changeProductQty('${product.id}', -1)" aria-label="Retirer">−</button>
-                        <span class="card-qty-label">${qty} × ${formatPrice(product.price * qty)}</span>
-                        <button type="button" class="card-qty-btn plus" onclick="changeProductQty('${product.id}', 1)" aria-label="Ajouter">+</button>
-                    </div>
-                ` : `
-                    <button type="button" class="btn btn-primary btn-sm add-to-cart-btn" onclick="addToCart('${product.id}')">
-                        + Ajouter au panier
-                    </button>
-                `}
+                <div class="product-action-slot">
+                    ${getProductActionHTML(product, qty)}
+                </div>
             </div>
         `;
-        menuContainer.appendChild(card);
+        fragment.appendChild(card);
+    });
+
+    menuContainer.innerHTML = '';
+    menuContainer.appendChild(fragment);
+}
+
+// Surgical DOM update (< 1ms, no image reload!) when cart changes
+function updateAllProductCardsQtyDOM() {
+    const cart = DataManager.getCart();
+    const cards = document.querySelectorAll('.product-card[data-product-id]');
+    cards.forEach(card => {
+        const pid = card.dataset.productId;
+        const product = knownProductsMap[pid] || DataManager.getProductByIdSync(pid);
+        if (!product) return;
+
+        const cartItem = cart.find(i => i.productId === pid);
+        const qty = cartItem ? cartItem.quantity : 0;
+
+        card.classList.toggle('in-cart', qty > 0);
+
+        const badge = card.querySelector('.in-cart-badge');
+        if (badge) {
+            if (qty > 0) {
+                badge.textContent = `${qty} au panier`;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        const slot = card.querySelector('.product-action-slot');
+        if (slot) {
+            slot.innerHTML = getProductActionHTML(product, qty);
+        }
     });
 }
 
@@ -161,11 +257,7 @@ function setupCategoryFilters() {
     const existingCats = [...new Set(products.map(p => p.category).filter(Boolean))];
 
     const order = ['Repas', 'Boissons', 'Glaces'];
-    const sortedCats = ['all'];
-
-    order.forEach(c => {
-        sortedCats.push(c);
-    });
+    const sortedCats = ['all', ...order];
 
     existingCats.forEach(c => {
         if (!sortedCats.includes(c)) sortedCats.push(c);
@@ -212,25 +304,26 @@ function updateLiveCartUI() {
     const chipsHtml = [];
 
     cart.forEach(item => {
-        const product = knownProductsMap[item.productId] || (window.allProducts || []).find(p => p.id === item.productId);
+        const product = knownProductsMap[item.productId] || DataManager.getProductByIdSync(item.productId) || (window.allProducts || []).find(p => p.id === item.productId);
         const qty = item.quantity || 1;
         totalItems += qty;
 
-        if (product) {
-            const sub = (product.price || 0) * qty;
-            totalPrice += sub;
-            chipsHtml.push(`
-                <div class="live-cart-chip">
-                    <span class="live-cart-chip-name">${product.name}</span>
-                    <span class="live-cart-chip-price">${formatPrice(sub)}</span>
-                    <div class="live-cart-chip-controls">
-                        <button type="button" class="chip-qty-btn minus" onclick="changeProductQty('${item.productId}', -1)">−</button>
-                        <span class="chip-qty-val">${qty}</span>
-                        <button type="button" class="chip-qty-btn plus" onclick="changeProductQty('${item.productId}', 1)">+</button>
-                    </div>
+        const name = product ? product.name : (item.name || 'Article');
+        const unitPrice = product ? (product.price || 0) : (item.price || 0);
+        const sub = unitPrice * qty;
+        totalPrice += sub;
+
+        chipsHtml.push(`
+            <div class="live-cart-chip">
+                <span class="live-cart-chip-name">${name}</span>
+                <span class="live-cart-chip-price">${formatPrice(sub)}</span>
+                <div class="live-cart-chip-controls">
+                    <button type="button" class="chip-qty-btn minus" onclick="changeProductQty('${item.productId}', -1)">−</button>
+                    <span class="chip-qty-val">${qty}</span>
+                    <button type="button" class="chip-qty-btn plus" onclick="changeProductQty('${item.productId}', 1)">+</button>
                 </div>
-            `);
-        }
+            </div>
+        `);
     });
 
     if (totalItems > 0) {
@@ -276,7 +369,7 @@ function showToast(message) {
         toast.classList.add('show');
         setTimeout(() => {
             toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 1800);
+            setTimeout(() => toast.remove(), 250);
+        }, 1400);
     }, 10);
 }

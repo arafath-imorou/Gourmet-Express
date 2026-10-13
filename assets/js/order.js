@@ -24,12 +24,17 @@ async function checkCartValidity() {
         return;
     }
 
-    // Display summary totals
+    // Instant 0ms display of summary total from cache/snapshot
     const totalElement = document.getElementById('summary-total');
     if (totalElement) {
-        totalElement.textContent = 'Calcul...';
-        const total = await DataManager.getCartTotal();
-        totalElement.textContent = formatPrice(total);
+        const syncTotal = DataManager.getCartTotalSync();
+        if (syncTotal !== null) {
+            totalElement.textContent = formatPrice(syncTotal);
+        } else {
+            totalElement.textContent = 'Calcul...';
+            const total = await DataManager.getCartTotal();
+            totalElement.textContent = formatPrice(total);
+        }
     }
 }
 
@@ -70,7 +75,7 @@ function setupForm() {
 
         const banner = document.createElement('div');
         banner.innerHTML = `<div style="background: #EBF8FF; color: #1e40af; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size:0.9rem; font-weight:600; border: 1px solid #bfdbfe;">
-            👋 Heureux de vous revoir <strong>${client.firstname}</strong> ! Vous cumulerez des points de fidélité sur cette commande.
+            Heureux de vous revoir <strong>${client.firstname}</strong> ! Vous cumulerez des points de fidélité sur cette commande.
         </div>`;
         form.insertBefore(banner, form.firstChild);
     }
@@ -101,7 +106,7 @@ function setupForm() {
         const orderTotal = await DataManager.getCartTotal();
 
         const clientName = formData.get('name') ? formData.get('name').trim() : `${client?.firstname || ''} ${client?.lastname || ''}`.trim();
-        const clientEmail = (client && client.email) || 'client@gourmetexpress.com';
+        const clientEmail = (client && client.email) || 'client@itamya.store';
         const phone = formData.get('phone') ? formData.get('phone').trim() : (client?.phone || '');
         const paymentPhone = formData.get('payment_phone') ? formData.get('payment_phone').trim() : phone;
         const mode = formData.get('mode');
@@ -124,12 +129,10 @@ function setupForm() {
             submitBtn.innerHTML = `<span>⏳ Traitement paiement ${paymentNetwork}...</span>`;
         }
 
-        // Split names for clean FedaPay customer formatting
         const nameParts = clientName.split(' ');
         const firstname = nameParts[0] || 'Client';
         const lastname = nameParts.slice(1).join(' ') || firstname;
 
-        // Lancement du paiement FedaPay
         FedaPayManager.pay({
             amount: orderTotal,
             description: `Commande ${DataManager.getCurrentRestaurantName() || 'ITAMYA'} (${paymentNetwork})`,
@@ -152,7 +155,7 @@ function setupForm() {
 
                 const orderDetails = {
                     clientName: clientName,
-                    phone: phone, // WhatsApp phone for delivery & contact
+                    phone: phone,
                     type: mode,
                     address: address,
                     comment: finalComment,
@@ -160,7 +163,6 @@ function setupForm() {
                     status: 'Nouvelle'
                 };
 
-                // Enregistrement définitif de la commande dans Supabase
                 const newOrder = await DataManager.placeOrder(orderDetails);
 
                 if (newOrder) {

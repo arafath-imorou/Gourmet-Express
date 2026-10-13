@@ -137,15 +137,49 @@
         // 5. Détection Réseau & Mode Hors-ligne
         setupNetworkMonitoring();
 
-        // 6. Bandeau d'installation (désactivé par défaut tant que non souhaité)
+        // 6. Préconnexion Supabase & Préchargement instantané des pages au toucher/survol
+        setupInstantNavigation();
+
+        // 7. Bandeau d'installation (désactivé par défaut tant que non souhaité)
         if (SHOW_APP_INSTALL_PROMPT) {
             setupSmartAppBanner();
             setupDesktopPromo();
         }
 
-        // 7. Enregistrement PWA Service Worker
+        // 8. Enregistrement PWA Service Worker
         setupServiceWorker();
     });
+
+    // Préconnexion & Préchargement ultra-rapide des liens internes ("tac tac")
+    function setupInstantNavigation() {
+        try {
+            if (document.head && !document.querySelector('link[href*="supabase.co"]')) {
+                const preconnect = document.createElement('link');
+                preconnect.rel = 'preconnect';
+                preconnect.href = 'https://egpgppglcnwrzznhzgbi.supabase.co';
+                preconnect.crossOrigin = 'anonymous';
+                document.head.appendChild(preconnect);
+            }
+
+            const prefetched = new Set();
+            function prefetchUrl(e) {
+                const link = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+                if (!link) return;
+                const href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('javascript:')) return;
+                if (prefetched.has(href)) return;
+                prefetched.add(href);
+
+                const pf = document.createElement('link');
+                pf.rel = 'prefetch';
+                pf.href = href;
+                document.head.appendChild(pf);
+            }
+
+            document.addEventListener('touchstart', prefetchUrl, { passive: true });
+            document.addEventListener('mouseenter', prefetchUrl, { capture: true, passive: true });
+        } catch (e) {}
+    }
 
     // Toast de notification mobile
     function showMobileToast(message, duration = 2000) {

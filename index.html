@@ -1305,6 +1305,11 @@
 
             const modal = document.getElementById('restaurant-modal');
             modal.style.display = 'flex';
+
+            // Préchargement silencieux du menu de ce restaurant pour ouverture instantanée (0ms)
+            if (resto && resto.id) {
+                DataManager.getMenu(resto.id);
+            }
         }
 
         function closeRestaurantModal() {
@@ -1317,6 +1322,38 @@
                 DataManager.setCurrentRestaurant(selectedRestaurantForModal.id, selectedRestaurantForModal.name);
                 window.location.href = 'menu.html';
             }
+        }
+
+        function renderHomeRestaurants(restaurants) {
+            const grid = document.getElementById('restaurants-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            if (!restaurants || restaurants.length === 0) {
+                grid.innerHTML = '<p style="color:#888; text-align: center; width: 100%; font-size:0.85rem;">Aucun restaurant disponible pour le moment.</p>';
+                return;
+            }
+            const fragment = document.createDocumentFragment();
+            restaurants.forEach(r => {
+                const a = document.createElement('a');
+                a.href = '#';
+                a.className = 'restaurant-card';
+                a.onclick = (e) => {
+                    e.preventDefault();
+                    openRestaurantModal(r);
+                };
+                const initial = r.name ? r.name.charAt(0).toUpperCase() : 'R';
+                a.innerHTML = `
+                    <div class="cover">
+                        ${r.logo ? `<img src="${r.logo}" alt="${r.name}" loading="lazy" decoding="async">` : `<span style="font-weight:800; color:white;">${initial}</span>`}
+                    </div>
+                    <div class="info">
+                        <div class="name">${r.name}</div>
+                        <div class="address">${r.address || (r.city ? r.city : 'En savoir plus...')}</div>
+                    </div>
+                    <span style="font-size:0.74rem; font-weight:700; color:#e63946; background:#fff1f2; padding:5px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;">Commander</span>`;
+                fragment.appendChild(a);
+            });
+            grid.appendChild(fragment);
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -1362,33 +1399,22 @@
                 }
             }
 
-            const grid = document.getElementById('restaurants-grid');
-            const restaurants = await DataManager.getRestaurants(true);
-            grid.innerHTML = '';
-            if (restaurants.length === 0) {
-                grid.innerHTML = '<p style="color:#888; text-align: center; width: 100%; font-size:0.85rem;">Aucun restaurant disponible pour le moment.</p>';
-                return;
+            // Affichage instantané 0ms depuis le cache si disponible
+            const cachedRestos = DataManager.getCachedRestaurantsSync(true);
+            if (cachedRestos && cachedRestos.length > 0) {
+                renderHomeRestaurants(cachedRestos);
             }
-            restaurants.forEach(r => {
-                const a = document.createElement('a');
-                a.href = '#';
-                a.className = 'restaurant-card';
-                a.onclick = (e) => {
-                    e.preventDefault();
-                    openRestaurantModal(r);
-                };
-                const initial = r.name ? r.name.charAt(0).toUpperCase() : 'R';
-                a.innerHTML = `
-                    <div class="cover">
-                        ${r.logo ? `<img src="${r.logo}" alt="${r.name}" loading="lazy" decoding="async">` : `<span style="font-weight:800; color:white;">${initial}</span>`}
-                    </div>
-                    <div class="info">
-                        <div class="name">${r.name}</div>
-                        <div class="address">${r.address || (r.city ? r.city : 'En savoir plus...')}</div>
-                    </div>
-                    <span style="font-size:0.74rem; font-weight:700; color:#e63946; background:#fff1f2; padding:5px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;">Commander</span>`;
-                grid.appendChild(a);
-            });
+
+            const restaurants = await DataManager.getRestaurants(true);
+            renderHomeRestaurants(restaurants);
+
+            // Préchargement silencieux du menu du premier restaurant en arrière-plan pour que menu.html s'ouvre en 0ms !
+            if (restaurants && restaurants.length > 0) {
+                const targetId = DataManager.getCurrentRestaurantId() || restaurants[0].id;
+                setTimeout(() => {
+                    DataManager.getMenu(targetId);
+                }, 100);
+            }
         });
     </script>
 </body>

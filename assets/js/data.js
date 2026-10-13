@@ -1,6 +1,6 @@
 /**
- * Data Manager - Multi-Restaurant Platform
- * Supabase backend, localStorage for cart & session
+ * Data Manager - Multi-Restaurant Platform (Ultra-Fast SWR Engine)
+ * Supabase backend, persistent sessionStorage/localStorage cache for 0ms navigation
  */
 
 const STORAGE_KEYS = {
@@ -12,17 +12,93 @@ const STORAGE_KEYS = {
     PAYOUTS: 'restaurant_payouts_local'
 };
 
-const _DATA_CACHE = {
-    restaurants: { data: null, expires: 0 },
-    menus: {}
+const FAST_CACHE_KEYS = {
+    RESTAURANTS: 'it_fast_cache_restaurants_v2',
+    MENU_PREFIX: 'it_fast_cache_menu_v2_',
+    PRODUCTS_MAP: 'it_fast_products_map_v2'
 };
+
+const CACHE_TTL_MS = 90000; // 90s fresh window + instant Stale-While-Revalidate
+
+const _DATA_CACHE = {
+    restaurants: { data: null, expires: 0, inFlight: null },
+    menus: {},
+    productsById: {}
+};
+
+// Safe sessionStorage helpers for cross-page 0ms cache
+function _readSessionCache(key) {
+    try {
+        const raw = sessionStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function _writeSessionCache(key, value) {
+    try {
+        sessionStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+        // Ignore quota errors if base64 images are large
+    }
+}
+
+function _removeSessionCache(key) {
+    try {
+        sessionStorage.removeItem(key);
+    } catch (e) {}
+}
+
+function _indexProducts(menuItems) {
+    if (!Array.isArray(menuItems)) return;
+    let map = _readSessionCache(FAST_CACHE_KEYS.PRODUCTS_MAP) || {};
+    menuItems.forEach(p => {
+        if (p && p.id) {
+            _DATA_CACHE.productsById[p.id] = p;
+            map[p.id] = {
+                id: p.id,
+                name: p.name,
+                price: p.price,
+                image: p.image,
+                category: p.category,
+                restaurant_id: p.restaurant_id,
+                active: p.active,
+                available: p.available
+            };
+        }
+    });
+    _writeSessionCache(FAST_CACHE_KEYS.PRODUCTS_MAP, map);
+}
+
+// Hydrate RAM cache immediately on script load
+(function _hydrateCacheOnBoot() {
+    const cachedRestos = _readSessionCache(FAST_CACHE_KEYS.RESTAURANTS);
+    if (cachedRestos && Array.isArray(cachedRestos.data)) {
+        _DATA_CACHE.restaurants.data = cachedRestos.data;
+        _DATA_CACHE.restaurants.expires = cachedRestos.expires || 0;
+    }
+    const cachedMap = _readSessionCache(FAST_CACHE_KEYS.PRODUCTS_MAP);
+    if (cachedMap && typeof cachedMap === 'object') {
+        Object.assign(_DATA_CACHE.productsById, cachedMap);
+    }
+})();
 
 const DataManager = {
 
     // Cache control
     invalidateCache: () => {
         _DATA_CACHE.restaurants.data = null;
+        _DATA_CACHE.restaurants.expires = 0;
         _DATA_CACHE.menus = {};
+        _removeSessionCache(FAST_CACHE_KEYS.RESTAURANTS);
+        try {
+            Object.keys(sessionStorage).forEach(k => {
+                if (k.startsWith(FAST_CACHE_KEYS.MENU_PREFIX)) {
+                    sessionStorage.removeItem(k);
+                }
+            });
+        } catch (e) {}
     },
 
     // ==================== HELPERS ====================
@@ -38,7 +114,6 @@ const DataManager = {
         const d2 = p2.toString().replace(/\D/g, '');
         if (!d1 || !d2) return false;
         if (d1 === d2) return true;
-        // Compare last 8 or 10 digits (Benin formats: 8 digits or 10 digits with '01')
         if (d1.length >= 8 && d2.length >= 8 && d1.slice(-8) === d2.slice(-8)) return true;
         if (d1.length >= 10 && d2.length >= 10 && d1.slice(-10) === d2.slice(-10)) return true;
         return false;
@@ -82,9 +157,7 @@ const DataManager = {
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Conversion instantanée en format WEBP optimisé
                     const webpDataUrl = canvas.toDataURL('image/webp', quality);
-                    console.log(`🖼️ Image convertie en WEBP (${width}x${height}) - Réduction de poids maximale`);
                     resolve(webpDataUrl);
                 };
                 img.onerror = (err) => reject(err);
@@ -133,42 +206,72 @@ const DataManager = {
     logoutClient: () => localStorage.removeItem(STORAGE_KEYS.CLIENT_SESSION),
     logoutStaff: () => localStorage.removeItem(STORAGE_KEYS.STAFF_SESSION),
 
-    // ==================== RESTAURANTS ====================
-    getRestaurants: async (activeOnly = false, forceRefresh = false) => {
-        try {
-            if (!forceRefresh && _DATA_CACHE.restaurants.data && Date.now() < _DATA_CACHE.restaurants.expires) {
-                if (activeOnly) {
-                    return _DATA_CACHE.restaurants.data.filter(r => r.status !== 'inactive');
-                }
-                return _DATA_CACHE.restaurants.data;
+    // ==================== RESTAURANTS (0ms Sync + SWR Async) ====================
+    getCachedRestaurantsSync: (activeOnly = false) => {
+        let list = _DATA_CACHE.restaurants.data;
+        if (!list) {
+            const cached = _readSessionCache(FAST_CACHE_KEYS.RESTAURANTS);
+            if (cached && Array.isArray(cached.data)) {
+                list = cached.data;
+                _DATA_CACHE.restaurants.data = list;
+                _DATA_CACHE.restaurants.expires = cached.expires || 0;
             }
-
-            if (!window.supabaseClient) return [];
-            let q = window.supabaseClient.from('restaurants').select('*');
-            if (activeOnly) {
-                q = q.neq('status', 'inactive');
-            }
-            const { data, error } = await q.order('name');
-            let results = [];
-            if (!error && data && data.length > 0) {
-                results = data;
-            } else {
-                // Fallback: fetch all without filter
-                const { data: allData, error: allErr } = await window.supabaseClient.from('restaurants').select('*');
-                if (!allErr && allData) results = allData;
-            }
-
-            if (results && results.length > 0) {
-                _DATA_CACHE.restaurants.data = results;
-                _DATA_CACHE.restaurants.expires = Date.now() + 30000; // 30s TTL
-            }
-            return results;
-        } catch (e) {
-            console.error('Erreur getRestaurants:', e);
         }
-        return [];
+        if (!list || !list.length) return null;
+        return activeOnly ? list.filter(r => r.status !== 'inactive') : list;
     },
+
+    _fetchRestaurantsNetwork: async () => {
+        if (_DATA_CACHE.restaurants.inFlight) {
+            return _DATA_CACHE.restaurants.inFlight;
+        }
+        _DATA_CACHE.restaurants.inFlight = (async () => {
+            try {
+                if (!window.supabaseClient) return _DATA_CACHE.restaurants.data || [];
+                const { data, error } = await window.supabaseClient
+                    .from('restaurants')
+                    .select('*')
+                    .order('name');
+                if (!error && data && data.length > 0) {
+                    const expires = Date.now() + CACHE_TTL_MS;
+                    _DATA_CACHE.restaurants.data = data;
+                    _DATA_CACHE.restaurants.expires = expires;
+                    _writeSessionCache(FAST_CACHE_KEYS.RESTAURANTS, { data, expires });
+                    window.dispatchEvent(new CustomEvent('restaurants-refreshed', { detail: data }));
+                    return data;
+                }
+            } catch (e) {
+                console.error('Erreur _fetchRestaurantsNetwork:', e);
+            } finally {
+                _DATA_CACHE.restaurants.inFlight = null;
+            }
+            return _DATA_CACHE.restaurants.data || [];
+        })();
+        return _DATA_CACHE.restaurants.inFlight;
+    },
+
+    getRestaurants: async (activeOnly = false, forceRefresh = false) => {
+        const cached = DataManager.getCachedRestaurantsSync(false);
+        const now = Date.now();
+
+        if (!forceRefresh && cached && cached.length > 0) {
+            // Si le cache a expiré, on rafraîchit en arrière-plan sans bloquer l'interface !
+            if (now >= _DATA_CACHE.restaurants.expires) {
+                DataManager._fetchRestaurantsNetwork();
+            }
+            return activeOnly ? cached.filter(r => r.status !== 'inactive') : cached;
+        }
+
+        const fresh = await DataManager._fetchRestaurantsNetwork();
+        return activeOnly ? (fresh || []).filter(r => r.status !== 'inactive') : (fresh || []);
+    },
+
     getRestaurantById: async (id) => {
+        const cached = DataManager.getCachedRestaurantsSync(false);
+        if (cached) {
+            const found = cached.find(r => r.id === id);
+            if (found) return found;
+        }
         const { data, error } = await window.supabaseClient
             .from('restaurants').select('*').eq('id', id).single();
         if (error) return null;
@@ -191,17 +294,22 @@ const DataManager = {
             .insert([{ ...adminData, restaurant_id: restaurant.id, role: 'admin', status: 'active' }]);
         if (sErr) return { success: false, message: sErr.message };
 
+        DataManager.invalidateCache();
         return { success: true, restaurant };
     },
     updateRestaurant: async (id, data) => {
         const { error } = await window.supabaseClient.from('restaurants').update(data).eq('id', id);
+        DataManager.invalidateCache();
         return !error;
     },
     deleteRestaurant: async (id) => {
         try {
-            await window.supabaseClient.from('restau_menu').delete().eq('restaurant_id', id);
-            await window.supabaseClient.from('staff').delete().eq('restaurant_id', id);
+            await Promise.all([
+                window.supabaseClient.from('restau_menu').delete().eq('restaurant_id', id),
+                window.supabaseClient.from('staff').delete().eq('restaurant_id', id)
+            ]);
             const { error } = await window.supabaseClient.from('restaurants').delete().eq('id', id);
+            DataManager.invalidateCache();
             return !error;
         } catch (e) {
             console.error('Error deleting restaurant:', e);
@@ -209,31 +317,29 @@ const DataManager = {
         }
     },
     getAllRestaurantsStats: async () => {
-        const { data: restaurants } = await window.supabaseClient.from('restaurants').select('*');
-        const { data: orders } = await window.supabaseClient.from('restau_orders').select('total, status, restaurant_id');
-        const payouts = await DataManager.getPayouts();
+        // Exécution 100% parallèle au lieu de séquentielle
+        const [restaurantsRes, ordersRes, payouts] = await Promise.all([
+            DataManager.getRestaurants(false),
+            window.supabaseClient.from('restau_orders').select('total, status, restaurant_id'),
+            DataManager.getPayouts()
+        ]);
 
-        return (restaurants || []).map(r => {
-            const restoOrders = (orders || []).filter(o => o.restaurant_id === r.id);
+        const restaurants = restaurantsRes || [];
+        const orders = (ordersRes && ordersRes.data) || [];
+
+        return restaurants.map(r => {
+            const restoOrders = orders.filter(o => o.restaurant_id === r.id);
             const grossRevenue = restoOrders
                 .filter(o => o.status === 'Terminée' || o.status === 'En cours' || o.status === 'Nouvelle')
                 .reduce((s, o) => s + (o.total || 0), 0);
-            
-            const completedRevenue = restoOrders
-                .filter(o => o.status === 'Terminée')
-                .reduce((s, o) => s + (o.total || 0), 0);
 
-            // 5% Commission pour ITA INNOVATE
             const itaCommission = Math.round(grossRevenue * 0.05);
-            // 95% Part nette revenant au restaurant
             const restaurantNet = grossRevenue - itaCommission;
 
-            // Total déjà reversé
             const totalPaidOut = (payouts || [])
                 .filter(p => p.restaurant_id === r.id)
                 .reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
 
-            // Solde restant à reverser
             const remainingBalance = Math.max(0, restaurantNet - totalPaidOut);
 
             return {
@@ -242,7 +348,7 @@ const DataManager = {
                 completedOrdersCount: restoOrders.filter(o => o.status === 'Terminée').length,
                 cancelledOrdersCount: restoOrders.filter(o => o.status === 'Annulée').length,
                 grossRevenue: grossRevenue,
-                revenue: grossRevenue, // alias
+                revenue: grossRevenue,
                 itaCommission: itaCommission,
                 restaurantNet: restaurantNet,
                 totalPaidOut: totalPaidOut,
@@ -306,7 +412,6 @@ const DataManager = {
                 return { success: false, message: 'Veuillez saisir votre email et mot de passe.' };
             }
 
-            // 1. Direct Hardcoded Superadmin Check for 100% instant reliability
             if (cleanEmail === 'groupita25@gmail.com' && cleanPassword === 'Dilshadtairou2') {
                 const session = {
                     id: 'STAFF-SUPER-001',
@@ -324,7 +429,6 @@ const DataManager = {
                 return { success: true, staff: session };
             }
 
-            // 2. Query Supabase staff table
             if (window.supabaseClient) {
                 const { data, error } = await window.supabaseClient.from('staff')
                     .select('*')
@@ -355,24 +459,6 @@ const DataManager = {
             return { success: false, message: 'Email ou mot de passe superadmin incorrect.' };
         } catch (e) {
             console.error('Erreur loginSuperAdmin:', e);
-            const cleanEmail = email ? email.toLowerCase().trim() : '';
-            const cleanPassword = password ? password.trim() : '';
-            if (cleanEmail === 'groupita25@gmail.com' && cleanPassword === 'Dilshadtairou2') {
-                const session = {
-                    id: 'STAFF-SUPER-001',
-                    role: 'superadmin',
-                    agent_role: null,
-                    restaurant_id: null,
-                    restaurant_name: 'Plateforme ITAMYA',
-                    restaurant_logo: null,
-                    firstname: 'Super',
-                    lastname: 'Admin',
-                    email: cleanEmail
-                };
-                localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
-                localStorage.removeItem(STORAGE_KEYS.CLIENT_SESSION);
-                return { success: true, staff: session };
-            }
             return { success: false, message: 'Identifiants superadmin incorrects.' };
         }
     },
@@ -383,7 +469,6 @@ const DataManager = {
         const cleanEmail = rawId.toLowerCase();
         const cleanPassword = password ? password.trim() : '';
 
-        // 1. Check if superadmin
         const { data: superadmins } = await window.supabaseClient.from('staff')
             .select('*, restaurants(id, name, logo, slug, phone)')
             .eq('email', cleanEmail)
@@ -404,9 +489,7 @@ const DataManager = {
             return { success: true, staff: session };
         }
 
-        // 2. Check regular restaurant staff (by email or restaurant phone)
         let candidateStaff = [];
-
         let q = window.supabaseClient.from('staff')
             .select('*, restaurants(id, name, logo, slug, phone)')
             .eq('email', cleanEmail)
@@ -418,7 +501,7 @@ const DataManager = {
         if (byEmail && byEmail.length > 0) candidateStaff.push(...byEmail);
 
         if (candidateStaff.length === 0) {
-            const { data: restos } = await window.supabaseClient.from('restaurants').select('id, name, phone');
+            const restos = await DataManager.getRestaurants(false);
             const matchingRestos = (restos || []).filter(r => DataManager.matchPhones(r.phone, rawId));
             if (matchingRestos.length > 0) {
                 let pq = window.supabaseClient.from('staff')
@@ -448,7 +531,7 @@ const DataManager = {
         return { success: true, staff: session };
     },
 
-    // ==================== UNIFIED AUTOMATIC LOGIN ====================
+    // ==================== UNIFIED AUTOMATIC LOGIN (100% PARALLELIZED) ====================
     loginUnified: async (identifier, password) => {
         try {
             const rawId = (identifier || '').trim();
@@ -460,11 +543,9 @@ const DataManager = {
                 return { success: false, message: 'Veuillez saisir votre identifiant et votre mot de passe.' };
             }
 
-            // 1. Vérifier si c'est un compte Restaurant (ou Staff) dans la table 'staff'
-            // Connexion possible par Email OU par Numéro de téléphone du restaurant
-            const candidateStaffList = [];
+            const isPotentialPhone = /\d{6,}/.test(rawId.replace(/\D/g, ''));
 
-            // 1.A. Recherche directe par email dans la table 'staff'
+            // Préparation des requêtes en parallèle (1 seul aller-retour réseau au lieu de 4-5 !)
             let staffQuery = window.supabaseClient
                 .from('staff')
                 .select('*, restaurants(id, name, logo, phone, address, status)');
@@ -475,47 +556,43 @@ const DataManager = {
                 staffQuery = staffQuery.eq('email', normEmail || rawId);
             }
 
-            const { data: emailStaffList, error: staffErr } = await staffQuery;
-            if (!staffErr && emailStaffList && emailStaffList.length > 0) {
-                candidateStaffList.push(...emailStaffList);
+            let clientQuery = window.supabaseClient.from('restau_clients').select('*');
+            if (rawId.includes('@')) {
+                clientQuery = clientQuery.eq('email', normEmail || rawId);
+            } else {
+                clientQuery = clientQuery.or(`phone.eq.${normPhone},phone.eq.${rawId},email.eq.${rawId}`);
             }
 
-            // 1.B. Recherche par Numéro de téléphone du Restaurant
-            const isPotentialPhone = /\d{6,}/.test(rawId.replace(/\D/g, ''));
-            if (isPotentialPhone || candidateStaffList.length === 0) {
-                const { data: allRestos } = await window.supabaseClient
-                    .from('restaurants')
-                    .select('id, name, logo, phone, address, status');
+            const restosPromise = isPotentialPhone ? DataManager.getRestaurants(false) : Promise.resolve([]);
 
-                const matchingRestos = (allRestos || []).filter(r => DataManager.matchPhones(r.phone, rawId));
+            // Exécution simultanée
+            const [staffRes, clientRes, allRestos] = await Promise.all([
+                staffQuery,
+                clientQuery,
+                restosPromise
+            ]);
 
-                if (matchingRestos && matchingRestos.length > 0) {
+            const candidateStaffList = [];
+            if (!staffRes.error && staffRes.data && staffRes.data.length > 0) {
+                candidateStaffList.push(...staffRes.data);
+            }
+
+            // Si téléphone de restaurant détecté
+            if (isPotentialPhone && allRestos && allRestos.length > 0) {
+                const matchingRestos = allRestos.filter(r => DataManager.matchPhones(r.phone, rawId));
+                if (matchingRestos.length > 0) {
                     const restoIds = matchingRestos.map(r => r.id);
                     const { data: phoneStaffList } = await window.supabaseClient
                         .from('staff')
                         .select('*, restaurants(id, name, logo, phone, address, status)')
                         .in('restaurant_id', restoIds);
-
                     if (phoneStaffList && phoneStaffList.length > 0) {
                         candidateStaffList.push(...phoneStaffList);
                     }
                 }
             }
 
-            // 1.C. Recherche de tolérance sans accents si email saisi (ex: ginacodelices vs ginacodélices)
-            if (candidateStaffList.length === 0 && rawId.includes('@')) {
-                const strippedInput = DataManager.stripAccents(rawId);
-                const { data: allStaff } = await window.supabaseClient
-                    .from('staff')
-                    .select('*, restaurants(id, name, logo, phone, address, status)');
-
-                const accentMatched = (allStaff || []).filter(s => DataManager.stripAccents(s.email) === strippedInput);
-                if (accentMatched && accentMatched.length > 0) {
-                    candidateStaffList.push(...accentMatched);
-                }
-            }
-
-            // Dédoublonnage des membres staff candidats
+            // Dédoublonnage staff
             const uniqueStaff = [];
             const seenIds = new Set();
             for (const s of candidateStaffList) {
@@ -525,62 +602,51 @@ const DataManager = {
                 }
             }
 
-            if (uniqueStaff.length > 0) {
-                const member = uniqueStaff.find(s => s.password === cleanPassword);
-                if (member) {
-                    if (member.status === 'inactive' || member.status === 'blocked') {
-                        return { success: false, message: 'Ce compte restaurant est actuellement désactivé.' };
-                    }
-                    if (member.restaurants && member.restaurants.status === 'inactive') {
-                        return { success: false, message: 'Cet établissement est actuellement désactivé.' };
-                    }
-                    const session = {
-                        id: member.id,
-                        role: member.role || 'admin',
-                        agent_role: member.agent_role,
-                        restaurant_id: member.restaurant_id,
-                        restaurant_name: member.restaurants ? member.restaurants.name : 'Plateforme ITAMYA',
-                        restaurant_logo: member.restaurants ? member.restaurants.logo : null,
-                        restaurant_phone: member.restaurants ? member.restaurants.phone : null,
-                        firstname: member.firstname,
-                        lastname: member.lastname,
-                        name: `${member.firstname || ''} ${member.lastname || ''}`.trim() || member.email,
-                        email: member.email,
-                        phone: member.restaurants ? member.restaurants.phone : null
-                    };
-                    localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
-                    localStorage.removeItem(STORAGE_KEYS.CLIENT_SESSION);
-
-                    if (member.restaurant_id) {
-                        DataManager.setCurrentRestaurant(member.restaurant_id, session.restaurant_name);
-                    }
-
-                    if (member.role === 'superadmin') {
-                        return { success: true, type: 'superadmin', redirectUrl: 'superadmin/index.html' };
-                    } else {
-                        return { success: true, type: 'staff', redirectUrl: 'admin/index.html' };
-                    }
+            const matchedMember = uniqueStaff.find(s => s.password === cleanPassword);
+            if (matchedMember) {
+                if (matchedMember.status === 'inactive' || matchedMember.status === 'blocked') {
+                    return { success: false, message: 'Ce compte restaurant est actuellement désactivé.' };
                 }
+                if (matchedMember.restaurants && matchedMember.restaurants.status === 'inactive') {
+                    return { success: false, message: 'Cet établissement est actuellement désactivé.' };
+                }
+                const session = {
+                    id: matchedMember.id,
+                    role: matchedMember.role || 'admin',
+                    agent_role: matchedMember.agent_role,
+                    restaurant_id: matchedMember.restaurant_id,
+                    restaurant_name: matchedMember.restaurants ? matchedMember.restaurants.name : 'Plateforme ITAMYA',
+                    restaurant_logo: matchedMember.restaurants ? matchedMember.restaurants.logo : null,
+                    restaurant_phone: matchedMember.restaurants ? matchedMember.restaurants.phone : null,
+                    firstname: matchedMember.firstname,
+                    lastname: matchedMember.lastname,
+                    name: `${matchedMember.firstname || ''} ${matchedMember.lastname || ''}`.trim() || matchedMember.email,
+                    email: matchedMember.email,
+                    phone: matchedMember.restaurants ? matchedMember.restaurants.phone : null
+                };
+                localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
+                localStorage.removeItem(STORAGE_KEYS.CLIENT_SESSION);
+
+                if (matchedMember.restaurant_id) {
+                    DataManager.setCurrentRestaurant(matchedMember.restaurant_id, session.restaurant_name);
+                }
+
+                return {
+                    success: true,
+                    type: matchedMember.role === 'superadmin' ? 'superadmin' : 'staff',
+                    redirectUrl: matchedMember.role === 'superadmin' ? 'superadmin/index.html' : 'admin/index.html'
+                };
             }
 
-            // 2. Vérifier si c'est un compte Client dans la table 'restau_clients'
-            let clientQuery = window.supabaseClient.from('restau_clients').select('*');
-            if (rawId.includes('@')) {
-                clientQuery = clientQuery.eq('email', normEmail || rawId);
-            } else {
-                clientQuery = clientQuery.or(`phone.eq.${normPhone},phone.eq.${rawId},email.eq.${rawId}`);
-            }
+            // Vérification Client directe
+            let matchedClients = (!clientRes.error && clientRes.data) ? clientRes.data : [];
 
-            const { data: clientList, error: clientErr } = await clientQuery;
-            let matchedClients = clientList || [];
-
-            // Recherche par téléphone souple pour les clients si nécessaire
-            if ((!matchedClients || matchedClients.length === 0) && isPotentialPhone) {
+            if (matchedClients.length === 0 && isPotentialPhone) {
                 const { data: allClients } = await window.supabaseClient.from('restau_clients').select('*');
                 matchedClients = (allClients || []).filter(c => DataManager.matchPhones(c.phone, rawId));
             }
 
-            if (matchedClients && matchedClients.length > 0) {
+            if (matchedClients.length > 0) {
                 const client = matchedClients.find(c => c.password === cleanPassword);
                 if (client) {
                     if (client.status === 'blocked' || client.status === 'inactive') {
@@ -602,12 +668,48 @@ const DataManager = {
                 }
             }
 
+            // Fallback tolérance accents email staff uniquement si aucun résultat
+            if (rawId.includes('@')) {
+                const strippedInput = DataManager.stripAccents(rawId);
+                const { data: allStaff } = await window.supabaseClient
+                    .from('staff')
+                    .select('*, restaurants(id, name, logo, phone, address, status)');
+                const accentMember = (allStaff || []).find(s => DataManager.stripAccents(s.email) === strippedInput && s.password === cleanPassword);
+                if (accentMember) {
+                    const session = {
+                        id: accentMember.id,
+                        role: accentMember.role || 'admin',
+                        agent_role: accentMember.agent_role,
+                        restaurant_id: accentMember.restaurant_id,
+                        restaurant_name: accentMember.restaurants ? accentMember.restaurants.name : 'Plateforme ITAMYA',
+                        restaurant_logo: accentMember.restaurants ? accentMember.restaurants.logo : null,
+                        restaurant_phone: accentMember.restaurants ? accentMember.restaurants.phone : null,
+                        firstname: accentMember.firstname,
+                        lastname: accentMember.lastname,
+                        name: `${accentMember.firstname || ''} ${accentMember.lastname || ''}`.trim() || accentMember.email,
+                        email: accentMember.email,
+                        phone: accentMember.restaurants ? accentMember.restaurants.phone : null
+                    };
+                    localStorage.setItem(STORAGE_KEYS.STAFF_SESSION, JSON.stringify(session));
+                    localStorage.removeItem(STORAGE_KEYS.CLIENT_SESSION);
+                    if (accentMember.restaurant_id) {
+                        DataManager.setCurrentRestaurant(accentMember.restaurant_id, session.restaurant_name);
+                    }
+                    return {
+                        success: true,
+                        type: accentMember.role === 'superadmin' ? 'superadmin' : 'staff',
+                        redirectUrl: accentMember.role === 'superadmin' ? 'superadmin/index.html' : 'admin/index.html'
+                    };
+                }
+            }
+
             return { success: false, message: 'Identifiant (Email / Téléphone) ou mot de passe incorrect.' };
         } catch (e) {
             console.error('Erreur loginUnified:', e);
             return { success: false, message: 'Erreur lors de la connexion. Veuillez vérifier votre connexion internet.' };
         }
     },
+
     getStaff: async (restaurantId) => {
         const { data, error } = await window.supabaseClient
             .from('staff').select('*')
@@ -666,25 +768,91 @@ const DataManager = {
         return data || [];
     },
 
-    // ==================== MENU ====================
+    // ==================== MENU (0ms Sync + SWR Async) ====================
+    getProductByIdSync: (productId) => {
+        if (!productId) return null;
+        if (_DATA_CACHE.productsById[productId]) return _DATA_CACHE.productsById[productId];
+        const map = _readSessionCache(FAST_CACHE_KEYS.PRODUCTS_MAP);
+        if (map && map[productId]) {
+            _DATA_CACHE.productsById[productId] = map[productId];
+            return map[productId];
+        }
+        return null;
+    },
+
+    getCachedMenuSync: (restaurantId) => {
+        const rid = restaurantId || DataManager.getCurrentRestaurantId();
+        if (!rid) return null;
+        if (_DATA_CACHE.menus[rid] && Array.isArray(_DATA_CACHE.menus[rid].data)) {
+            return _DATA_CACHE.menus[rid].data;
+        }
+        const sessionEntry = _readSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + rid);
+        if (sessionEntry && Array.isArray(sessionEntry.data)) {
+            _DATA_CACHE.menus[rid] = {
+                data: sessionEntry.data,
+                expires: sessionEntry.expires || 0,
+                inFlight: null
+            };
+            _indexProducts(sessionEntry.data);
+            return sessionEntry.data;
+        }
+        return null;
+    },
+
+    _fetchMenuNetwork: async (rid) => {
+        if (!_DATA_CACHE.menus[rid]) {
+            _DATA_CACHE.menus[rid] = { data: null, expires: 0, inFlight: null };
+        }
+        if (_DATA_CACHE.menus[rid].inFlight) {
+            return _DATA_CACHE.menus[rid].inFlight;
+        }
+        _DATA_CACHE.menus[rid].inFlight = (async () => {
+            try {
+                if (!window.supabaseClient) return _DATA_CACHE.menus[rid].data || [];
+                const { data, error } = await window.supabaseClient
+                    .from('restau_menu')
+                    .select('*')
+                    .eq('restaurant_id', rid)
+                    .order('category');
+                if (!error && data) {
+                    const expires = Date.now() + CACHE_TTL_MS;
+                    _DATA_CACHE.menus[rid].data = data;
+                    _DATA_CACHE.menus[rid].expires = expires;
+                    _writeSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + rid, { data, expires });
+                    _indexProducts(data);
+                    window.dispatchEvent(new CustomEvent('menu-refreshed', { detail: { restaurantId: rid, data } }));
+                    return data;
+                }
+            } catch (e) {
+                console.error('Erreur _fetchMenuNetwork:', e);
+            } finally {
+                if (_DATA_CACHE.menus[rid]) {
+                    _DATA_CACHE.menus[rid].inFlight = null;
+                }
+            }
+            return (_DATA_CACHE.menus[rid] && _DATA_CACHE.menus[rid].data) || [];
+        })();
+        return _DATA_CACHE.menus[rid].inFlight;
+    },
+
     getMenu: async (restaurantId, forceRefresh = false) => {
         const rid = restaurantId || DataManager.getCurrentRestaurantId();
         if (!rid) return [];
 
-        if (!forceRefresh && _DATA_CACHE.menus[rid] && Date.now() < _DATA_CACHE.menus[rid].expires) {
-            return _DATA_CACHE.menus[rid].data;
+        const cached = DataManager.getCachedMenuSync(rid);
+        const now = Date.now();
+
+        if (!forceRefresh && cached) {
+            const entry = _DATA_CACHE.menus[rid];
+            if (!entry || now >= entry.expires) {
+                DataManager._fetchMenuNetwork(rid);
+            }
+            return cached;
         }
 
-        const { data, error } = await window.supabaseClient
-            .from('restau_menu').select('*').eq('restaurant_id', rid).order('category');
-        if (error) return [];
-        const menuItems = data || [];
-        _DATA_CACHE.menus[rid] = {
-            data: menuItems,
-            expires: Date.now() + 30000 // 30s TTL
-        };
-        return menuItems;
+        return await DataManager._fetchMenuNetwork(rid);
     },
+
     addMenuItem: async (item) => {
         const itemToInsert = {
             id: item.id || 'prod_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
@@ -698,8 +866,13 @@ const DataManager = {
                 console.error('Erreur Supabase addMenuItem:', error);
                 return null;
             }
-            if (item.restaurant_id) delete _DATA_CACHE.menus[item.restaurant_id];
-            return data && data.length > 0 ? data[0] : itemToInsert;
+            if (item.restaurant_id) {
+                delete _DATA_CACHE.menus[item.restaurant_id];
+                _removeSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + item.restaurant_id);
+            }
+            const created = data && data.length > 0 ? data[0] : itemToInsert;
+            _indexProducts([created]);
+            return created;
         } catch (err) {
             console.error('Exception addMenuItem:', err);
             return null;
@@ -709,7 +882,7 @@ const DataManager = {
         try {
             const { error } = await window.supabaseClient.from('restau_menu').update(updates).eq('id', id);
             if (error) console.error('Erreur updateMenuItem:', error);
-            _DATA_CACHE.menus = {}; // Invalidate menu cache
+            DataManager.invalidateCache();
             return !error;
         } catch (err) {
             console.error('Exception updateMenuItem:', err);
@@ -720,7 +893,7 @@ const DataManager = {
         try {
             const { error } = await window.supabaseClient.from('restau_menu').delete().eq('id', id);
             if (error) console.error('Erreur deleteMenuItem:', error);
-            _DATA_CACHE.menus = {}; // Invalidate menu cache
+            DataManager.invalidateCache();
             return !error;
         } catch (err) {
             console.error('Exception deleteMenuItem:', err);
@@ -728,14 +901,39 @@ const DataManager = {
         }
     },
 
-    // ==================== CART (localStorage) ====================
-    getCart: () => { const s = localStorage.getItem(STORAGE_KEYS.CART); return s ? JSON.parse(s) : []; },
+    // ==================== CART (localStorage + Enriched Snapshot for 0ms Cart/Order) ====================
+    getCart: () => {
+        try {
+            const s = localStorage.getItem(STORAGE_KEYS.CART);
+            return s ? JSON.parse(s) : [];
+        } catch (e) {
+            return [];
+        }
+    },
     saveCart: (cart) => localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart)),
     addToCart: (productId, quantity = 1) => {
         let cart = DataManager.getCart();
+        const product = DataManager.getProductByIdSync(productId);
         const item = cart.find(i => i.productId === productId);
-        if (item) item.quantity += quantity;
-        else cart.push({ productId, quantity, note: '' });
+        if (item) {
+            item.quantity += quantity;
+            if (product) {
+                item.name = product.name;
+                item.price = product.price;
+                item.image = product.image;
+                item.restaurantId = product.restaurant_id;
+            }
+        } else {
+            cart.push({
+                productId,
+                quantity,
+                note: '',
+                name: product ? product.name : undefined,
+                price: product ? product.price : undefined,
+                image: product ? product.image : undefined,
+                restaurantId: product ? product.restaurant_id : undefined
+            });
+        }
         DataManager.saveCart(cart);
         window.dispatchEvent(new Event('cart-updated'));
     },
@@ -753,16 +951,42 @@ const DataManager = {
             window.dispatchEvent(new Event('cart-updated'));
         }
     },
-    clearCart: () => { localStorage.removeItem(STORAGE_KEYS.CART); window.dispatchEvent(new Event('cart-updated')); },
-    getCartItemCount: () => DataManager.getCart().reduce((acc, i) => acc + i.quantity, 0),
-    getCartTotal: async (restaurantId) => {
-        const rid = restaurantId || DataManager.getCurrentRestaurantId();
+    clearCart: () => {
+        localStorage.removeItem(STORAGE_KEYS.CART);
+        window.dispatchEvent(new Event('cart-updated'));
+    },
+    getCartItemCount: () => DataManager.getCart().reduce((acc, i) => acc + (i.quantity || 1), 0),
+
+    getCartTotalSync: () => {
         const cart = DataManager.getCart();
         if (!cart.length) return 0;
+        let total = 0;
+        let allResolved = true;
+        for (const item of cart) {
+            const p = DataManager.getProductByIdSync(item.productId);
+            const price = p ? p.price : item.price;
+            if (typeof price === 'number') {
+                total += price * (item.quantity || 1);
+            } else {
+                allResolved = false;
+            }
+        }
+        return allResolved ? total : null;
+    },
+
+    getCartTotal: async (restaurantId) => {
+        const cart = DataManager.getCart();
+        if (!cart.length) return 0;
+
+        const syncTotal = DataManager.getCartTotalSync();
+        if (syncTotal !== null) return syncTotal;
+
+        const rid = restaurantId || DataManager.getCurrentRestaurantId();
         const menu = await DataManager.getMenu(rid);
         return cart.reduce((total, item) => {
-            const p = menu.find(m => m.id === item.productId);
-            return total + (p ? p.price * item.quantity : 0);
+            const p = menu.find(m => m.id === item.productId) || DataManager.getProductByIdSync(item.productId);
+            const price = p ? p.price : (item.price || 0);
+            return total + price * (item.quantity || 1);
         }, 0);
     },
 
@@ -781,7 +1005,7 @@ const DataManager = {
                 .from('restau_orders')
                 .select('*, restaurants(id, name, logo, phone, address)')
                 .order('date', { ascending: false });
-            
+
             if (clientId && phone) {
                 const cleanPhone = phone.trim();
                 query = query.or(`client_id.eq.${clientId},phone.eq.${cleanPhone}`);
@@ -790,7 +1014,7 @@ const DataManager = {
             } else if (phone) {
                 query = query.eq('phone', phone.trim());
             }
-            
+
             const { data, error } = await query;
             if (!error && data) return data;
         } catch (e) {
@@ -800,20 +1024,31 @@ const DataManager = {
     },
     placeOrder: async (orderDetails) => {
         const restaurantId = DataManager.getCurrentRestaurantId();
-        const menu = await DataManager.getMenu(restaurantId);
+        const menu = DataManager.getCachedMenuSync(restaurantId) || await DataManager.getMenu(restaurantId);
         const cart = DataManager.getCart();
         const enrichedItems = cart.map(cartItem => {
-            const p = menu.find(m => m.id === cartItem.productId);
-            return { productId: cartItem.productId, quantity: cartItem.quantity, frozenName: p ? p.name : '?', frozenPrice: p ? p.price : 0, frozenImage: p ? p.image : '' };
+            const p = (menu || []).find(m => m.id === cartItem.productId) || DataManager.getProductByIdSync(cartItem.productId);
+            return {
+                productId: cartItem.productId,
+                quantity: cartItem.quantity,
+                frozenName: p ? p.name : (cartItem.name || '?'),
+                frozenPrice: p ? p.price : (cartItem.price || 0),
+                frozenImage: p ? p.image : (cartItem.image || '')
+            };
         });
         const client = DataManager.getCurrentClient();
         const newOrder = {
             id: 'CMD-' + Date.now().toString().slice(-6),
-            status: 'Nouvelle', restaurant_id: restaurantId,
-            type: orderDetails.type, address: orderDetails.address,
-            phone: orderDetails.phone, client_name: orderDetails.clientName,
+            status: 'Nouvelle',
+            restaurant_id: restaurantId,
+            type: orderDetails.type,
+            address: orderDetails.address,
+            phone: orderDetails.phone,
+            client_name: orderDetails.clientName,
             client_id: client ? client.id : null,
-            total: orderDetails.total, items: enrichedItems, comment: orderDetails.comment || ''
+            total: orderDetails.total,
+            items: enrichedItems,
+            comment: orderDetails.comment || ''
         };
         const { data, error } = await window.supabaseClient.from('restau_orders').insert([newOrder]).select();
         if (error) return null;

@@ -1,12 +1,12 @@
 /**
- * Cart.js
- * Handles rendering and interaction on the cart page.
+ * Cart.js - Instant 0ms Cart Rendering Engine ("tac tac")
+ * Renders immediately from cart snapshots & SWR cache without network delay.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     renderCart();
 
-    // Listen for updates (in case of multi-tab or internal changes)
+    // Listen for updates (instant 0ms synchronous update on + / -)
     window.addEventListener('cart-updated', renderCart);
 });
 
@@ -26,41 +26,56 @@ async function renderCart() {
         return;
     }
 
-    // Show loading state while fetching menu
-    if(cartContainer.innerHTML === '') {
-        cartContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 20px;">Chargement du panier...</div>';
-    }
-
-    const menu = await DataManager.getMenu();
-
     emptyState.style.display = 'none';
     cartContent.style.display = 'block';
-    cartContainer.innerHTML = '';
 
+    // Try 0ms synchronous lookup first (from product index or cart item snapshot)
+    const cachedMenu = DataManager.getCachedMenuSync() || [];
+    let needsAsyncFetch = false;
+
+    for (const item of cart) {
+        const p = DataManager.getProductByIdSync(item.productId) || cachedMenu.find(m => m.id === item.productId);
+        if (!p && typeof item.price !== 'number') {
+            needsAsyncFetch = true;
+            break;
+        }
+    }
+
+    let menu = cachedMenu;
+    if (needsAsyncFetch) {
+        if (cartContainer.children.length === 0) {
+            cartContainer.innerHTML = '<div class="text-center text-muted" style="width:100%; padding: 20px;">Chargement du panier...</div>';
+        }
+        menu = await DataManager.getMenu();
+    }
+
+    const fragment = document.createDocumentFragment();
     let total = 0;
 
     cart.forEach(item => {
-        const product = menu.find(p => p.id === item.productId);
-        if (!product) return; // Should not happen ideally
+        const product = DataManager.getProductByIdSync(item.productId) || (menu || []).find(p => p.id === item.productId);
+        const name = product ? product.name : (item.name || 'Article');
+        const price = product ? (product.price || 0) : (item.price || 0);
+        const image = (product && product.image) || item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=60';
 
-        const itemTotal = product.price * item.quantity;
+        const itemTotal = price * (item.quantity || 1);
         total += itemTotal;
 
         const div = document.createElement('div');
         div.className = 'cart-item';
         div.innerHTML = `
-            <div class="cart-item-image" style="background-image: url('${product.image}');"></div>
+            <div class="cart-item-image" style="background-image: url('${image}');"></div>
             <div class="cart-item-details">
-                <div class="font-bold">${product.name}</div>
-                <div class="text-muted text-sm">${formatPrice(product.price)}</div>
+                <div class="font-bold">${name}</div>
+                <div class="text-muted text-sm">${formatPrice(price)} × ${item.quantity} = <strong style="color:#0f172a;">${formatPrice(itemTotal)}</strong></div>
             </div>
             <div class="quantity-controls">
-                <button class="qty-btn" onclick="updateQuantity('${item.productId}', -1)">-</button>
-                <span>${item.quantity}</span>
-                <button class="qty-btn" onclick="updateQuantity('${item.productId}', 1)">+</button>
+                <button type="button" class="qty-btn" onclick="updateQuantity('${item.productId}', -1)">−</button>
+                <span style="font-weight:800; min-width:18px; text-align:center;">${item.quantity}</span>
+                <button type="button" class="qty-btn" onclick="updateQuantity('${item.productId}', 1)">+</button>
             </div>
-            <button onclick="removeItem('${item.productId}')" style="margin-left: 12px; border: none; background: none; font-size: 1.2rem; cursor: pointer; padding: 4px; color: #DC3545; display: flex; align-items: center;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button type="button" onclick="removeItem('${item.productId}')" style="margin-left: 6px; border: none; background: none; font-size: 1.2rem; cursor: pointer; padding: 6px; color: #DC3545; display: flex; align-items: center;" aria-label="Supprimer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     <line x1="10" y1="11" x2="10" y2="17"></line>
@@ -68,10 +83,13 @@ async function renderCart() {
                 </svg>
             </button>
         `;
-        cartContainer.appendChild(div);
+        fragment.appendChild(div);
     });
 
-    if(totalElement) totalElement.textContent = formatPrice(total);
+    cartContainer.innerHTML = '';
+    cartContainer.appendChild(fragment);
+
+    if (totalElement) totalElement.textContent = formatPrice(total);
 }
 
 window.updateQuantity = (productId, delta) => {
@@ -79,7 +97,5 @@ window.updateQuantity = (productId, delta) => {
 };
 
 window.removeItem = (productId) => {
-    if (confirm('Voulez-vous retirer cet article du panier ?')) {
-        DataManager.removeFromCart(productId);
-    }
+    DataManager.removeFromCart(productId);
 };
