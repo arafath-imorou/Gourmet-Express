@@ -544,17 +544,17 @@ const DataManager = {
 
     // ==================== REVERSEMENTS / PAYOUTS ====================
     getPayouts: async (restaurantId) => {
-        try {
-            let q = window.supabaseClient.from('restaurant_payouts').select('*').order('date', { ascending: false });
-            if (restaurantId) q = q.eq('restaurant_id', restaurantId);
-            const { data, error } = await q;
-            if (!error && data && Array.isArray(data)) {
-                return data;
-            }
-        } catch (e) {
-            console.warn('Supabase payouts fallback:', e);
-        }
         const local = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAYOUTS) || '[]');
+        try {
+            if (window.supabaseClient) {
+                let q = window.supabaseClient.from('restaurant_payouts').select('*').order('date', { ascending: false });
+                if (restaurantId) q = q.eq('restaurant_id', restaurantId);
+                const { data, error } = await q;
+                if (!error && data && Array.isArray(data)) {
+                    return data;
+                }
+            }
+        } catch (e) {}
         if (restaurantId) return local.filter(p => p.restaurant_id === restaurantId);
         return local;
     },
