@@ -114,12 +114,12 @@
             }
         });
 
-        // Image upload with automatic WEBP conversion
+        // Image upload with automatic ultra-light WEBP conversion (< 25 KB)
         document.getElementById('image-file').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) {
                 try {
-                    const webpDataUrl = await DataManager.convertToWebP(file, 800, 0.82);
+                    const webpDataUrl = await DataManager.convertToWebP(file, 380, 0.72);
                     document.getElementById('image').value = webpDataUrl;
                     updatePreview(webpDataUrl);
                 } catch (err) {

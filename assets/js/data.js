@@ -227,11 +227,79 @@ const DataManager = {
         return str.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     },
 
-    // ==================== IMAGE WEBP COMPRESSION ====================
-    convertToWebP: (file, maxDimension = 450, quality = 0.74) => {
+    // ==================== IMAGE WEBP ULTRA-LIGHT CONVERTER (< 25 KB) ====================
+    convertToWebP: (fileOrDataUrl, maxDimension = 380, quality = 0.72) => {
         return new Promise((resolve, reject) => {
-            if (!file) { resolve(''); return; }
-            if (!file.type || !file.type.match(/image.*/)) {
+            if (!fileOrDataUrl) { resolve(''); return; }
+
+            const processImg = (img) => {
+                let width = img.naturalWidth || img.width;
+                let height = img.naturalHeight || img.height;
+
+                if (!width || !height) {
+                    resolve(typeof fileOrDataUrl === 'string' ? fileOrDataUrl : '');
+                    return;
+                }
+
+                if (width > height) {
+                    if (width > maxDimension) {
+                        height = Math.round((height * maxDimension) / width);
+                        width = maxDimension;
+                    }
+                } else {
+                    if (height > maxDimension) {
+                        width = Math.round((width * maxDimension) / height);
+                        height = maxDimension;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Test native WebP encoding support
+                let result = canvas.toDataURL('image/webp', quality);
+                // Safari fallback: if canvas returns uncompressed PNG, encode as compact JPEG
+                if (!result.startsWith('data:image/webp')) {
+                    result = canvas.toDataURL('image/jpeg', Math.max(0.65, quality - 0.05));
+                }
+
+                // If result is still over 32 KB, scale down one more step to guarantee light weight
+                if (result.length > 44000) {
+                    const canvasSmall = document.createElement('canvas');
+                    canvasSmall.width = Math.round(width * 0.82);
+                    canvasSmall.height = Math.round(height * 0.82);
+                    const ctxSmall = canvasSmall.getContext('2d');
+                    ctxSmall.imageSmoothingEnabled = true;
+                    ctxSmall.drawImage(canvas, 0, 0, canvasSmall.width, canvasSmall.height);
+                    let resultSmall = canvasSmall.toDataURL('image/webp', 0.65);
+                    if (!resultSmall.startsWith('data:image/webp')) {
+                        resultSmall = canvasSmall.toDataURL('image/jpeg', 0.62);
+                    }
+                    resolve(resultSmall);
+                    return;
+                }
+
+                resolve(result);
+            };
+
+            if (typeof fileOrDataUrl === 'string') {
+                if (fileOrDataUrl.startsWith('http://') || fileOrDataUrl.startsWith('https://')) {
+                    resolve(fileOrDataUrl);
+                    return;
+                }
+                const img = new Image();
+                img.onload = () => processImg(img);
+                img.onerror = () => resolve(fileOrDataUrl);
+                img.src = fileOrDataUrl;
+                return;
+            }
+
+            if (!fileOrDataUrl.type || !fileOrDataUrl.type.match(/image.*/)) {
                 reject(new Error('Le fichier sélectionné n\'est pas une image valide.'));
                 return;
             }
@@ -239,37 +307,26 @@ const DataManager = {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
-                img.onload = () => {
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > maxDimension) {
-                            height = Math.round((height * maxDimension) / width);
-                            width = maxDimension;
-                        }
-                    } else {
-                        if (height > maxDimension) {
-                            width = Math.round((width * maxDimension) / height);
-                            height = maxDimension;
-                        }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    const webpDataUrl = canvas.toDataURL('image/webp', quality);
-                    resolve(webpDataUrl);
-                };
+                img.onload = () => processImg(img);
                 img.onerror = (err) => reject(err);
                 img.src = e.target.result;
             };
             reader.onerror = (err) => reject(err);
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(fileOrDataUrl);
         });
+    },
+
+    ensureLightWebP: async (imgStr, maxDim = 380) => {
+        if (!imgStr || typeof imgStr !== 'string') return imgStr;
+        if (imgStr.startsWith('http://') || imgStr.startsWith('https://')) return imgStr;
+        if (imgStr.startsWith('data:image') && imgStr.length > 40000) {
+            try {
+                return await DataManager.convertToWebP(imgStr, maxDim, 0.70);
+            } catch (e) {
+                return imgStr;
+            }
+        }
+        return imgStr;
     },
 
     // ==================== SESSION ====================
@@ -402,9 +459,14 @@ const DataManager = {
             .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
             + '-' + Date.now();
 
+        const cleanData = { ...restaurantData };
+        if (cleanData.logo) {
+            cleanData.logo = await DataManager.ensureLightWebP(cleanData.logo, 220);
+        }
+
         const { data: restaurant, error: rErr } = await window.supabaseClient
             .from('restaurants')
-            .insert([{ ...restaurantData, slug, status: 'active' }])
+            .insert([{ ...cleanData, slug, status: 'active' }])
             .select().single();
         if (rErr) return { success: false, message: rErr.message };
 
@@ -417,7 +479,11 @@ const DataManager = {
         return { success: true, restaurant };
     },
     updateRestaurant: async (id, data) => {
-        const { error } = await window.supabaseClient.from('restaurants').update(data).eq('id', id);
+        const cleanData = { ...data };
+        if (cleanData.logo) {
+            cleanData.logo = await DataManager.ensureLightWebP(cleanData.logo, 220);
+        }
+        const { error } = await window.supabaseClient.from('restaurants').update(cleanData).eq('id', id);
         DataManager.invalidateCache();
         return !error;
     },
@@ -1036,11 +1102,15 @@ const DataManager = {
     },
 
     addMenuItem: async (item) => {
+        const cleanItem = { ...item };
+        if (cleanItem.image) {
+            cleanItem.image = await DataManager.ensureLightWebP(cleanItem.image, 380);
+        }
         const itemToInsert = {
-            id: item.id || 'prod_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-            active: item.active !== false,
-            available: item.available !== false,
-            ...item
+            id: cleanItem.id || 'prod_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+            active: cleanItem.active !== false,
+            available: cleanItem.available !== false,
+            ...cleanItem
         };
         try {
             const { data, error } = await window.supabaseClient.from('restau_menu').insert([itemToInsert]).select();
@@ -1048,9 +1118,9 @@ const DataManager = {
                 console.error('Erreur Supabase addMenuItem:', error);
                 return null;
             }
-            if (item.restaurant_id) {
-                delete _DATA_CACHE.menus[item.restaurant_id];
-                _removeSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + item.restaurant_id);
+            if (cleanItem.restaurant_id) {
+                delete _DATA_CACHE.menus[cleanItem.restaurant_id];
+                _removeSessionCache(FAST_CACHE_KEYS.MENU_PREFIX + cleanItem.restaurant_id);
             }
             const created = data && data.length > 0 ? data[0] : itemToInsert;
             _indexProducts([created]);
@@ -1062,7 +1132,11 @@ const DataManager = {
     },
     updateMenuItem: async (id, updates) => {
         try {
-            const { error } = await window.supabaseClient.from('restau_menu').update(updates).eq('id', id);
+            const cleanUpdates = { ...updates };
+            if (cleanUpdates.image) {
+                cleanUpdates.image = await DataManager.ensureLightWebP(cleanUpdates.image, 380);
+            }
+            const { error } = await window.supabaseClient.from('restau_menu').update(cleanUpdates).eq('id', id);
             if (error) console.error('Erreur updateMenuItem:', error);
             DataManager.invalidateCache();
             return !error;

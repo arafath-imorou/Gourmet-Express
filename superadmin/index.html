@@ -711,8 +711,8 @@
                 if (file) {
                     try {
                         const isLogo = fileInputId.includes('logo');
-                        const maxDim = isLogo ? 400 : 800;
-                        const webpDataUrl = await DataManager.convertToWebP(file, maxDim, 0.82);
+                        const maxDim = isLogo ? 200 : 380;
+                        const webpDataUrl = await DataManager.convertToWebP(file, maxDim, 0.72);
                         document.getElementById(hiddenInputId).value = webpDataUrl;
                         document.getElementById(imgPreviewId).src = webpDataUrl;
                         document.getElementById(containerId).style.display = 'flex';
